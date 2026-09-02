@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Модель Рамсея–Касса–Купманса — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root {
+      --bg: #f5f1e7;
+      --surface: #fffdf8;
+      --surface-2: #efe9d9;
+      --ink: #2c2a24;
+      --ink-soft: #6e6858;
+      --ink-faint: #9b937e;
+      --accent: #2f5590;
+      --accent-strong: #1f3d66;
+      --accent-soft: #dbe6f5;
+      --accent-2: #8a6122;
+      --accent-2-soft: #f5e6c8;
+      --rule: #e6dfcd;
+      --good: #3f7d5c;
+      --good-soft: #e1efe4;
+      --shadow: 0 1px 2px rgba(44, 42, 36, 0.06), 0 6px 20px -8px rgba(44, 42, 36, 0.15);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: clamp(28px, 6vw, 48px) clamp(18px, 5vw, 24px) 90px;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.85rem;
+      color: var(--accent);
+      text-decoration: none;
+      margin-bottom: 28px;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    .eyebrow {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12.5px;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 22px; height: 1px; background: var(--accent);
+      display: inline-block;
+    }
+    h1.title {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(28px, 5vw, 40px);
+      line-height: 1.15;
+      letter-spacing: -.01em;
+      margin: 14px 0 6px;
+      text-wrap: balance;
+    }
+    .subtitle {
+      font-size: 17px;
+      color: var(--ink-soft);
+      font-style: italic;
+      max-width: 56ch;
+      text-wrap: balance;
+    }
+    header.hero {
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 26px;
+      margin-bottom: 34px;
+    }
+    .meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      margin-top: 16px;
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 12px;
+      color: var(--ink-faint);
+    }
+    .meta-row span { white-space: nowrap; }
+
+    nav.toc {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin-bottom: 44px;
+      box-shadow: var(--shadow);
+    }
+    nav.toc .toc-title {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11.5px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 10px;
+    }
+    nav.toc ol {
+      columns: 2;
+      column-gap: 28px;
+      list-style: none;
+      margin: 0; padding: 0;
+      font-size: 14px;
+    }
+    nav.toc li { break-inside: avoid; margin-bottom: 7px; }
+    nav.toc a {
+      color: var(--ink);
+      text-decoration: none;
+      display: flex;
+      gap: 8px;
+    }
+    nav.toc a:hover { color: var(--accent); }
+    nav.toc .num {
+      font-family: "IBM Plex Mono", monospace;
+      color: var(--accent);
+      font-size: 12px;
+      min-width: 18px;
+    }
+
+    section { margin-bottom: 48px; scroll-margin-top: 20px; }
+    h2 {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 23px;
+      font-weight: 700;
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin: 0 0 4px;
+      text-wrap: balance;
+    }
+    h2 .secnum {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    h2 + .section-kicker {
+      color: var(--ink-faint);
+      font-size: 13.5px;
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+    h3 {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 17px;
+      font-weight: 700;
+      margin: 26px 0 8px;
+    }
+    p { margin: 0 0 14px; }
+    .lede { font-size: 18px; color: var(--ink-soft); }
+    ul, ol.plain { margin: 0 0 14px; padding-left: 22px; }
+    li { margin-bottom: 6px; }
+    strong { color: var(--ink); font-weight: 700; }
+    em.term { font-style: italic; color: var(--accent-strong); font-weight: 600; }
+
+    .eq {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 14px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+    .eq .eq-body { flex: 1; min-width: 0; }
+    .eq .eq-tags {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      font-family: "IBM Plex Mono", monospace;
+      color: var(--ink-faint);
+      font-size: 11.5px;
+      white-space: nowrap;
+    }
+    .eq .eq-tags .num { color: var(--accent); font-weight: 600; font-size: 12.5px; }
+    .eq .eq-tags .num.book { color: var(--accent-2); }
+
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px;
+      margin: 18px 0;
+      font-size: 15px;
+    }
+    .callout .label {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11px;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--accent-strong);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .callout.result { border-left-color: var(--accent-2); background: var(--accent-2-soft); }
+    .callout.result .label { color: var(--accent-2); }
+    .callout.fact { border-left-color: var(--good); background: var(--good-soft); }
+    .callout.fact .label { color: var(--good); }
+    .callout p:last-child { margin-bottom: 0; }
+    .callout ol, .callout ul { margin-bottom: 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 14.5px;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 9px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--rule);
+      vertical-align: top;
+    }
+    th {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 11.5px;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      background: var(--surface-2);
+    }
+    tr:last-child td { border-bottom: none; }
+    td.sym { font-family: "IBM Plex Mono", monospace; color: var(--accent-strong); white-space: nowrap; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    .table-wrap table { margin: 0; min-width: 600px; }
+
+    figure { margin: 22px 0 6px; }
+    figure svg { width: 100%; height: auto; display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; box-shadow: var(--shadow); }
+    figcaption { font-size: 13px; color: var(--ink-faint); margin-top: 8px; font-style: italic; }
+
+    .quadgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--rule);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 16px 0;
+      font-size: 13.5px;
+    }
+    .quadgrid > div { background: var(--surface); padding: 12px 14px; }
+    .quadgrid .k { font-family: "IBM Plex Mono", monospace; color: var(--accent); font-size: 12.5px; display: block; margin-bottom: 3px; }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+      padding: 0;
+      list-style: none;
+    }
+    .chips li {
+      margin: 0;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      padding: 5px 13px;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    hr.div { border: none; border-top: 1px dashed var(--rule); margin: 36px 0; }
+
+    footer.endnote {
+      margin-top: 56px;
+      padding-top: 20px;
+      border-top: 1px solid var(--rule);
+      font-size: 13px;
+      color: var(--ink-faint);
+    }
+
+    mjx-container { overflow-x: auto; overflow-y: hidden; }
+
+    @media (max-width: 520px) {
+      nav.toc ol { columns: 1; }
+      .eq { flex-direction: column; align-items: stretch; }
+      .eq .eq-tags { flex-direction: row; justify-content: flex-end; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a class="back-link" href="../index.html">← Все конспекты</a>
+
+    <header class="hero">
+      <div class="eyebrow">Macroeconomics&nbsp;2 · Модель Рамсея</div>
+      <h1 class="title">Модель Рамсея–Касса–Купманса</h1>
+      <p class="subtitle">Откуда берётся норма сбережений, если её никто не назначает — подробный разбор модели оптимального роста: от постановки задачи до эквивалентности Барро-Рикардо и переходной динамики при шоках политики.</p>
+      <div class="meta-row">
+        <span>16 разделов</span>
+        <span>·</span>
+        <span>презентация «Ramsey Model» + гл. 2 учебника</span>
+        <span>·</span>
+        <span>02.09.2026</span>
+      </div>
+    </header>
+
+    <nav class="toc" aria-label="Оглавление">
+      <div class="toc-title">Оглавление</div>
+      <ol>
+        <li><a href="#motivation"><span class="num">00</span>Зачем нужна модель Рамсея</a></li>
+        <li><a href="#setup"><span class="num">01</span>Экономика: агенты, технология, демография</a></li>
+        <li><a href="#prices"><span class="num">02</span>Накопление капитала и цены факторов</a></li>
+        <li><a href="#planner"><span class="num">03</span>Задача социального планировщика</a></li>
+        <li><a href="#hamiltonian"><span class="num">04</span>Гамильтониан и принцип Понтрягина</a></li>
+        <li><a href="#euler"><span class="num">05</span>Уравнение Эйлера и CRRA-полезность</a></li>
+        <li><a href="#continuous"><span class="num">06</span>Непрерывное время и динамическая система</a></li>
+        <li><a href="#steady"><span class="num">07</span>Стационарное состояние</a></li>
+        <li><a href="#phase"><span class="num">08</span>Фазовая диаграмма и скорость сходимости</a></li>
+        <li><a href="#saving"><span class="num">09</span>Норма сбережений и золотое правило</a></li>
+        <li><a href="#welfare"><span class="num">10</span>Планировщик vs. децентрализованное равновесие</a></li>
+        <li><a href="#ricardo"><span class="num">11</span>Эквивалентность Барро-Рикардо</a></li>
+        <li><a href="#lumpsum"><span class="num">12</span>Фискальная политика: паушальный налог</a></li>
+        <li><a href="#distortion"><span class="num">13</span>Фискальная политика: налог на капитал</a></li>
+        <li><a href="#transitional"><span class="num">14</span>Переходная динамика при шоках политики</a></li>
+        <li><a href="#summary"><span class="num">15</span>Итоги главы</a></li>
+      </ol>
+    </nav>
+
+    <section id="motivation">
+      <h2><span class="secnum">§00</span>Зачем нужна эта модель</h2>
+      <p class="section-kicker">Мотивация · слайд 2</p>
+      <p class="lede">В прошлой лекции разбирался межвременной выбор одного репрезентативного потребителя. Но там трудовой доход и процентная ставка были <em class="term">заданы извне</em> — как погода. Модель Рамсея убирает этот костыль.</p>
+      <p>Три вопроса, на которые она отвечает:</p>
+      <ul>
+        <li><strong>Общее равновесие.</strong> Доход домохозяйства и ставка процента на самом деле определяются тем же самым выбором сбережений — они эндогенны и взаимосвязаны. Нужна модель, где потребление, капитал и цены факторов определяются одновременно.</li>
+        <li><strong>Откуда берётся норма сбережений?</strong> В модели Солоу норма сбережений — экзогенный параметр, который просто постулируется. Модель Рамсея выводит её из оптимизационной задачи: сколько сберегать — это <em class="term">выбор</em>, а не константа.</li>
+        <li><strong>Фискальная политика без костылей.</strong> Кейнсианцы и классики по-разному смотрят на эффекты госрасходов и налогов, но обычно — без явных микрооснований. Модель Рамсея даёт микрооснования: домохозяйства максимизируют полезность, фирмы — прибыль, а дальше можно честно спросить, что делает налог.</li>
+      </ul>
+      <p>Дальше вся конструкция стоит на двух блоках: <strong>технология</strong> (что производится и как), и <strong>предпочтения</strong> (как домохозяйства делят потребление во времени). Стыкует их — накопление капитала.</p>
+      <div class="callout fact">
+        <span class="label">Интересный факт</span>
+        <p>Модель названа в честь Фрэнка Рамсея (Ramsey, 1928) — кембриджского математика и философа, умершего в 26 лет, который поставил задачу оптимального накопления капитала на четыре десятилетия раньше, чем появился аппарат для её удобного решения. Современный вид модель получила у Дэвида Касса и Тжалинга Купманса (Cass, 1965; Koopmans, 1965), поэтому в литературе её называют моделью Рамсея–Касса–Купманса.</p>
+      </div>
+    </section>
+
+    <section id="setup">
+      <h2><span class="secnum">§01</span>Экономика: агенты, технология, демография</h2>
+      <p class="section-kicker">Production and capital accumulation · слайды 3–4</p>
+      <p>Экономика состоит из бесконечно живущих домохозяйств. Население растёт с постоянным темпом <em>n</em>:</p>
+      <div class="eq">
+        <div class="eq-body">\[ L_{t+1} = L_t(1+n) \]</div>
+        <div class="eq-tags"><span>стр. 3</span></div>
+      </div>
+      <p>Каждое домохозяйство поставляет одну единицу труда, поэтому <em>L</em> — это одновременно и число домохозяйств, и совокупный труд. Выпуск <em>Y</em> производится из капитала <em>K</em> и труда <em>L</em>:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.1)\qquad Y_t = F(K_t, L_t) \]</div>
+        <div class="eq-tags"><span class="num">(3.1)</span><span>стр. 3</span></div>
+      </div>
+      <p>Производственная функция удовлетворяет стандартным неоклассическим условиям: положительная и убывающая предельная производительность каждого фактора (\(F_K'>0,\ F_{KK}''<0\), аналогично для труда), положительная перекрёстная производная \(F_{KL}''>0\), линейная однородность (постоянная отдача от масштаба) и условия Инада (предельный продукт стремится к бесконечности при факторе → 0 и к нулю при факторе → ∞). Это ровно те же допущения, что в модели Солоу — модель Рамсея не меняет технологию, она меняет то, <em class="term">кто решает, сколько сберегать</em>.</p>
+      <p>Благодаря постоянной отдаче от масштаба удобно перейти к <em class="term">интенсивной форме</em> — переменным на одного работника:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.2)\qquad y_t = f(k_t), \qquad y_t=\dfrac{Y_t}{L_t},\quad k_t=\dfrac{K_t}{L_t} \]</div>
+        <div class="eq-tags"><span class="num">(3.2)</span><span>стр. 4</span></div>
+      </div>
+      <p>Ресурсное тождество экономики очевидно: весь выпуск либо потребляется, либо инвестируется —</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.3)\qquad Y_t = C_t + I_t \]</div>
+        <div class="eq-tags"><span class="num">(3.3)</span><span>стр. 4</span></div>
+      </div>
+      <p>а капитал следующего периода — это капитал этого периода за вычетом износа плюс новые инвестиции:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.4)\qquad K_{t+1} = I_t + K_t(1-\delta) = Y_t - C_t + K_t(1-\delta) \]</div>
+        <div class="eq-tags"><span class="num">(3.4)</span><span>стр. 4</span></div>
+      </div>
+    </section>
+
+    <section id="prices">
+      <h2><span class="secnum">§02</span>Накопление капитала и цены факторов</h2>
+      <p class="section-kicker">Capital accumulation and factor prices · слайд 5</p>
+      <p>Разделим (3.4) на <em>L<sub>t</sub></em> и учтём рост населения — получится главное уравнение движения капитала в расчёте на работника, которое будет встречаться во всей модели:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.5)\qquad (1+n)k_{t+1} = f(k_t) - c_t + k_t(1-\delta) \]</div>
+        <div class="eq-tags"><span class="num">(3.5)</span><span>стр. 5</span></div>
+      </div>
+      <div class="callout">
+        <span class="label">Экономический смысл</span>
+        <p>Капитал на работника завтра = сегодняшний выпуск на работника минус потребление на работника, плюс то, что осталось от старого капитала после износа. Множитель \((1+n)\) слева — это «размывание» капитала растущим населением: даже если ничего не сберегать сверх амортизации, капитал на одного работника будет падать, если население растёт.</p>
+      </div>
+      <p>При совершенной конкуренции факторы получают оплату по предельному продукту. Отсюда — зарплата и ставка процента (после вычета износа) как функции капиталовооружённости:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.6)\qquad w_t = f(k_t) - k_t f'(k_t) \]</div>
+        <div class="eq-tags"><span class="num">(3.6)</span><span>стр. 5</span></div>
+      </div>
+      <div class="eq">
+        <div class="eq-body">\[ (3.7)\qquad r_t = f'(k_t) - \delta \]</div>
+        <div class="eq-tags"><span class="num">(3.7)</span><span>стр. 5</span></div>
+      </div>
+      <p>Это будет мостом между решением социального планировщика и децентрализованной экономикой: как только (3.6)–(3.7) подставлены в бюджет домохозяйства, оно превращается ровно в (3.5) — см. §10.</p>
+    </section>
+
+    <section id="planner">
+      <h2><span class="secnum">§03</span>Задача социального планировщика</h2>
+      <p class="section-kicker">Optimization problem · слайды 6–7</p>
+      <p>Социальный планировщик максимизирует пожизненную полезность репрезентативного домохозяйства при ресурсном ограничении всей экономики (позже, в §10, будет показано, что децентрализованное равновесие даёт тот же результат):</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.8)\qquad \sum_{t=0}^{\infty} \dfrac{u(c_t)}{(1+\rho)^t} \;\longrightarrow\; \max_{c_t} \]</div>
+        <div class="eq-tags"><span class="num">(3.8)</span><span>стр. 6</span></div>
+      </div>
+      <p>при ограничении (3.5). Здесь <em>ρ</em> — норма временных предпочтений: чем она выше, тем сильнее домохозяйство «дисконтирует» будущее удовольствие, то есть тем более оно нетерпеливо.</p>
+      <div class="callout">
+        <span class="label">Тонкость формулировки</span>
+        <p>Есть альтернативная («бентамовская») спецификация, где полезность домохозяйства взвешивается его размером \(L_t u(c_t)\), а не берётся на одного человека. Она сводится к той же задаче, но с эффективной ставкой дисконтирования \((1+\rho)/(1+n)\) вместо \((1+\rho)\), поэтому требуется \(\rho>n\), чтобы сумма сходилась. Ниже используется подушевая версия (3.8) — она проще и даёт тот же качественный результат.</p>
+      </div>
+      <p>Составим лагранжиан по (3.8) и (3.5) и продифференцируем по \(c_t\) и \(k_{t+1}\):</p>
+      <div class="eq">
+        <div class="eq-body">\[ \Lambda=\sum_{t=0}^{\infty}\dfrac{u(c_t)}{(1+\rho)^t}+\sum_{t=0}^{\infty}\lambda_t\big(f(k_t)-c_t+k_t(1-\delta)-(1+n)k_{t+1}\big) \]</div>
+        <div class="eq-tags"><span>стр. 7</span></div>
+      </div>
+      <div class="eq">
+        <div class="eq-body">\[ \dfrac{\partial \Lambda}{\partial c_t}=0 \;\Rightarrow\; \dfrac{u'(c_t)}{(1+\rho)^t}=\lambda_t \qquad \forall t \]</div>
+        <div class="eq-tags"><span>стр. 7</span></div>
+      </div>
+      <div class="eq">
+        <div class="eq-body">\[ \dfrac{\partial \Lambda}{\partial k_{t+1}}=0 \;\Rightarrow\; -\lambda_t(1+n)+\lambda_{t+1}\big(f'(k_{t+1})+1-\delta\big)=0 \qquad \forall t \]</div>
+        <div class="eq-tags"><span>стр. 7</span></div>
+      </div>
+      <p>Из этих двух условий первого порядка \(\lambda_t\) исключается, и остаётся условие, связывающее сегодняшнее и завтрашнее потребление:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.9)\qquad \dfrac{u'(c_t)}{u'(c_{t+1})}=\dfrac{1+f'(k_{t+1})-\delta}{(1+n)(1+\rho)} \]</div>
+        <div class="eq-tags"><span class="num">(3.9)</span><span>стр. 7</span></div>
+      </div>
+    </section>
+
+    <section id="hamiltonian">
+      <h2><span class="secnum">§04</span>Гамильтониан и принцип максимума Понтрягина</h2>
+      <p class="section-kicker">Учебник, гл. 2 · §2.2 — тот же результат, выведенный напрямую в непрерывном времени</p>
+      <p>Лагранжиан из §03 — дискретный аппарат. Учебник решает ту же задачу планировщика сразу в непрерывном времени через <em class="term">принцип максимума Понтрягина</em> — это стандартный инструмент оптимального управления, который дальше понадобится для анализа скорости сходимости (§08) и переходной динамики (§14). Целевая функция — непрерывный аналог (3.8):</p>
+      <div class="eq">
+        <div class="eq-body">\[ (10)\qquad \max_{c(t)}\int_{0}^{\infty} u\big(c(t)\big)e^{-\rho t}\,dt \]</div>
+        <div class="eq-tags"><span class="num book">(10)</span><span>учебник</span></div>
+      </div>
+      <p>при ресурсном ограничении (3.13) и заданном начальном капитале \(k(0)=k_0\). Множитель \(e^{-\rho t}\) — это непрерывный аналог дисконтирования \((1+\rho)^{-t}\): предел сложного процента при начислении \(m\) раз в год, \(m\to\infty\), даёт \((1+\rho/m)^{-mt}\to e^{-\rho t}\).</p>
+      <p>Потребление \(c(t)\) здесь — <em class="term">переменная управления</em> (может меняться скачком, как цена актива), а капитал \(k(t)\) — <em class="term">переменная состояния</em> (меняется только плавно, определяется предысторией). Для капитала есть начальное условие \(k_0\); экзогенно заданного \(c_0\) не существует — оно определяется эндогенно, и именно в этом главное отличие от статичной задачи распределения заданного дохода из Лекции 2.</p>
+      <p>Гамильтониан задачи:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (11)\qquad H\big(k,c,\lambda,t\big)=u\big(c(t)\big)e^{-\rho t}+\lambda(t)\Big[f\big(k(t)\big)-c(t)-(n+\delta)k(t)\Big] \]</div>
+        <div class="eq-tags"><span class="num book">(11)</span><span>учебник</span></div>
+      </div>
+      <p>Первое слагаемое — мгновенная полезность потребления, приведённая к моменту 0. Второе — неявная полезность будущего потребления: выражение в скобках — это \(\dot k(t)\), прирост капиталовооружённости, обеспечивающий будущий выпуск. Множитель \(\lambda(t)\) — <em class="term">сопряжённая переменная</em> (теневая цена инвестиций): ценность дополнительной единицы капитала в единицах предельной полезности.</p>
+      <p>Условия первого порядка:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (12)\text{–}(14)\qquad \dfrac{\partial H}{\partial c}=0 \;\Longrightarrow\; u'\big(c(t)\big)e^{-\rho t}=\lambda(t) \]</div>
+        <div class="eq-tags"><span class="num book">(14)</span><span>учебник</span></div>
+      </div>
+      <div class="eq">
+        <div class="eq-body">\[ (13),(15)\qquad -\dot\lambda(t)=\dfrac{\partial H}{\partial k} \;\Longrightarrow\; \dot\lambda(t)=\lambda(t)\big[(n+\delta)-f'(k(t))\big] \]</div>
+        <div class="eq-tags"><span class="num book">(15)</span><span>учебник</span></div>
+      </div>
+      <p>Условие (14) — равенство цены и предельного выигрыша: приведённая предельная полезность потребления должна равняться теневой цене инвестиций (альтернативной стоимости сбережений). Условие (15) говорит, что теневая цена растёт, когда чистая производительность капитала \(f'(k)\) ниже, чем рост населения и износ; используя \(r=f'(k)-\delta\), это переписывается как:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (15')\qquad \dfrac{\dot\lambda(t)}{\lambda(t)}=n-r(t) \]</div>
+        <div class="eq-tags"><span class="num book">(15′)</span><span>учебник</span></div>
+      </div>
+      <p>Дифференцируя (14) по времени и подставляя (15′), \(\lambda\) исключается — получается то же самое правило Рамсея-Кейнса, что и в §05 (уравнение (3.14)/(18)).</p>
+      <p>Решение нуждается ещё в <em class="term">условии трансверсальности</em> — без него уравнения (14)–(15) имеют бесконечно много решений:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (16),(16')\qquad \lim_{t\to\infty}\lambda(t)k(t)=0 \quad\Longleftrightarrow\quad \lim_{t\to\infty} k(t)\,u'\big(c(t)\big)e^{-\rho t}=0 \]</div>
+        <div class="eq-tags"><span class="num book">(16′)</span><span>учебник</span></div>
+      </div>
+      <div class="callout">
+        <span class="label">Экономический смысл</span>
+        <p>Трансверсальность — это условие <em>отсутствия пузыря</em> на рынке капитала: ценность запаса капитала, оставленного «на бесконечности», в единицах полезности должна стремиться к нулю. Она запрещает планировщику вечно перенакапливать капитал ради накопления как такового, не конвертируя его в полезность через потребление.</p>
+      </div>
+      <h3>Гамильтониан в текущей стоимости и условие отсутствия арбитража</h3>
+      <p>Удобно ввести альтернативную форму — <em class="term">Гамильтониан в текущей стоимости</em> \(\tilde H = He^{\rho t}\), с текущей сопряжённой переменной \(\mu(t)=\lambda(t)e^{\rho t}\):</p>
+      <div class="eq">
+        <div class="eq-body">\[ (11')\qquad \tilde H(k,c,\mu,t)=u\big(c(t)\big)+\mu(t)\Big[f\big(k(t)\big)-c(t)-(n+\delta)k(t)\Big] \]</div>
+        <div class="eq-tags"><span class="num book">(11′)</span><span>учебник</span></div>
+      </div>
+      <div class="eq">
+        <div class="eq-body">\[ (12')\qquad \mu(t)=u'\big(c(t)\big) \qquad\qquad (13')\qquad \dfrac{\dot\mu(t)}{\mu(t)}=\rho+n+\delta-f'\big(k(t)\big) \]</div>
+        <div class="eq-tags"><span>учебник</span></div>
+      </div>
+      <p>Условие (13′) допускает трактовку как <em class="term">условие отсутствия арбитража</em> — уравнение ценообразования теневой стоимости инвестиций \(\mu\): сумма «капитального выигрыша» \(\dot\mu\) и дохода от дополнительной единицы капитала \((r(t)-n)\mu\) должна равняться альтернативной доходности \(\rho\mu\) (норма доходности здесь измеряется в единицах полезности, а альтернатива — отложенное потребление).</p>
+    </section>
+
+    <section id="euler">
+      <h2><span class="secnum">§05</span>Уравнение Эйлера и CRRA-полезность</h2>
+      <p class="section-kicker">Euler equation · слайды 8–9</p>
+      <p>Подставив \(r_t=f'(k_t)-\delta\) из (3.7), (3.9) превращается в знакомое <em class="term">уравнение Эйлера</em> (в учебнике — <em class="term">правило Рамсея-Кейнса</em>) для подушевого потребления:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.10)\qquad \dfrac{u'(c_t)}{u'(c_{t+1})}=\dfrac{1+r_{t+1}}{(1+n)(1+\rho)} \]</div>
+        <div class="eq-tags"><span class="num">(3.10)</span><span>стр. 8</span></div>
+      </div>
+      <p>Дальше нужна конкретная функция полезности, чтобы получить явную формулу для темпа роста потребления. Берём изоэластичную (CRRA) полезность:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.11)\qquad u(c)=\dfrac{c^{1-1/\sigma}}{1-1/\sigma} \]</div>
+        <div class="eq-tags"><span class="num">(3.11)</span><span>стр. 8</span></div>
+      </div>
+      <p>где <em>σ</em> — межвременная эластичность замещения: насколько легко домохозяйство готово переносить потребление между периодами в ответ на изменение доходности. Формально \(\sigma=-u'(c)/\big(c\,u''(c)\big)\). Подставляя (3.11) в (3.10) и линеаризуя приближение при малых <em>r</em>, <em>ρ</em>, <em>n</em>, получаем компактный <em class="term">закон роста потребления</em>:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.12)\qquad \dfrac{c_{t+1}-c_t}{c_t}\approx \sigma\big(r_{t+1}-\rho-n\big)=\sigma\big(f'(k_{t+1})-\rho-n-\delta\big) \]</div>
+        <div class="eq-tags"><span class="num">(3.12)</span><span>стр. 9</span></div>
+      </div>
+      <div class="callout">
+        <span class="label">Экономический смысл</span>
+        <p>Потребление растёт, если доходность капитала <em>f′(k)&nbsp;−&nbsp;δ</em> превышает сумму нетерпеливости <em>ρ</em> и темпа роста населения <em>n</em>. Чем выше <em>σ</em> (чем легче замещать потребление во времени), тем сильнее реакция роста потребления на разрыв между доходностью и «требуемой» доходностью \(\rho+n\). Это ровно та же логика межвременного выбора из Лекции&nbsp;2 — просто доходность <em>r</em> теперь не с неба, а определяется предельным продуктом капитала, который сам зависит от того, сколько сберегает вся экономика.</p>
+      </div>
+    </section>
+
+    <section id="continuous">
+      <h2><span class="secnum">§06</span>Непрерывное время и динамическая система</h2>
+      <p class="section-kicker">Dynamic system · слайд 10</p>
+      <p>Теперь есть два уравнения движения — для капитала (3.5) и для потребления (3.12). Для удобства анализа (фазовые диаграммы рисуются проще) переходим к непрерывному времени:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.13)\qquad \dot{k}(t)=f\big(k(t)\big)-c(t)-(n+\delta)k(t) \]</div>
+        <div class="eq-tags"><span class="num">(3.13)</span><span>стр. 10</span></div>
+      </div>
+      <div class="eq">
+        <div class="eq-body">\[ (3.14)\qquad \dfrac{\dot{c}(t)}{c(t)}=\sigma\big(f'(k(t))-\rho-n-\delta\big) \]</div>
+        <div class="eq-tags"><span class="num">(3.14)</span><span>стр. 10</span></div>
+      </div>
+      <p>Это и есть <em class="term">модель Рамсея</em> в её каноническом виде: система из двух дифференциальных уравнений, где скорость изменения капитала зависит от текущего потребления, а скорость изменения потребления — от предельного продукта капитала, то есть, косвенно, тоже от капитала. Переменные <em>k</em> и <em>c</em> определяются совместно — вот и всё общее равновесие, обещанное в мотивации.</p>
+    </section>
+
+    <section id="steady">
+      <h2><span class="secnum">§07</span>Стационарное состояние</h2>
+      <p class="section-kicker">Steady state · слайд 11</p>
+      <p>В стационарном состоянии обе переменные перестают меняться: \(\dot k=0\) и \(\dot c=0\).</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.15)\qquad \dot k=0:\quad c^{*}=f(k^{*})-(n+\delta)k^{*} \]</div>
+        <div class="eq-tags"><span class="num">(3.15)</span><span>стр. 11</span></div>
+      </div>
+      <div class="eq">
+        <div class="eq-body">\[ (3.16)\qquad \dot c=0:\quad f'(k^{*})=\rho+n+\delta \]</div>
+        <div class="eq-tags"><span class="num">(3.16)</span><span>стр. 11</span></div>
+      </div>
+      <p>(3.16) — ключевое условие: в стационарном состоянии предельный продукт капитала должен в точности покрывать нетерпеливость, рост населения и износ. (3.15) говорит, что стационарное потребление — это то, что остаётся от выпуска после «безубыточных» инвестиций \((n+\delta)k^{*}\), которые лишь поддерживают капиталовооружённость постоянной при растущем населении и изнашивающемся капитале.</p>
+    </section>
+
+    <section id="phase">
+      <h2><span class="secnum">§08</span>Фазовая диаграмма и скорость сходимости</h2>
+      <p class="section-kicker">Phase diagram · слайды 12–13 · учебник, гл. 2 · §2.3</p>
+      <p>Две локусы \(\dot k=0\) и \(\dot c=0\) делят плоскость \((k,c)\) на четыре области, в каждой из которых капитал и потребление либо растут, либо падают:</p>
+
+      <figure>
+        <svg viewBox="0 0 680 460" role="img" aria-label="Фазовая диаграмма модели Рамсея: горбообразная кривая k-точка равна нулю, вертикальная линия c-точка равна нулю в точке k*, и седловая траектория, сходящаяся к стационарному состоянию (k*, c*)">
+          <line x1="70" y1="404" x2="650" y2="404" stroke="currentColor" stroke-width="1.4" opacity="0.55"/>
+          <line x1="70" y1="404" x2="70" y2="40" stroke="currentColor" stroke-width="1.4" opacity="0.55"/>
+          <text x="656" y="410" font-family="IBM Plex Mono, monospace" font-size="14" fill="currentColor" opacity="0.7">k</text>
+          <text x="58" y="36" font-family="IBM Plex Mono, monospace" font-size="14" fill="currentColor" opacity="0.7">c</text>
+
+          <path d="M 70,404 C 190,190 260,90 360,72 C 460,58 560,120 630,395"
+                fill="none" stroke="currentColor" stroke-width="2"/>
+          <text x="600" y="150" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="currentColor" opacity="0.75">k̇ = 0</text>
+
+          <line x1="330" y1="404" x2="330" y2="60" stroke="currentColor" stroke-width="2" stroke-dasharray="6 5"/>
+          <text x="336" y="52" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="currentColor" opacity="0.75">ċ = 0</text>
+
+          <circle cx="330" cy="118" r="4.5" fill="var(--accent-2)"/>
+          <line x1="330" y1="118" x2="70" y2="118" stroke="currentColor" stroke-width="1" stroke-dasharray="3 4" opacity="0.5"/>
+          <text x="42" y="122" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="currentColor" opacity="0.75">c*</text>
+          <text x="316" y="424" font-family="IBM Plex Mono, monospace" font-size="12.5" fill="currentColor" opacity="0.75">k*</text>
+
+          <path d="M 105,392 Q 220,270 330,118 Q 420,90 560,145"
+                fill="none" stroke="var(--accent-2)" stroke-width="2.5"/>
+          <polygon points="0,-5 10,0 0,5" fill="var(--accent-2)" transform="translate(268,196) rotate(-58)"/>
+          <polygon points="0,-5 10,0 0,5" fill="var(--accent-2)" transform="translate(470,110) rotate(158)"/>
+          <text x="120" y="378" font-family="IBM Plex Mono, monospace" font-size="12" fill="var(--accent-2)">седловая траектория</text>
+
+          <g stroke="currentColor" fill="currentColor" opacity="0.55">
+            <line x1="170" y1="330" x2="200" y2="300"/><polygon points="0,-4 8,0 0,4" transform="translate(200,300) rotate(-45)"/>
+            <line x1="200" y1="150" x2="170" y2="120"/><polygon points="0,-4 8,0 0,4" transform="translate(170,120) rotate(-135)"/>
+            <line x1="440" y1="330" x2="470" y2="300"/><polygon points="0,-4 8,0 0,4" transform="translate(470,300) rotate(-45)"/>
+            <line x1="470" y1="120" x2="440" y2="150"/><polygon points="0,-4 8,0 0,4" transform="translate(440,150) rotate(135)"/>
+          </g>
+        </svg>
+        <figcaption>Стрелки показывают направление движения в каждой из четырёх зон; из всех траекторий к (k*, c*) сходится только одна — седловая (выделена цветом).</figcaption>
+      </figure>
+
+      <div class="quadgrid">
+        <div><span class="k">k &lt; k*, c ниже k̇=0</span>k̇ &gt; 0, ċ &gt; 0 — капитал и потребление растут</div>
+        <div><span class="k">k &lt; k*, c выше k̇=0</span>k̇ &lt; 0, ċ &gt; 0 — капитал падает, потребление растёт</div>
+        <div><span class="k">k &gt; k*, c ниже k̇=0</span>k̇ &gt; 0, ċ &lt; 0 — капитал растёт, потребление падает</div>
+        <div><span class="k">k &gt; k*, c выше k̇=0</span>k̇ &lt; 0, ċ &lt; 0 — капитал и потребление падают</div>
+      </div>
+
+      <p>Знак \(\dot c\) зависит только от того, где <em>k</em> относительно <em>k*</em> (левее — предельный продукт выше \(\rho+n+\delta\), потребление растёт; правее — падает). Знак \(\dot k\) зависит от того, выше или ниже кривой \(\dot k=0\) находится точка. Стационарное состояние \((k^{*},c^{*})\) — <em class="term">седловая точка</em>: почти все траектории уходят от неё, и только одна — начальное потребление \(c_0\), выбранное ровно так, чтобы попасть на седловую траекторию, — сходится к ней. Поэтому при заданном начальном капитале \(k_0\) потребление \(c_0\) не может быть произвольным: только точка на седловой траектории даёт ограниченную, экономически осмысленную динамику (и удовлетворяет условию трансверсальности (16′) из §04).</p>
+
+      <h3>Линеаризация: скорость сходимости и наклон седловой траектории</h3>
+      <p>Чтобы формально это доказать и оценить, насколько быстро экономика приближается к равновесию, линеаризуем систему (3.13)–(3.14) в окрестности \((k^{*},c^{*})\). Матрица Якоби, с учётом \(f'(k^{*})=\rho+n+\delta\) (3.16):</p>
+      <div class="eq">
+        <div class="eq-body">\[ J=\begin{pmatrix}\rho & -1\\[2pt] \sigma c^{*}f''(k^{*}) & 0\end{pmatrix} \]</div>
+        <div class="eq-tags"><span>учебник</span></div>
+      </div>
+      <p>Характеристическое уравнение \(x^{2}-\rho x+\sigma c^{*}f''(k^{*})=0\) даёт собственные числа:</p>
+      <div class="eq">
+        <div class="eq-body">\[ x_{1,2}=\dfrac{\rho\pm\sqrt{\rho^{2}-4\sigma c^{*}f''(k^{*})}}{2} \]</div>
+        <div class="eq-tags"><span>учебник</span></div>
+      </div>
+      <p>Так как \(f''(k^{*})&lt;0\), произведение корней \(x_1x_2=\sigma c^{*}f''(k^{*})&lt;0\) — корни вещественные и разных знаков (\(x_1&lt;0&lt;x_2\)), что формально подтверждает: стационарное состояние — седло. Общее решение — комбинация двух экспонент; единственная <strong>ограниченная</strong> траектория получается, если убить неустойчивую компоненту с корнем \(x_2\). Тогда на седловой траектории:</p>
+      <div class="eq">
+        <div class="eq-body">\[ k(t)=k^{*}+(k_0-k^{*})e^{x_1 t}, \qquad c(t)=c^{*}+(c_0-c^{*})e^{x_1 t} \]</div>
+        <div class="eq-tags"><span>учебник</span></div>
+      </div>
+      <p>Отрицательный корень \(x_1\) — это <em class="term">скорость сходимости</em> к стационарному состоянию (в типичной калибровке порядка \(|x_1|\approx0.4\)–\(0.5\) в год — то есть примерно половина разрыва с равновесием исчезает за год). Наклон седловой траектории на диаграмме \((k,c)\):</p>
+      <div class="eq">
+        <div class="eq-body">\[ \dfrac{c-c^{*}}{k-k^{*}}=\rho-x_1 \;>\;0,\qquad c_0=c^{*}+(\rho-x_1)(k_0-k^{*}) \]</div>
+        <div class="eq-tags"><span>учебник</span></div>
+      </div>
+      <div class="callout fact">
+        <span class="label">Интересный факт</span>
+        <p>Наклон седловой траектории растёт вместе с эластичностью замещения <em>σ</em>. При высокой <em>σ</em> даже небольшое отклонение ставки процента от \(\rho+n+\delta\) вызывает сильную реакцию потребления — траектория крутая. При низкой <em>σ</em> даже большой разрыв между <em>r</em> и стационарной доходностью почти не сдвигает потребление — траектория пологая. Эта формула — единственный способ количественно узнать, «насколько сильно» потребители реагируют на путь к равновесию, а не только в какую сторону.</p>
+      </div>
+    </section>
+
+    <section id="saving">
+      <h2><span class="secnum">§09</span>Норма сбережений и модифицированное золотое правило</h2>
+      <p class="section-kicker">Aggregate saving rate &amp; modified golden rule · слайды 14–16</p>
+      <p>Один из главных практических вопросов лекции: если сбережения — результат оптимального выбора, а не заданное число, какая норма сбережений получится в стационарном состоянии? Определим её как долю выпуска, не пошедшую на потребление:</p>
+      <div class="eq">
+        <div class="eq-body">\[ s^{*}=1-\dfrac{c^{*}}{f(k^{*})} \]</div>
+        <div class="eq-tags"><span>стр. 14</span></div>
+      </div>
+      <p>Подставляя (3.15) и вводя эластичность выпуска по капиталу \(\alpha=f'(k^{*})k^{*}/f(k^{*})\) (константа, если производственная функция Кобба–Дугласа), получаем:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.17)\qquad s^{*}=\dfrac{(n+\delta)\,\alpha}{\rho+n+\delta} \]</div>
+        <div class="eq-tags"><span class="num">(3.17)</span><span>стр. 14</span></div>
+      </div>
+      <div class="callout result">
+        <span class="label">Результат</span>
+        <p>\(s^{*}\) растёт по <em>n</em>, <em>δ</em> и <em>α</em>, и падает по <em>ρ</em>. Экономический смысл: чем быстрее растёт население и чем быстрее изнашивается капитал, тем больше нужно сберегать просто для поддержания капиталовооружённости — отсюда рост по <em>n</em> и <em>δ</em>. А нетерпеливость <em>ρ</em> снижает сбережения — но не через уравнение Эйлера (в стационарном состоянии потребление постоянно, и Эйлер не «работает»), а через то, что более высокое <em>ρ</em> требует более высокой равновесной доходности \(f'(k^{*})=\rho+n+\delta\), а значит — <em>более низкого</em> \(k^{*}\) (убывающая отдача) и, соответственно, более низких \(f(k^{*})\) и \(c^{*}\).</p>
+      </div>
+      <p>Если \(\rho=0\) (полное терпение), то \(s^{*}=\alpha\) — это в точности «классическое» <em class="term">золотое правило</em> накопления капитала, знакомое по модели Солоу: норма сбережений равна доле капитала в доходе. При \(\rho&gt;0\) норма сбережений оказывается <em>ниже</em> золотого правила. Если бы вдобавок \(n=0\), стационарные сбережения обнулились бы совсем: рост населения и износ капитала — единственная причина, по которой в стационарном состоянии вообще нужно сберегать.</p>
+      <h3>Модифицированное золотое правило</h3>
+      <p>Сравним условие оптимальности планировщика \(f'(k^{*})=\rho+n+\delta\) с условием максимума устойчивого потребления по Солоу \(f'(k^{gr})=n+\delta\) (обычное золотое правило, где выбирают <em>k</em> так, чтобы максимизировать \(c=f(k)-(n+\delta)k\)):</p>
+      <div class="eq">
+        <div class="eq-body">\[ f'(k^{gr})=n+\delta \;<\; \rho+n+\delta=f'(k^{*}) \]</div>
+        <div class="eq-tags"><span>стр. 16</span></div>
+      </div>
+      <p>Поскольку \(f''&lt;0\), из \(f'(k^{*})&gt;f'(k^{gr})\) следует \(k^{*}&lt;k^{gr}\). Оптимальный планировщик <em>сознательно</em> накапливает <strong>меньше</strong> капитала, чем требуется для максимума устойчивого потребления \(c^{\max}\) — потому что домохозяйства нетерпеливы и не готовы жертвовать сегодняшним потреблением ради ещё более высокого, но далёкого \(c^{\max}\). Это называют <em class="term">модифицированным золотым правилом</em>: оптимум ниже «чистого» золотого правила ровно настолько, насколько нетерпеливость \(\rho\) весома по сравнению с \(n+\delta\).</p>
+      <h3>Норма сбережений вне стационарного состояния</h3>
+      <p>Вдали от равновесия сберегательное поведение определяется борьбой двух эффектов из Лекции 2. Пусть \(k_0&lt;k^{*}\): по мере роста капитала выпуск растёт, а ставка процента падает. <em class="term">Эффект замещения</em> (падение <em>r</em> снижает стимул откладывать потребление на будущее) тянет норму сбережений вниз; <em class="term">эффект дохода</em> (более высокий доход позволяет сберегать больше) тянет её вверх. Далеко от стационарного состояния, где доход низкий, а текущее потребление сравнительно велико, сбережения низкие; по мере приближения к \((k^{*},c^{*})\) ресурсов для сбережений становится больше. Для производственной функции Кобба-Дугласа (постоянная \(\alpha\)) можно показать, что норма сбережений — монотонная функция капитала.</p>
+    </section>
+
+    <section id="welfare">
+      <h2><span class="secnum">§10</span>Планировщик vs. децентрализованное равновесие</h2>
+      <p class="section-kicker">Social welfare vs. decentralized equilibrium · слайды 17–19</p>
+      <p>Возникает вопрос: решение социального планировщика — это нормативный ориентир («как было бы лучше»), а выберут ли то же самое реальные, разрозненные домохозяйства, максимизирующие каждое свою полезность при собственном бюджете? Разница на бумаге в том, что планировщик учитывает ресурсное ограничение <em>всей</em> экономики, а домохозяйство — только свой собственный бюджет:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.18)\qquad C_t+(K_{t+1}-K_t)=w_tL_t+r_tK_t \]</div>
+        <div class="eq-tags"><span class="num">(3.18)</span><span>стр. 18</span></div>
+      </div>
+      <p>В подушевом виде, после деления на \(L_t\):</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.19)\qquad c_t+(1+n)k_{t+1}-k_t=w_t+r_tk_t \]</div>
+        <div class="eq-tags"><span class="num">(3.19)</span><span>стр. 18</span></div>
+      </div>
+      <p>Подставляя цены факторов (3.6)–(3.7), правая часть \(w_t+r_tk_t\) превращается в \(f(k_t)-k_tf'(k_t)+\big(f'(k_t)-\delta\big)k_t=f(k_t)-\delta k_t\), и (3.19) сворачивается ровно в ресурсное ограничение планировщика (3.5). Иными словами:</p>
+      <div class="callout result">
+        <span class="label">Результат</span>
+        <p>Бюджетное ограничение децентрализованного домохозяйства при равновесных ценах факторов <strong>тождественно совпадает</strong> с ресурсным ограничением всей экономики. Поскольку функция полезности у планировщика и у домохозяйств одна и та же, децентрализованное равновесие в точности воспроизводит решение социального планировщика («командный оптимум»). А поскольку решение планировщика по построению Парето-эффективно, <strong>децентрализованное равновесие тоже Парето-эффективно</strong> — это, по сути, первая теорема благосостояния в динамической постановке.</p>
+      </div>
+      <p>Прямое следствие: любое вмешательство в виде фискальной политики или перераспределения <strong>не может быть Парето-улучшающим</strong> — оно способно только двигать экономику вдоль границы возможных полезностей или вовсе с неё уводить. Дальше — что именно происходит при разных вариантах фискальной политики: сначала общий принцип нейтральности способа финансирования (§11), а затем — что происходит, когда меняется сама величина госрасходов (§12–14).</p>
+    </section>
+
+    <section id="ricardo">
+      <h2><span class="secnum">§11</span>Эквивалентность Барро-Рикардо в модели Рамсея</h2>
+      <p class="section-kicker">Учебник, гл. 2 · §2.5</p>
+      <p>Допустим теперь, что домохозяйства могут держать не только производственный капитал, но и государственные облигации <em>B</em>. Раз оба актива безрисковы, в равновесии они должны приносить одну и ту же доходность <em>r</em> (иначе — арбитраж). Обозначим суммарные активы на душу населения \(a=(K+B)/L\), а паушальные налоги на душу населения — <em>τ</em>. Динамическое бюджетное ограничение домохозяйства:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (28)\qquad \dot a(t)=\big(r(t)-n\big)a(t)+w(t)-\tau(t)-c(t) \]</div>
+        <div class="eq-tags"><span class="num book">(28)</span><span>учебник</span></div>
+      </div>
+      <p>При условии отсутствия «игр Понци» (домохозяйство не может вечно рефинансировать долг ростом нового долга) это динамическое ограничение эквивалентно межвременному бюджетному ограничению — приведённая сумма потребления не может превышать приведённую сумму располагаемого трудового дохода плюс текущее богатство:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (30)\qquad \int_{t}^{\infty} c(z)e^{-R(t,z)}dz = a(t)+\int_{t}^{\infty}\big[w(z)-\tau(z)\big]e^{-R(t,z)}dz,\qquad R(t,z)=\int_{t}^{z}\big(r(s)-n\big)ds \]</div>
+        <div class="eq-tags"><span class="num book">(30)</span><span>учебник</span></div>
+      </div>
+      <p>Аналогично для государства: расходы \(g\) и обслуживание долга \((r-n)b\) финансируются новыми заимствованиями и налогами, \(\dot b(t)=g(t)+(r(t)-n)b(t)-\tau(t)\) (32), и при отсутствии «игр Понци» со стороны государства это даёт межвременное ограничение бюджета правительства:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (34)\qquad \int_{t}^{\infty} g(z)e^{-R(t,z)}dz = -b(t)+\int_{t}^{\infty}\tau(z)e^{-R(t,z)}dz \]</div>
+        <div class="eq-tags"><span class="num book">(34)</span><span>учебник</span></div>
+      </div>
+      <p>Складывая (30) и (34), государственный долг <em>b</em> и налоги <em>τ</em> взаимно уничтожаются, и остаётся ограничение, где фигурируют только реальные величины:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (35)\qquad \int_{t}^{\infty} c(z)e^{-R(t,z)}dz + k(t) = \int_{t}^{\infty}\big[w(z)-g(z)\big]e^{-R(t,z)}dz \]</div>
+        <div class="eq-tags"><span class="num book">(35)</span><span>учебник</span></div>
+      </div>
+      <div class="callout result">
+        <span class="label">Результат: эквивалентность Барро-Рикардо</span>
+        <p>Для <strong>заданной</strong> траектории государственных закупок \(g(z)\) способ их финансирования — аккордными налогами сейчас или долгом сейчас и налогами позже — <strong>не влияет</strong> на бюджетное ограничение (35), а значит, и на выбор потребления и сбережений. Значение имеет только приведённая сумма будущих закупок, а не то, как именно во времени распределены налоги, которые их покрывают.</p>
+      </div>
+      <div class="callout fact">
+        <span class="label">Интересный факт</span>
+        <p>Представим, что в момент \(t_1\) государство снижает налог на \(\Delta T\) и берёт в долг ровно \(\Delta T\), а в момент \(t_2\) поднимает налог на \(\Delta T\,e^{r(t_2-t_1)}\), чтобы расплатиться. Домохозяйства в момент \(t_1\) тратят весь дополнительный располагаемый доход \(\Delta T\) на покупку тех же самых новых облигаций — их ресурсы для потребления и сбережения не меняются ни на копейку. К моменту \(t_2\) проценты и основная сумма по этим облигациям в точности покрывают возросший налог. Итог: перераспределение налогового бремени во времени никак не отражается на потреблении, сбережениях и накоплении капитала — при условии, что налоги неискажающие (аккордные). Это ключевая предпосылка: как только налоги становятся искажающими (§13), эквивалентность ломается.</p>
+      </div>
+    </section>
+
+    <section id="lumpsum">
+      <h2><span class="secnum">§12</span>Фискальная политика: паушальный налог</h2>
+      <p class="section-kicker">Balanced budget · lump-sum tax · слайды 20–22</p>
+      <p>В §11 менялся только способ финансирования <em>заданного</em> \(g\). Теперь посмотрим, что будет, если правительство поддерживает сбалансированный бюджет (не занимает вовсе) и меняется сама величина расходов. Государство финансирует (нецелевые, «бесполезные» с точки зрения полезности домохозяйств) расходы <em>g</em> паушальным (аккордным) налогом <em>τ</em>, который не зависит от поведения агента:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.20)\qquad g_t=\tau_t \]</div>
+        <div class="eq-tags"><span class="num">(3.20)</span><span>стр. 20</span></div>
+      </div>
+      <p>Бюджет домохозяйства и ресурсное ограничение экономики становятся:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.21)\qquad c_t+(1+n)k_{t+1}-k_t=w_t+r_tk_t-\tau_t \]</div>
+        <div class="eq-tags"><span class="num">(3.21)</span><span>стр. 20</span></div>
+      </div>
+      <div class="eq">
+        <div class="eq-body">\[ (3.22)\qquad (1+n)k_{t+1}=f(k_t)-c_t-g_t+k_t(1-\delta) \]</div>
+        <div class="eq-tags"><span class="num">(3.22)</span><span>стр. 20</span></div>
+      </div>
+      <p>Ключевое наблюдение: паушальный налог не входит в цену межвременного выбора — уравнение Эйлера (3.10)/(3.12) остаётся буквально тем же самым, потому что оно определяется только доходностью капитала <em>r</em>, а не уровнем дохода. Значит, локус \(\dot c=0\) (условие \(f'(k^{*})=\rho+n+\delta\)) не меняется, а локус \(\dot k=0\) сдвигается вниз ровно на величину <em>g</em>:</p>
+      <div class="eq">
+        <div class="eq-body">\[ \dot k(t)=f(k(t))-c(t)-g-(n+\delta)k(t) \]</div>
+        <div class="eq-tags"><span>стр. 21</span></div>
+      </div>
+      <div class="callout result">
+        <span class="label">Результат: полное вытеснение</span>
+        <p>Поскольку <em>k*</em> определяется только локусом \(\dot c=0\), который не сдвинулся, стационарная капиталовооружённость <strong>не меняется</strong> (это по-прежнему модифицированное золотое правило из §09). А раз \(k^{*}\) прежний, то и «безубыточные» инвестиции \((n+\delta)k^{*}\) прежние — значит, госрасходы <em>g</em> целиком финансируются за счёт снижения частного потребления, доллар в доллар: \(c^{*}_{\text{new}}=c^{*}_{\text{old}}-g\). Процентная ставка и накопление капитала при этом вообще не затрагиваются. Это — эффект <em class="term">полного вытеснения</em> (crowding-out) частного потребления паушально финансируемыми госрасходами.</p>
+      </div>
+      <div class="callout fact">
+        <span class="label">Интересный факт: спор классиков и кейнсианцев</span>
+        <p>Статическая кейнсианская модель IS-LM предсказывает, что рост госрасходов запускает мультипликативный рост выпуска (пусть отчасти сдержанный вытеснением инвестиций через рост ставки процента) — потому что экономика в ней изначально не использует все ресурсы, и спрос подтягивает выпуск к потенциальному уровню. Модель Рамсея описывает экономику, где ресурсы и так используются оптимально и полностью: расти особо нечему, поэтому госрасходы в стационарном состоянии один к одному вытесняют частное потребление, оставляя капитал и выпуск неизменными — вывод, прямо противоположный мультипликатору IS-LM.</p>
+      </div>
+    </section>
+
+    <section id="distortion">
+      <h2><span class="secnum">§13</span>Фискальная политика: искажающий налог на капитал</h2>
+      <p class="section-kicker">Distortionary capital-income tax · слайды 23–25</p>
+      <p>Теперь государство облагает налогом доход от капитала по ставке \(\tau_K\) и весь сбор возвращает паушальным трансфертом <em>x</em>:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.23)\qquad x_t=\tau_K f'(k_t)k_t \]</div>
+        <div class="eq-tags"><span class="num">(3.23)</span><span>стр. 23</span></div>
+      </div>
+      <p>На первый взгляд кажется, что ничего не должно измениться: доход домохозяйства (с учётом трансферта) и его бюджетное ограничение как уравнение — те же самые. Но налог меняет ставку <em>после налога</em>, по которой одна единица сегодняшнего потребления обменивается на завтрашнее — а именно она определяет решение о сбережениях:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (3.24)\qquad r_t=(1-\tau_K)f'(k_t)-\delta \]</div>
+        <div class="eq-tags"><span class="num">(3.24)</span><span>стр. 23</span></div>
+      </div>
+      <div class="eq">
+        <div class="eq-body">\[ (3.25)\qquad \dfrac{c_{t+1}-c_t}{c_t}=\sigma\big((1-\tau_K)f'(k_{t+1})-\rho-n-\delta\big) \]</div>
+        <div class="eq-tags"><span class="num">(3.25)</span><span>стр. 23</span></div>
+      </div>
+      <p>Теперь локус \(\dot c=0\) требует \((1-\tau_K)f'(k^{*})=\rho+n+\delta\), то есть новое стационарное условие:</p>
+      <div class="eq">
+        <div class="eq-body">\[ (41)\qquad f'(k^{*})=\dfrac{\rho+n+\delta}{1-\tau_K} \]</div>
+        <div class="eq-tags"><span class="num book">(41)</span><span>учебник</span></div>
+      </div>
+      <p>то есть более высокого \(f'(k^{*})\), а значит — локус сдвигается <strong>влево</strong> (к меньшему <em>k*</em>), тогда как локус \(\dot k=0\) не меняется (трансферт возвращается в экономику полностью, ресурсы не теряются).</p>
+      <div class="callout result">
+        <span class="label">Результат: Парето-ухудшающее искажение</span>
+        <p>Более низкая доходность капитала после налога снижает стимул сберегать — это работает <em>формально так же</em>, как если бы домохозяйства вдруг стали более нетерпеливыми (рост эффективного <em>ρ</em>). Но есть принципиальная разница: нетерпеливые домохозяйства сокращают накопление капитала <em>оптимально</em>, для себя же максимизируя полезность, а вот искажающий налог <em>заставляет</em> их отклониться от оптимума. Итог — более низкие \(k^{*}\), \(f(k^{*})\) и \(c^{*}\), и, в отличие от паушального налога из §12, это уже не нейтральный сдвиг вдоль эффективной границы, а настоящая <strong>Парето-ухудшающая</strong> потеря. Это же объясняет, почему в §11 эквивалентность Барро-Рикардо требовала именно <em>неискажающих</em> (аккордных) налогов.</p>
+      </div>
+      <p>Зеркальный случай — субсидия на капитал \(\varsigma_K\), финансируемая паушальным налогом (\(r(t)=(1+\varsigma_K)f'(k_t)-\delta\), \(\tau_t=\varsigma_K f'(k_t)k_t\), новое условие \(f'(k^{*})=(\rho+n+\delta)/(1+\varsigma_K)\)): она сдвигает локус \(\dot c=0\) <strong>вправо</strong> и может довести стационарное потребление вплоть до \(c^{\max}\) простого золотого правила. Но и это не Парето-улучшение: такое «дозированное перекармливание» сбережениями заставляет домохозяйства откладывать больше, чем им самим оптимально при их собственной норме нетерпеливости — то есть принудительное перепотребление капитала в будущем в ущерб текущему потреблению.</p>
+    </section>
+
+    <section id="transitional">
+      <h2><span class="secnum">§14</span>Переходная динамика при шоках фискальной политики</h2>
+      <p class="section-kicker">Учебник, гл. 2 · §2.5 — что происходит между двумя стационарными состояниями</p>
+      <p>Смена <em>g</em> или \(\tau_K\) двигает саму седловую траекторию — экономика должна перескочить с одной седловой траектории на другую. Вся сложность переходной динамики держится на трёх принципах:</p>
+      <div class="callout">
+        <span class="label">Три принципа переходной динамики</span>
+        <ol class="plain">
+          <li><strong>Разные классы переменных.</strong> Капитал — инертная переменная, меняется только плавно, по предыстории. Потребление — вперёд-смотрящая переменная и может меняться скачком.</li>
+          <li><strong>Скачки только на новой информации.</strong> Пока новой информации о будущей политике нет, потребление следует ранее выбранной оптимальной траектории — скачок означает пересмотр решения, а пересматривать нечего, если ничего не изменилось.</li>
+          <li><strong>Обязательный выход на седловую траекторию.</strong> В момент фактического наступления нового режима политики (и векторного поля) система обязана оказаться на седловой траектории, ведущей к <em>действующему в этот момент</em> стационарному состоянию — иначе нарушается условие трансверсальности (16′), и капитал или потребление уходят в ноль или в бесконечность.</li>
+        </ol>
+      </div>
+      <p>Эти принципы полностью определяют, что произойдёт для любой комбинации: перманентный/временный шаг и ожидаемый/неожиданный. Разберём рост государственных закупок <em>g</em> (тот же логический скелет работает и для роста налога \(\tau_K\), только вместо капитала «жертвует» уже само потребление, реагируя на изменившуюся чистую доходность):</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Сценарий</th><th>В момент новости / реализации</th><th>Переходная динамика</th><th>Итог</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Перманентный, неожиданный</strong> рост g</td>
+              <td>Ровно в момент роста g потребление скачком падает на всю величину \(\Delta g\)</td>
+              <td>Отсутствует — система сразу попадает в новое стационарное состояние</td>
+              <td>\(k^{*}\) не меняется, \(c^{*}\) падает на \(\Delta g\) — полное вытеснение (см. §12)</td>
+            </tr>
+            <tr>
+              <td><strong>Временный, неожиданный</strong> рост g</td>
+              <td>Потребление падает <em>меньше</em>, чем на \(\Delta g\) — частичное вытеснение</td>
+              <td>Пока g повышен: чистые инвестиции отрицательны, капитал снижается, ставка процента растёт, потребление растёт вдоль неустойчивой траектории; после отмены g — эффект заполнения (crowding-in): инвестиции скачком растут, экономика возвращается к исходному равновесию по его седловой траектории</td>
+              <td>Возврат к исходным \(k^{*}\), \(c^{*}\) — но с колебанием капитала и потребления по пути</td>
+            </tr>
+            <tr>
+              <td><strong>Перманентный, ожидаемый</strong> рост g (новость приходит раньше)</td>
+              <td>Потребление падает частично уже в момент новости — до фактического роста g</td>
+              <td>От новости до реализации: инвестиции растут (эффект заполнения), капитал успевает подрасти; после реализации — вытеснение инвестиций, капитал и потребление снижаются к новому равновесию</td>
+              <td>То же \(k^{*}\), \(c^{*}\), что и в неожиданном перманентном случае — но с «горбом» капитала по пути</td>
+            </tr>
+            <tr>
+              <td><strong>Временный, ожидаемый</strong> рост g</td>
+              <td>Частичный скачок вниз уже в момент новости</td>
+              <td>Самая сложная траектория — сочетает эффекты заполнения и вытеснения дважды, по мере прохождения через оба переключения режима</td>
+              <td>Возврат к исходному равновесию, самая извилистая траектория</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Для шока по ставке искажающего налога \(\tau_K\) логика зеркальная, но «жертвует» вначале не инвестиции, а сразу потребление: при неожиданном перманентном росте \(\tau_K\) чистая доходность капитала падает, и по правилу Рамсея-Кейнса потребление сразу же скачком <strong>растёт</strong> (домохозяйства замещают будущее потребление текущим), вытесняя инвестиции — капитал начинает снижаться к новому, более низкому \(k^{*}\). Ожидаемые и временные варианты добавляют те же переключения эффектов заполнения/вытеснения, что и для <em>g</em>, только зеркально по знаку.</p>
+
+      <div class="callout fact">
+        <span class="label">Интересный факт</span>
+        <p>Экономика в модели Рамсея начинает готовиться к будущим изменениям политики заранее, если о них становится известно — просто за счёт предварительного скачка потребления, а не ждёт формального наступления изменения. Это прямое следствие того, что потребление — вперёд-смотрящая переменная с рациональными ожиданиями, и разительно отличается от статических моделей, где реакция экономики наступает только по факту события, а не по факту новости о нём.</p>
+      </div>
+    </section>
+
+    <section id="summary">
+      <h2><span class="secnum">§15</span>Итоги главы</h2>
+      <p class="section-kicker">Учебник, гл. 2 — сжатые выводы</p>
+      <ul>
+        <li>Оптимальный выбор потребления соответствует равенству предельной полезности потребления и теневой цены инвестиций (§04).</li>
+        <li>Если объём ресурсов не задан экзогенно, текущий выбор между потреблением и сбережением определяет не только распределение ресурсов во времени, но и само ресурсное ограничение в будущем.</li>
+        <li>Стационарное состояние — единственное и седлового типа; переходная динамика допускает дискретные скачки потребления при плавной подстройке капитала (§08, §14).</li>
+        <li>Дискретные изменения потребления возможны только при появлении новой информации.</li>
+        <li>Реакция потребления на разрыв между фактической и равновесной ставкой процента тем сильнее, чем выше эластичность замещения σ (§08).</li>
+        <li>Рост населения и выбытие капитала обеспечивают положительную норму сбережений в стационарном состоянии; она растёт по <em>n</em> и <em>δ</em>, и падает по <em>ρ</em> (§09).</li>
+        <li>Децентрализованное равновесие совпадает с решением социального планировщика — оно Парето-эффективно (§10).</li>
+        <li>Оптимум соответствует модифицированному, а не простому золотому правилу: стационарный капитал не максимизирует устойчивое потребление (§09).</li>
+        <li>При неискажающих (аккордных) налогах в модели Рамсея выполняется эквивалентность Барро-Рикардо (§11).</li>
+        <li>Рост госрасходов не создаёт кейнсианский мультипликативный эффект — в стационарном состоянии он один к одному вытесняет частное потребление (§12).</li>
+        <li>Искажающее налогообложение капитального дохода меняет межвременное замещение потребления и порождает потери Парето-эффективности, которых нет при паушальных налогах (§13).</li>
+      </ul>
+    </section>
+
+    <hr class="div">
+
+    <section id="glossary">
+      <h2><span class="secnum">Ref</span>Глоссарий обозначений</h2>
+      <table>
+        <thead><tr><th>Символ</th><th>Значение</th></tr></thead>
+        <tbody>
+          <tr><td class="sym">k, c</td><td>капитал и потребление на одного работника, \(k=K/L,\ c=C/L\)</td></tr>
+          <tr><td class="sym">y = f(k)</td><td>выпуск на работника, интенсивная форма производственной функции</td></tr>
+          <tr><td class="sym">n</td><td>темп роста населения / рабочей силы</td></tr>
+          <tr><td class="sym">δ</td><td>норма амортизации (износа) капитала</td></tr>
+          <tr><td class="sym">ρ</td><td>норма временных предпочтений (нетерпеливость домохозяйства)</td></tr>
+          <tr><td class="sym">σ</td><td>межвременная эластичность замещения (в CRRA-полезности)</td></tr>
+          <tr><td class="sym">α</td><td>эластичность выпуска по капиталу; доля капитала в доходе при Кобб-Дугласе</td></tr>
+          <tr><td class="sym">s</td><td>норма сбережений, \(s=1-C/Y\)</td></tr>
+          <tr><td class="sym">r, w</td><td>реальная ставка процента (после износа) и реальная зарплата</td></tr>
+          <tr><td class="sym">k*, c*</td><td>стационарные значения капитала и потребления</td></tr>
+          <tr><td class="sym">k^gr</td><td>капиталовооружённость «золотого правила» (максимизирует устойчивое c)</td></tr>
+          <tr><td class="sym">λ, μ</td><td>сопряжённая переменная (теневая цена инвестиций) в приведённой и текущей стоимости</td></tr>
+          <tr><td class="sym">x₁, x₂</td><td>собственные числа линеаризованной системы (\(x_1&lt;0&lt;x_2\)); \(|x_1|\) — скорость сходимости</td></tr>
+          <tr><td class="sym">a, b</td><td>суммарные активы и государственный долг на душу населения</td></tr>
+          <tr><td class="sym">τ, g, τ_K</td><td>паушальный налог, госрасходы, ставка налога на доход от капитала</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="terms">
+      <h2><span class="secnum">Ref</span>Ключевые термины</h2>
+      <ul class="chips">
+        <li>Аккордные (паушальные) налоги</li>
+        <li>Векторное поле</li>
+        <li>Восстановительные инвестиции</li>
+        <li>Гамильтониан (приведённый / текущий)</li>
+        <li>Динамическая система</li>
+        <li>Задача социального планировщика</li>
+        <li>Золотое правило</li>
+        <li>Искажающие налоги</li>
+        <li>Капиталовооружённость</li>
+        <li>Командный оптимум</li>
+        <li>Линеаризация системы</li>
+        <li>Локус (изоклина)</li>
+        <li>Модифицированное золотое правило</li>
+        <li>Норма амортизации</li>
+        <li>Общественное благосостояние</li>
+        <li>Переходная динамика</li>
+        <li>Принцип максимума Понтрягина</li>
+        <li>Ресурсное ограничение</li>
+        <li>Седловая траектория</li>
+        <li>Седловое равновесие</li>
+        <li>Скорость конвергенции</li>
+        <li>Сопряжённая переменная</li>
+        <li>Стационарное состояние</li>
+        <li>Теневая цена инвестиций</li>
+        <li>Условие трансверсальности</li>
+        <li>Фазовая диаграмма</li>
+        <li>Эффект вытеснения / заполнения</li>
+        <li>Эффективность по Парето</li>
+        <li>Эквивалентность Барро-Рикардо</li>
+      </ul>
+    </section>
+
+    <footer class="endnote">
+      Конспект составлен на основе презентации «Macroeconomics-2 · Module 1 · Lecture 3 · Ramsey Model» (02.09.2026) и главы 2 «Модель Рамсея» учебника по макроэкономике (Ramsey, 1928; Cass, 1965; Koopmans, 1965). Нумерация (3.x) и ссылки «стр. N» — со слайдов презентации; нумерация без префикса и пометка «учебник» — из главы 2.
+    </footer>
+  </div>
+</body>
+</html>
