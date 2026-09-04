@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Эконометрика. Введение и линейная регрессия — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f5f1e7;
+      --surface:#fffdf8;
+      --surface-2:#efe9d9;
+      --surface-3:#e6ddc4;
+      --ink:#2c2a24;
+      --text:#3a362c;
+      --text-muted:#6e6858;
+      --line:#e6dfcd;
+      --line-strong:#d5cbb0;
+      --accent:#2f5590;
+      --accent-soft:#dbe6f5;
+      --accent-2:#8a6122;
+      --accent-2-soft:#f5e6c8;
+      --ok:#3f7d5c;
+      --warn:#a5432c;
+      --shadow: 0 1px 2px rgba(44,42,36,.06), 0 8px 24px -12px rgba(44,42,36,.18);
+      --grid-line: rgba(44,42,36,.05);
+    }
+
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent-2);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:860px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:860px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--line);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:40px 24px 40px; max-width:860px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(28px,4.2vw,42px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--text-muted); max-width:62ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--text-muted);
+      border-top:1px solid var(--line); padding-top:16px;
+    }
+    .meta-row strong{color:var(--text); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--line);
+    }
+    .toc-inner{
+      max-width:860px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--text-muted);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--text-muted); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:52px 0 8px; border-bottom:1px solid var(--line);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:28px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(22px,3vw,29px);}
+
+    .prose{max-width:68ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    blockquote.quote{
+      margin:20px 0; padding:4px 0 4px 20px;
+      border-left:3px solid var(--accent-2);
+      font-family:'Fraunces',serif; font-style:italic; color:var(--text);
+      font-size:15.5px; max-width:64ch;
+    }
+    blockquote.quote cite{display:block; margin-top:8px; font-style:normal; font-family:'Inter',sans-serif; font-size:13px; color:var(--text-muted);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 16px; margin:20px 0; max-width:64ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--text);}
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--line-strong); border-radius:12px;
+      box-shadow:var(--shadow); padding:22px 26px; margin:22px 0;
+      display:flex; flex-wrap:wrap; gap:22px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:19px; color:var(--ink); font-weight:500;}
+    .formula-box .eq .var{color:var(--accent); font-weight:700;}
+    .formula-legend{display:flex; gap:18px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--text-muted); max-width:14em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--line);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto; color:var(--text-muted);}
+    figcaption{font-size:13px; color:var(--text-muted); margin-top:10px; padding-top:10px; border-top:1px solid var(--line);}
+    figcaption b{color:var(--text);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:640px){.fig-grid{grid-template-columns:1fr;}}
+
+    .axis-label{font-size:11px; fill:var(--text-muted); font-family:'IBM Plex Mono',monospace;}
+    .tick-label{font-size:10.5px; fill:var(--text-muted); font-family:'IBM Plex Mono',monospace;}
+    .data-dot{fill:var(--accent-2); opacity:.55;}
+    .fit-line{stroke:var(--accent); stroke-width:2.4;}
+    .grid-line{stroke:var(--line); stroke-width:1;}
+    .axis-line{stroke:var(--line-strong); stroke-width:1.2;}
+
+    table.stat{
+      width:100%; border-collapse:collapse; font-size:14px; margin:18px 0;
+      background:var(--surface); border-radius:10px; overflow:hidden; box-shadow:var(--shadow);
+    }
+    table.stat th, table.stat td{
+      padding:10px 16px; text-align:right; border-bottom:1px solid var(--line);
+      font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums;
+    }
+    table.stat th:first-child, table.stat td:first-child{text-align:left; font-family:'Inter',sans-serif;}
+    table.stat thead th{background:var(--surface-2); color:var(--text-muted); font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.04em;}
+    table.stat tbody tr:last-child td{border-bottom:none;}
+    table.stat tbody tr:hover{background:var(--surface-2);}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface-2); color:var(--text);
+      border:1px solid var(--line);
+    }
+
+    .two-col{display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;}
+    @media (max-width:700px){.two-col{grid-template-columns:1fr;}}
+
+    .diagram-wrap{
+      background:var(--surface); border:1px solid var(--line); border-radius:14px;
+      box-shadow:var(--shadow); padding:20px; margin:24px 0; overflow-x:auto;
+    }
+    .diagram-wrap svg{min-width:560px;}
+    .legend-inline{display:flex; gap:20px; flex-wrap:wrap; margin-top:14px; font-size:12.5px; color:var(--text-muted);}
+    .legend-inline span{display:inline-flex; align-items:center; gap:6px;}
+    .swatch{width:11px;height:11px;border-radius:3px; display:inline-block; border:1.5px solid currentColor;}
+
+    .lit-list{list-style:none; margin:0; padding:0; font-size:13.5px; color:var(--text-muted); max-width:70ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--line); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--text-muted); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      html{scroll-behavior:auto;}
+    }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../index.html">← Все конспекты</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Эконометрика · Лекция 1 · конспект</p>
+      <h1 class="title">Что такое эконометрика и зачем она нужна</h1>
+      <p class="subtitle">Предмет науки, причинность и прогноз, методология исследования и — подробно — линейная регрессионная модель на примере связи роста и веса.</p>
+      <div class="meta-row">
+        <span><strong>Вакуленко Е.С.</strong>, д.э.н., НИУ ВШЭ</span>
+        <span>Эконометрика — 1</span>
+        <span>Москва, 2026</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#predmet"><span class="n">01</span>Предмет</a>
+      <a href="#prichinnost"><span class="n">02</span>Причинность</a>
+      <a href="#metod"><span class="n">03</span>Методология</a>
+      <a href="#dannye"><span class="n">04</span>Данные</a>
+      <a href="#regressiya"><span class="n">05</span>Регрессия</a>
+      <a href="#literatura"><span class="n">06</span>Литература</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <!-- ============ 01 PREDMET ============ -->
+    <section class="sec" id="predmet">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Предмет</p>
+        <h2 class="sec-title">Наука об измерении в экономике</h2>
+      </div>
+      <div class="prose">
+        <p>Продавцы мороженого давно заметили: чем выше температура воздуха, тем больше мороженого покупают. Наблюдение понятное — но оно ставит перед экономистом два разных вопроса. Первый: как не допустить дефицита мороженого в жаркие дни? Это вопрос <strong>прогноза</strong>. Второй: какую именно модель нужно оценить, чтобы ответ на первый вопрос был обоснован числами, а не интуицией? Это уже вопрос <strong>эконометрики</strong>.</p>
+
+        <p>Дословно <em>econometrics</em> переводится как «измерение в экономике». Экономисты почти всегда интересуются связями между экономическими величинами, и эконометрика — это дисциплина, которая переводит такие связи в измеримую, проверяемую форму.</p>
+
+        <blockquote class="quote">
+          «Econometrics, the result of a certain outlook on the role of economics, consists of the application of <strong>mathematical statistics</strong> to economic data to lend empirical support to the models constructed by mathematical economics and to obtain numerical results».
+          <cite>— P. A. Samuelson</cite>
+        </blockquote>
+
+        <div class="callout">
+          <span class="mark">!</span>
+          <p>Не путать корреляцию и причинно-следственную связь. То, что две величины движутся согласованно, само по себе не говорит о том, что одна порождает другую — ниже (раздел 02) это показано на конкретном примере ложной регрессии.</p>
+        </div>
+
+        <h3 class="sub">Откуда взялось разделение</h3>
+        <p>Термин «econometrics» ввёл норвежский статистик <strong>Рагнар Фриш</strong> около 1930 г. До середины века эконометрикой называли вообще всё, что использовало математические методы в экономике. Примерно с 1950 г. произошло разделение: <strong>математическая экономика</strong> занимается тем, чтобы выразить отношения между экономическими величинами в математической форме — без необходимости оценивать и проверять эту модель на данных. <strong>Эконометрика</strong> же берёт на себя именно это — верификацию экономической теории на данных.</p>
+
+        <h3 class="sub">Где применяется</h3>
+        <p>Инструментарий эконометрики используется везде, где обрабатываются статистические данные и нужно отделить закономерность от шума:</p>
+        <div class="pill-row">
+          <span class="pill">Экономика</span>
+          <span class="pill">Менеджмент</span>
+          <span class="pill">Политология</span>
+          <span class="pill">Социология</span>
+          <span class="pill">Биология</span>
+          <span class="pill">Медицина</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 PRICHINNOST ============ -->
+    <section class="sec" id="prichinnost">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Причинность</p>
+        <h2 class="sec-title">От корреляции — к причинности и прогнозу</h2>
+      </div>
+      <div class="prose">
+        <p>Вопросы, которые задают эконометристам, делятся на два больших класса. Первый — про <strong>причинно-следственные связи</strong>:</p>
+        <ol>
+          <li>Что произойдёт с уровнем преступности, если принять закон, разрешающий гражданам носить личное огнестрельное оружие?</li>
+          <li>Увеличится ли уровень инфляции в результате ускорения темпов роста денежной массы? Если да — на сколько процентных пунктов, сразу или через некоторое время? Через какое?</li>
+          <li>Влияет ли образование индивида на уровень его доходов?</li>
+        </ol>
+        <p>Второй класс — вопросы <strong>прогнозирования</strong>: сколько будет стоить квартира с заданными характеристиками через полгода; с какой вероятностью в следующем году начнётся экономический рост; вернёт ли конкретный клиент кредит.</p>
+
+        <h3 class="sub">Пример: ложная регрессия</h3>
+        <p>Общий тренд у двух рядов — самая коварная ловушка на пути от корреляции к причинности. Ниже — реальный курьёз: реальный ВВП России и численность населения Австралии в 1995–2012 гг. У обоих рядов практически линейный тренд, поэтому простая регрессия одного на другой даёт обманчиво высокий R².</p>
+      </div>
+
+      <div class="fig-grid">
+        <figure class="chart">
+          <p class="chart-title">Уровни рядов: R² = 0,92</p>
+          <svg viewBox="0 0 460 300" role="img" aria-label="Точечная диаграмма: ВВП России против населения Австралии в уровнях, с линией регрессии — сильная, но ложная связь">
+            <line class="grid-line" x1="46" y1="14" x2="46" y2="268"/>
+            <line class="grid-line" x1="46" y1="268" x2="446" y2="268"/>
+            <g class="tick-label">
+              <text x="46" y="284" text-anchor="middle">18</text>
+              <text x="126" y="284" text-anchor="middle">19</text>
+              <text x="206" y="284" text-anchor="middle">20</text>
+              <text x="286" y="284" text-anchor="middle">21</text>
+              <text x="366" y="284" text-anchor="middle">22</text>
+              <text x="446" y="284" text-anchor="middle">23</text>
+              <text x="38" y="271" text-anchor="end">20</text>
+              <text x="38" y="207.5" text-anchor="end">25</text>
+              <text x="38" y="144" text-anchor="end">30</text>
+              <text x="38" y="80.5" text-anchor="end">35</text>
+              <text x="38" y="17" text-anchor="end">40</text>
+            </g>
+            <line class="fit-line" x1="46.0" y1="263.1" x2="329.2" y2="14.0"/>
+            <g class="data-dot">
+              <circle cx="46.0" cy="229.9" r="4" /><circle cx="70.0" cy="240.1" r="4" /><circle cx="78.0" cy="238.8" r="4" /><circle cx="90.0" cy="255.3" r="4" /><circle cx="106.0" cy="235.0" r="4" /><circle cx="122.0" cy="208.3" r="4" /><circle cx="142.0" cy="190.5" r="4" /><circle cx="154.0" cy="176.6" r="4" /><circle cx="174.0" cy="149.9" r="4" /><circle cx="194.0" cy="123.2" r="4" /><circle cx="214.0" cy="97.8" r="4" /><circle cx="234.0" cy="62.3" r="4" /><circle cx="266.0" cy="22.9" r="4" /><circle cx="330.0" cy="39.4" r="4" /><circle cx="354.0" cy="16.5" r="4" />
+            </g>
+            <text class="axis-label" x="246" y="298" text-anchor="middle">Население Австралии, млн чел.</text>
+            <text class="axis-label" x="-140" y="12" text-anchor="middle" transform="rotate(-90)">ВВП России, трлн руб.</text>
+          </svg>
+          <figcaption>Иллюстрация тезиса лекции (по мотивам примера Ф. Картаева): <b>реальные уровни</b> двух рядов сильно коррелируют — оба просто растут во времени.</figcaption>
+        </figure>
+
+        <figure class="chart">
+          <p class="chart-title">Приросты рядов: R² = 0,01</p>
+          <svg viewBox="0 0 460 300" role="img" aria-label="Точечная диаграмма изменений тех же рядов — связь практически исчезает">
+            <line class="grid-line" x1="46" y1="14" x2="46" y2="268"/>
+            <line class="grid-line" x1="46" y1="141" x2="446" y2="141"/>
+            <g class="tick-label">
+              <text x="46" y="284" text-anchor="middle">.1</text>
+              <text x="146" y="284" text-anchor="middle">.2</text>
+              <text x="246" y="284" text-anchor="middle">.3</text>
+              <text x="346" y="284" text-anchor="middle">.4</text>
+              <text x="446" y="284" text-anchor="middle">.5</text>
+              <text x="38" y="271" text-anchor="end">-4</text>
+              <text x="38" y="144" text-anchor="end">0</text>
+              <text x="38" y="17" text-anchor="end">4</text>
+            </g>
+            <line class="fit-line" x1="46.0" y1="94.9" x2="446.0" y2="123.1"/>
+            <g class="data-dot">
+              <circle cx="126.0" cy="175.9" r="4" /><circle cx="136.0" cy="131.5" r="4" /><circle cx="146.0" cy="80.7" r="4" /><circle cx="156.0" cy="68.0" r="4" /><circle cx="166.0" cy="102.9" r="4" /><circle cx="176.0" cy="99.7" r="4" /><circle cx="181.0" cy="169.6" r="4" /><circle cx="196.0" cy="55.3" r="4" /><circle cx="226.0" cy="87.0" r="4" /><circle cx="246.0" cy="90.2" r="4" /><circle cx="276.0" cy="42.6" r="4" /><circle cx="296.0" cy="96.5" r="4" /><circle cx="326.0" cy="87.0" r="4" /><circle cx="346.0" cy="77.5" r="4" /><circle cx="376.0" cy="248.9" r="4" />
+            </g>
+            <text class="axis-label" x="246" y="298" text-anchor="middle">Δ население Австралии</text>
+            <text class="axis-label" x="-140" y="12" text-anchor="middle" transform="rotate(-90)">Δ ВВП России</text>
+          </svg>
+          <figcaption>Та же пара рядов в <b>приростах</b>: убрав общий тренд, почти всю «связь» теряем — R² падает до нуля.</figcaption>
+        </figure>
+      </div>
+      <div class="prose">
+        <p><strong>Причина ложной регрессии — единый тренд.</strong> Оба ряда растут просто потому, что растут со временем, а не потому, что между ними есть содержательная связь. Проверка на приростах (или добавление тренда как контрольной переменной) — стандартный способ отличить настоящую зависимость от совпадения трендов.</p>
+      </div>
+    </section>
+
+    <!-- ============ 03 METODOLOGIYA ============ -->
+    <section class="sec" id="metod">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Методология</p>
+        <h2 class="sec-title">Как устроено эконометрическое исследование</h2>
+      </div>
+      <div class="prose">
+        <p>Экономическая теория задаёт содержательную гипотезу о связи величин. Эта гипотеза переводится в эконометрическую модель, под которую подбираются данные; модель оценивается, и результат проверяется на адекватность. Если модель адекватна — она используется для проверки гипотез или прогноза. Если нет — модель пересматривается, и цикл повторяется.</p>
+      </div>
+
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 780 630" role="img" aria-label="Схема построения эконометрического исследования: от экономической теории через модель, данные и оценивание к проверке адекватности, с циклом пересмотра модели при отрицательном результате">
+          <defs>
+            <marker id="af" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g fill="none" stroke="currentColor" stroke-width="1.6" marker-end="url(#af)">
+            <line x1="390" y1="74" x2="390" y2="110"/>
+            <line x1="295" y1="141" x2="222" y2="141"/>
+            <line x1="390" y1="170" x2="390" y2="232"/>
+            <polyline points="135,170 135,205 335,205 335,232"/>
+            <line x1="390" y1="292" x2="390" y2="324"/>
+            <line x1="296.6" y1="409.4" x2="228" y2="436"/>
+            <line x1="550" y1="372" x2="590" y2="372"/>
+            <polyline points="225,518 225,540 110,540 110,554"/>
+            <polyline points="225,518 225,540 350,540 350,554"/>
+            <polyline points="708,372 745,372 745,141 487,141"/>
+          </g>
+
+          <text class="axis-label" x="616" y="131" text-anchor="middle">модель пересматривается</text>
+
+          <g font-family="'Inter',sans-serif" font-size="14" fill="var(--ink)" text-anchor="middle">
+            <g>
+              <rect x="295" y="20" width="190" height="54" rx="8" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="390" y="52" dominant-baseline="middle">Экономическая теория</text>
+            </g>
+            <g>
+              <rect x="295" y="112" width="190" height="58" rx="8" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="390" y="141" dominant-baseline="middle">Эконометрическая</text>
+              <text x="390" y="159" dominant-baseline="middle">модель</text>
+            </g>
+            <g>
+              <rect x="50" y="112" width="172" height="58" rx="8" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="136" y="141" dominant-baseline="middle">Данные</text>
+            </g>
+            <g>
+              <rect x="295" y="234" width="190" height="58" rx="8" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="390" y="263" dominant-baseline="middle">Оценивание</text>
+            </g>
+            <g>
+              <ellipse cx="390" cy="372" rx="160" ry="46" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="390" y="364" dominant-baseline="middle">Модель является</text>
+              <text x="390" y="382" dominant-baseline="middle">адекватной?</text>
+            </g>
+            <g>
+              <polygon points="225,438 287,478 225,518 163,478" fill="var(--surface)" stroke="var(--ok)" stroke-width="1.8"/>
+              <text x="225" y="478" dominant-baseline="middle" font-weight="700" fill="var(--ok)">Да</text>
+            </g>
+            <g>
+              <polygon points="650,334 708,372 650,410 592,372" fill="var(--surface)" stroke="var(--warn)" stroke-width="1.8"/>
+              <text x="650" y="372" dominant-baseline="middle" font-weight="700" fill="var(--warn)">Нет</text>
+            </g>
+            <g>
+              <rect x="25" y="554" width="170" height="56" rx="8" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="110" y="576" dominant-baseline="middle" font-size="13">Проверка</text>
+              <text x="110" y="592" dominant-baseline="middle" font-size="13">гипотез</text>
+            </g>
+            <g>
+              <rect x="225" y="554" width="255" height="56" rx="8" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.4"/>
+              <text x="352" y="576" dominant-baseline="middle" font-size="13">Использование модели</text>
+              <text x="352" y="592" dominant-baseline="middle" font-size="13">для прогнозирования</text>
+            </g>
+          </g>
+        </svg>
+        <div class="legend-inline">
+          <span><span class="swatch" style="color:var(--ok)"></span>модель принимается</span>
+          <span><span class="swatch" style="color:var(--warn)"></span>требует пересмотра спецификации</span>
+        </div>
+      </div>
+
+      <div class="prose">
+        <h3 class="sub">Методы оценивания</h3>
+        <div class="pill-row">
+          <span class="pill">МНК (OLS)</span>
+          <span class="pill">2МНК (2SLS)</span>
+          <span class="pill">ОМНК (GLS)</span>
+          <span class="pill">Метод максимального правдоподобия (ML)</span>
+          <span class="pill">Обобщённый метод моментов (GMM)</span>
+        </div>
+
+        <h3 class="sub">Эконометрика, машинное обучение и ИИ</h3>
+        <p>Регрессия — это и задача обучения с учителем в ML, и центральный инструмент эконометрики, но цели разные. <strong>Задачи ML в экономике</strong> — классификация и прогнозирование. <strong>Задачи эконометрики</strong> — не только спрогнозировать, но и объяснить механизм, стоящий за оценками: что будет с целевой переменной, если факторы изменятся определённым образом.</p>
+        <p>ИИ можно использовать как помощника: обрабатывать данные, подбирать методологию и набор факторов, рецензировать модель, оценивать baseline и подбирать литературу для сравнения. Но ИИ не заменяет понимание предмета — только зная эконометрику, можно проверить, не «галлюцинирует» ли модель или сам ИИ.</p>
+      </div>
+    </section>
+
+    <!-- ============ 04 DANNYE ============ -->
+    <section class="sec" id="dannye">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Данные</p>
+        <h2 class="sec-title">Экономические данные: типы, сбор, источники</h2>
+      </div>
+      <div class="prose">
+        <h3 class="sub">Три типа данных</h3>
+        <div class="two-col">
+          <div>
+            <p><span class="mono" style="color:var(--accent-2); font-weight:700;">Cross section</span> — пространственные данные: разные объекты (страны, фирмы, люди), один момент времени.</p>
+            <p><span class="mono" style="color:var(--accent-2); font-weight:700;">Time series</span> — временные ряды: один объект, много моментов времени.</p>
+            <p><span class="mono" style="color:var(--accent-2); font-weight:700;">Panel data</span> — панельные данные: много объектов, много моментов времени одновременно.</p>
+          </div>
+          <div>
+            <p><strong>Генеральная совокупность</strong> — совокупность всех мысленно возможных объектов данного вида, над которыми проводятся наблюдения.</p>
+            <p><strong>Выборка</strong> — случайно отобранная совокупность из объектов генеральной совокупности. Задача математической статистики — оценить характеристики генеральной совокупности по выборке: об истинной совокупности мы, как правило, знаем не всё, поэтому строим гипотезы и проверяем их на независимой выборке.</p>
+          </div>
+        </div>
+
+        <h3 class="sub">Как собираются данные</h3>
+        <p>Расчёт и сбор динамики показателей статистическими службами (макропоказатели, Росстат); обследования предприятий и людей; телефонные, почтовые и индивидуальные опросы; сплошные обследования (перепись) и выборочные обследования.</p>
+
+        <h3 class="sub">Где искать открытые базы данных</h3>
+        <div class="pill-row">
+          <span class="pill">Росстат</span>
+          <span class="pill">РМЭЗ НИУ ВШЭ (RLMS-HSE)</span>
+          <span class="pill">ЕАСД НИУ ВШЭ</span>
+          <span class="pill">World Value Survey</span>
+          <span class="pill">European Social Survey</span>
+          <span class="pill">BEEPS (Всемирный банк)</span>
+          <span class="pill">Евростат</span>
+          <span class="pill">OECD.Stat</span>
+          <span class="pill">KLEMS</span>
+        </div>
+
+        <h3 class="sub">Инструменты курса</h3>
+        <p>Статистических пакетов много (SPSS, Eviews, Gretl, MS Excel), но в рамках курса используются <strong>R</strong>, <strong>Python</strong> и <strong>STATA</strong>.</p>
+      </div>
+    </section>
+
+    <!-- ============ 05 REGRESSIYA ============ -->
+    <section class="sec" id="regressiya">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Регрессия</p>
+        <h2 class="sec-title">Линейная регрессионная модель</h2>
+      </div>
+      <div class="prose">
+        <p>Слово «регрессия» пришло из биометрии. В 1886 г. сэр <strong>Фрэнсис Гальтон</strong> ввёл этот термин в работе «Регрессия роста детей к среднему», изучая зависимость роста детей от роста родителей. Дословно регрессия — это обратное движение, отступление, возврат к более ранней стадии: Гальтон обнаружил, что дети очень высоких родителей в среднем чуть ниже них, а дети очень низких — чуть выше: рост «регрессирует» к среднему по популяции.</p>
+
+        <p>Возьмём похожий пример: какие факторы определяют наш вес? Первый кандидат, приходящий в голову — рост. Запишем эту гипотезу как модель:</p>
+      </div>
+
+      <div class="formula-box">
+        <div class="eq">Вес<sub>i</sub> = <span class="var">α</span> + <span class="var">β</span>×Рост<sub>i</sub> + <span class="var">ε</span><sub>i</sub></div>
+        <div class="formula-legend">
+          <div class="item"><b>α, β</b>коэффициенты модели — свободный член и наклон</div>
+          <div class="item"><b>ε<sub>i</sub></b>случайная составляющая для наблюдения i</div>
+          <div class="item"><b>i</b>индекс наблюдения (конкретного человека в выборке)</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>Без случайного члена ε все точки легли бы точно на одну прямую — но так не бывает: два человека одного роста почти никогда не весят одинаково. Случайная составляющая — это то, что линия «Вес = α + β·Рост» не объясняет для конкретного наблюдения.</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Почему в модели есть случайный член ε</p>
+        <svg viewBox="0 0 460 260" role="img" aria-label="Схематичный график: истинная линия Вес = альфа + бета·Рост и четыре точки наблюдений, разбросанные вокруг неё; ε1 — отклонение первого наблюдения от линии">
+          <defs>
+            <marker id="af2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="currentColor"/></marker>
+          </defs>
+          <line class="axis-line" x1="55" y1="230" x2="420" y2="230" marker-end="url(#af2)"/>
+          <line class="axis-line" x1="55" y1="230" x2="55" y2="18" marker-end="url(#af2)"/>
+          <text class="axis-label" x="420" y="222" text-anchor="end">Рост</text>
+          <text class="axis-label" x="30" y="14">Вес</text>
+
+          <line x1="75" y1="205" x2="410" y2="55" class="fit-line"/>
+          <text class="axis-label" x="86" y="34" fill="var(--accent)" font-weight="700">Вес = α + β·Рост</text>
+
+          <g stroke="var(--line)" stroke-dasharray="3 3">
+            <line x1="120" y1="230" x2="120" y2="150"/>
+          </g>
+
+          <g stroke="currentColor" stroke-width="1.2">
+            <line x1="108" y1="150" x2="132" y2="150"/>
+            <line x1="108" y1="184.85" x2="132" y2="184.85"/>
+            <line x1="112" y1="150" x2="112" y2="184.85"/>
+          </g>
+          <text class="axis-label" x="88" y="171" text-anchor="end">ε₁</text>
+
+          <text class="axis-label" x="42" y="218" text-anchor="end">α</text>
+
+          <g class="data-dot" opacity="1">
+            <circle cx="120" cy="184.85" r="3.4" fill="var(--text-muted)"/>
+            <circle cx="205" cy="146.8" r="3.4" fill="var(--text-muted)"/>
+            <circle cx="290" cy="108.7" r="3.4" fill="var(--text-muted)"/>
+            <circle cx="375" cy="70.7" r="3.4" fill="var(--text-muted)"/>
+          </g>
+          <g fill="var(--ink)">
+            <circle cx="120" cy="150" r="4.2"/>
+            <circle cx="205" cy="175" r="4.2"/>
+            <circle cx="290" cy="135" r="4.2"/>
+            <circle cx="345" cy="40" r="4.2"/>
+          </g>
+          <g class="axis-label">
+            <text x="126" y="145">P₁</text>
+            <text x="211" y="180">P₂</text>
+            <text x="296" y="140">P₃</text>
+            <text x="351" y="36">P₄</text>
+            <text x="126" y="196">Q₁</text>
+            <text x="211" y="158">Q₂</text>
+            <text x="296" y="120">Q₃</text>
+          </g>
+          <g class="tick-label">
+            <text x="120" y="246" text-anchor="middle">X₁</text>
+            <text x="205" y="246" text-anchor="middle">X₂</text>
+            <text x="290" y="246" text-anchor="middle">X₃</text>
+            <text x="375" y="246" text-anchor="middle">X₄</text>
+          </g>
+        </svg>
+        <figcaption>Точки <b>P</b> — реальные наблюдения; точки <b>Q</b> — значения, которые предсказывала бы линия при том же росте. Расстояние между ними — случайная составляющая ε для конкретного человека.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>Случайная составляющая существует не потому, что реальность «шумит» без причины, а по нескольким конкретным источникам:</p>
+        <ul>
+          <li><strong>Невключение объясняющих переменных</strong> — вес зависит не только от роста, но и от многих других факторов, не попавших в модель.</li>
+          <li><strong>Агрегирование переменных</strong> — упрощение множества влияний до одной переменной неизбежно теряет часть информации.</li>
+          <li><strong>Неправильное описание структуры модели</strong> — истинная зависимость может быть не такой, как предполагает модель.</li>
+          <li><strong>Неправильная функциональная спецификация</strong> — связь может быть нелинейной там, где предполагается линейность.</li>
+          <li><strong>Ошибки измерения</strong> — рост и вес фиксируются с погрешностью (особенно если это самоотчёт).</li>
+        </ul>
+
+        <h3 class="sub">Проверка на реальных данных: РМЭЗ НИУ ВШЭ</h3>
+        <p>Возьмём готовые данные — ежегодные опросы домохозяйств <strong>РМЭЗ НИУ ВШЭ</strong> (RLMS-HSE), волна 2017 года, 9905 наблюдений. Респондентов дважды спрашивали напрямую: «Сколько килограмм Вы весите?» и «А какой у Вас рост в сантиметрах?».</p>
+      </div>
+
+      <table class="stat">
+        <thead><tr><th>Переменная</th><th>Среднее</th><th>Минимум</th><th>Максимум</th></tr></thead>
+        <tbody>
+          <tr><td>Вес, кг</td><td>74.19</td><td>33</td><td>151</td></tr>
+          <tr><td>Рост, см</td><td>167.71</td><td>110</td><td>207</td></tr>
+        </tbody>
+      </table>
+
+      <div class="fig-grid">
+        <figure class="chart">
+          <p class="chart-title">Распределение веса</p>
+          <svg viewBox="0 0 320 200" role="img" aria-label="Гистограмма веса в выборке РМЭЗ 2017: правая асимметрия, пик около 70 кг">
+            <line class="axis-line" x1="34" y1="160" x2="310" y2="160"/>
+            <line class="axis-line" x1="34" y1="10" x2="34" y2="160"/>
+            <g fill="var(--accent-2)" opacity=".78">
+<rect x="34.00" y="160.00" width="8.00" height="0.00" /><rect x="43.20" y="160.00" width="8.00" height="0.00" /><rect x="52.40" y="160.00" width="8.00" height="0.00" /><rect x="61.60" y="160.00" width="8.00" height="0.00" /><rect x="70.80" y="160.00" width="8.00" height="0.00" /><rect x="80.00" y="160.00" width="8.00" height="0.00" /><rect x="89.20" y="160.00" width="8.00" height="0.00" /><rect x="98.40" y="158.08" width="8.00" height="1.92" /><rect x="107.60" y="157.46" width="8.00" height="2.54" /><rect x="116.80" y="149.80" width="8.00" height="10.20" /><rect x="126.00" y="134.13" width="8.00" height="25.87" /><rect x="135.20" y="108.93" width="8.00" height="51.07" /><rect x="144.40" y="73.19" width="8.00" height="86.81" /><rect x="153.60" y="30.41" width="8.00" height="129.59" /><rect x="162.80" y="30.41" width="8.00" height="129.59" /><rect x="172.00" y="10.00" width="8.00" height="150.00" /><rect x="181.20" y="22.46" width="8.00" height="137.54" /><rect x="190.40" y="60.40" width="8.00" height="99.60" /><rect x="199.60" y="99.35" width="8.00" height="60.65" /><rect x="208.80" y="116.26" width="8.00" height="43.74" /><rect x="218.00" y="142.75" width="8.00" height="17.25" /><rect x="227.20" y="151.71" width="8.00" height="8.29" /><rect x="236.40" y="157.75" width="8.00" height="2.25" /><rect x="245.60" y="158.71" width="8.00" height="1.29" /><rect x="254.80" y="160.00" width="8.00" height="0.00" /><rect x="264.00" y="160.00" width="8.00" height="0.00" /><rect x="273.20" y="160.00" width="8.00" height="0.00" /><rect x="282.40" y="160.00" width="8.00" height="0.00" /><rect x="291.60" y="160.00" width="8.00" height="0.00" /><rect x="300.80" y="160.00" width="8.00" height="0.00" />
+            </g>
+            <g class="tick-label">
+              <text x="34" y="174" text-anchor="middle">0</text>
+              <text x="126" y="174" text-anchor="middle">50</text>
+              <text x="218" y="174" text-anchor="middle">100</text>
+              <text x="310" y="174" text-anchor="middle">150</text>
+              <text x="28" y="163" text-anchor="end">0</text>
+              <text x="28" y="14" text-anchor="end">.031</text>
+            </g>
+            <text class="axis-label" x="172" y="192" text-anchor="middle">Вес, кг</text>
+          </svg>
+          <figcaption>Правая асимметрия: люди с большим весом «растягивают» хвост распределения сильнее, чем люди с маленьким весом.</figcaption>
+        </figure>
+
+        <figure class="chart">
+          <p class="chart-title">Распределение роста</p>
+          <svg viewBox="0 0 320 200" role="img" aria-label="Гистограмма роста в выборке РМЭЗ 2017: близко к нормальному, пик около 170 см">
+            <line class="axis-line" x1="34" y1="160" x2="310" y2="160"/>
+            <line class="axis-line" x1="34" y1="10" x2="34" y2="160"/>
+            <g fill="var(--accent-2)" opacity=".78">
+<rect x="34.00" y="160.00" width="8.60" height="0.00" /><rect x="43.86" y="160.00" width="8.60" height="0.00" /><rect x="53.71" y="159.71" width="8.60" height="0.29" /><rect x="63.57" y="160.00" width="8.60" height="0.00" /><rect x="73.43" y="160.00" width="8.60" height="0.00" /><rect x="83.29" y="160.00" width="8.60" height="0.00" /><rect x="93.14" y="160.00" width="8.60" height="0.00" /><rect x="103.00" y="159.38" width="8.60" height="0.62" /><rect x="112.86" y="160.00" width="8.60" height="0.00" /><rect x="122.71" y="159.38" width="8.60" height="0.62" /><rect x="132.57" y="155.36" width="8.60" height="4.64" /><rect x="142.43" y="152.54" width="8.60" height="7.46" /><rect x="152.29" y="138.91" width="8.60" height="21.09" /><rect x="162.14" y="109.78" width="8.60" height="50.22" /><rect x="172.00" y="80.65" width="8.60" height="79.35" /><rect x="181.86" y="37.60" width="8.60" height="122.40" /><rect x="191.71" y="22.72" width="8.60" height="137.28" /><rect x="201.57" y="10.00" width="8.60" height="150.00" /><rect x="211.43" y="23.01" width="8.60" height="136.99" /><rect x="221.29" y="63.29" width="8.60" height="96.71" /><rect x="231.14" y="93.37" width="8.60" height="66.63" /><rect x="241.00" y="125.90" width="8.60" height="34.10" /><rect x="250.86" y="144.83" width="8.60" height="15.17" /><rect x="260.71" y="154.41" width="8.60" height="5.59" /><rect x="270.57" y="159.09" width="8.60" height="0.91" /><rect x="280.43" y="159.71" width="8.60" height="0.29" /><rect x="290.29" y="160.00" width="8.60" height="0.00" /><rect x="300.14" y="160.00" width="8.60" height="0.00" />
+            </g>
+            <g class="tick-label">
+              <text x="34" y="174" text-anchor="middle">100</text>
+              <text x="134" y="174" text-anchor="middle">140</text>
+              <text x="235" y="174" text-anchor="middle">180</text>
+              <text x="28" y="163" text-anchor="end">0</text>
+              <text x="28" y="14" text-anchor="end">.041</text>
+            </g>
+            <text class="axis-label" x="172" y="192" text-anchor="middle">Рост, см</text>
+          </svg>
+          <figcaption>Форма ближе к нормальному распределению — типично для антропометрических признаков.</figcaption>
+        </figure>
+      </div>
+
+      <div class="prose">
+        <p>Отложив рост по горизонтали и вес по вертикали для всех 9905 респондентов, получаем плотное облако точек с явным восходящим трендом — с ростом связан больший вес, но связь далеко не жёсткая:</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Данные РМЭЗ, 2017 г. — рост и вес, n ≈ 9905</p>
+        <svg viewBox="0 0 630 386" role="img" aria-label="Точечная диаграмма роста и веса респондентов РМЭЗ 2017: плотное облако с положительным трендом">
+          <line class="axis-line" x1="58" y1="18" x2="58" y2="340"/>
+          <line class="axis-line" x1="58" y1="340" x2="600" y2="340"/>
+          <g class="tick-label">
+            <text x="58" y="356" text-anchor="middle">100</text>
+            <text x="156.5" y="356" text-anchor="middle">120</text>
+            <text x="255.1" y="356" text-anchor="middle">140</text>
+            <text x="353.6" y="356" text-anchor="middle">160</text>
+            <text x="452.2" y="356" text-anchor="middle">180</text>
+            <text x="550.7" y="356" text-anchor="middle">200</text>
+            <text x="50" y="343" text-anchor="end">0</text>
+            <text x="50" y="235.7" text-anchor="end">50</text>
+            <text x="50" y="128.3" text-anchor="end">100</text>
+            <text x="50" y="21" text-anchor="end">150</text>
+          </g>
+          <g class="data-dot" r="2.6">
+<circle cx="418.8" cy="162.4" r="2.6" /><circle cx="442.8" cy="161.1" r="2.6" /><circle cx="441.6" cy="178.7" r="2.6" /><circle cx="403.3" cy="209.6" r="2.6" /><circle cx="406.9" cy="198.8" r="2.6" /><circle cx="364.4" cy="208.4" r="2.6" /><circle cx="439.0" cy="173.1" r="2.6" /><circle cx="396.5" cy="142.9" r="2.6" /><circle cx="414.5" cy="163.7" r="2.6" /><circle cx="381.9" cy="193.2" r="2.6" /><circle cx="446.2" cy="168.6" r="2.6" /><circle cx="417.5" cy="173.1" r="2.6" /><circle cx="427.6" cy="177.2" r="2.6" /><circle cx="432.6" cy="165.0" r="2.6" /><circle cx="401.9" cy="208.0" r="2.6" /><circle cx="391.1" cy="195.5" r="2.6" /><circle cx="388.3" cy="167.4" r="2.6" /><circle cx="464.9" cy="157.2" r="2.6" /><circle cx="448.7" cy="154.7" r="2.6" /><circle cx="411.4" cy="201.8" r="2.6" /><circle cx="425.6" cy="178.4" r="2.6" /><circle cx="333.8" cy="240.5" r="2.6" /><circle cx="446.8" cy="128.1" r="2.6" /><circle cx="405.2" cy="167.1" r="2.6" /><circle cx="408.5" cy="137.0" r="2.6" /><circle cx="361.5" cy="161.2" r="2.6" /><circle cx="394.9" cy="160.1" r="2.6" /><circle cx="434.7" cy="130.1" r="2.6" /><circle cx="456.2" cy="126.3" r="2.6" /><circle cx="372.7" cy="147.7" r="2.6" /><circle cx="410.3" cy="178.7" r="2.6" /><circle cx="390.1" cy="182.5" r="2.6" /><circle cx="416.1" cy="140.3" r="2.6" /><circle cx="424.1" cy="174.4" r="2.6" /><circle cx="401.5" cy="175.9" r="2.6" /><circle cx="377.9" cy="208.4" r="2.6" /><circle cx="376.9" cy="218.4" r="2.6" /><circle cx="409.7" cy="148.6" r="2.6" /><circle cx="327.7" cy="190.9" r="2.6" /><circle cx="442.1" cy="170.9" r="2.6" /><circle cx="385.5" cy="138.0" r="2.6" /><circle cx="452.1" cy="127.8" r="2.6" /><circle cx="331.7" cy="194.1" r="2.6" /><circle cx="352.0" cy="205.1" r="2.6" /><circle cx="318.5" cy="200.9" r="2.6" /><circle cx="339.4" cy="205.1" r="2.6" /><circle cx="312.5" cy="213.4" r="2.6" /><circle cx="400.9" cy="150.4" r="2.6" /><circle cx="370.5" cy="186.9" r="2.6" /><circle cx="316.6" cy="201.2" r="2.6" /><circle cx="421.9" cy="167.4" r="2.6" /><circle cx="383.8" cy="149.9" r="2.6" /><circle cx="447.1" cy="168.6" r="2.6" /><circle cx="361.5" cy="176.1" r="2.6" /><circle cx="354.3" cy="158.2" r="2.6" /><circle cx="395.7" cy="184.0" r="2.6" /><circle cx="398.6" cy="158.9" r="2.6" /><circle cx="541.1" cy="107.8" r="2.6" /><circle cx="308.4" cy="233.5" r="2.6" /><circle cx="377.2" cy="185.1" r="2.6" /><circle cx="344.5" cy="193.6" r="2.6" /><circle cx="395.1" cy="155.3" r="2.6" /><circle cx="394.4" cy="189.6" r="2.6" /><circle cx="407.2" cy="171.2" r="2.6" /><circle cx="400.1" cy="167.5" r="2.6" /><circle cx="489.2" cy="142.9" r="2.6" /><circle cx="422.5" cy="122.9" r="2.6" /><circle cx="363.0" cy="207.3" r="2.6" /><circle cx="395.2" cy="151.1" r="2.6" /><circle cx="338.1" cy="176.5" r="2.6" /><circle cx="356.0" cy="166.4" r="2.6" /><circle cx="380.9" cy="193.9" r="2.6" /><circle cx="311.9" cy="177.4" r="2.6" /><circle cx="393.5" cy="222.8" r="2.6" /><circle cx="303.2" cy="222.3" r="2.6" /><circle cx="389.0" cy="154.4" r="2.6" /><circle cx="462.0" cy="174.9" r="2.6" /><circle cx="359.0" cy="231.0" r="2.6" /><circle cx="347.1" cy="189.8" r="2.6" /><circle cx="330.5" cy="202.5" r="2.6" /><circle cx="372.7" cy="154.0" r="2.6" /><circle cx="461.9" cy="154.0" r="2.6" /><circle cx="413.2" cy="165.3" r="2.6" /><circle cx="397.9" cy="182.1" r="2.6" /><circle cx="445.0" cy="164.5" r="2.6" /><circle cx="313.1" cy="182.7" r="2.6" /><circle cx="324.4" cy="224.0" r="2.6" /><circle cx="415.4" cy="139.6" r="2.6" /><circle cx="334.4" cy="197.7" r="2.6" /><circle cx="462.1" cy="162.4" r="2.6" /><circle cx="339.0" cy="151.6" r="2.6" /><circle cx="429.3" cy="171.9" r="2.6" /><circle cx="397.8" cy="153.1" r="2.6" /><circle cx="477.6" cy="141.6" r="2.6" /><circle cx="472.4" cy="149.7" r="2.6" /><circle cx="406.1" cy="179.0" r="2.6" /><circle cx="347.0" cy="184.7" r="2.6" /><circle cx="454.3" cy="153.6" r="2.6" /><circle cx="461.3" cy="178.9" r="2.6" /><circle cx="388.7" cy="204.8" r="2.6" /><circle cx="408.8" cy="160.9" r="2.6" /><circle cx="426.3" cy="180.9" r="2.6" /><circle cx="345.0" cy="202.9" r="2.6" /><circle cx="278.3" cy="198.7" r="2.6" /><circle cx="426.0" cy="180.0" r="2.6" /><circle cx="334.0" cy="197.8" r="2.6" /><circle cx="386.9" cy="177.9" r="2.6" /><circle cx="378.2" cy="184.5" r="2.6" /><circle cx="356.6" cy="195.6" r="2.6" /><circle cx="303.6" cy="195.9" r="2.6" /><circle cx="399.9" cy="168.9" r="2.6" /><circle cx="413.1" cy="153.1" r="2.6" /><circle cx="454.0" cy="152.5" r="2.6" /><circle cx="455.1" cy="165.3" r="2.6" /><circle cx="287.0" cy="199.5" r="2.6" /><circle cx="381.1" cy="182.7" r="2.6" /><circle cx="418.4" cy="193.9" r="2.6" /><circle cx="473.4" cy="128.3" r="2.6" /><circle cx="324.8" cy="188.8" r="2.6" /><circle cx="409.5" cy="172.2" r="2.6" /><circle cx="404.6" cy="214.8" r="2.6" /><circle cx="327.7" cy="191.4" r="2.6" /><circle cx="313.4" cy="189.2" r="2.6" /><circle cx="390.5" cy="194.9" r="2.6" /><circle cx="315.1" cy="182.9" r="2.6" /><circle cx="340.8" cy="229.8" r="2.6" /><circle cx="328.2" cy="181.7" r="2.6" /><circle cx="396.8" cy="136.3" r="2.6" /><circle cx="260.0" cy="237.2" r="2.6" /><circle cx="414.1" cy="192.4" r="2.6" /><circle cx="348.4" cy="214.4" r="2.6" /><circle cx="331.2" cy="190.7" r="2.6" /><circle cx="388.4" cy="153.4" r="2.6" /><circle cx="394.1" cy="170.4" r="2.6" /><circle cx="351.4" cy="158.9" r="2.6" /><circle cx="349.1" cy="189.9" r="2.6" /><circle cx="368.5" cy="185.8" r="2.6" /><circle cx="394.3" cy="173.5" r="2.6" /><circle cx="373.8" cy="185.5" r="2.6" /><circle cx="430.6" cy="148.9" r="2.6" /><circle cx="405.5" cy="164.9" r="2.6" /><circle cx="290.9" cy="202.0" r="2.6" /><circle cx="342.4" cy="241.6" r="2.6" /><circle cx="365.0" cy="167.2" r="2.6" /><circle cx="386.9" cy="214.3" r="2.6" /><circle cx="425.9" cy="174.1" r="2.6" /><circle cx="432.3" cy="163.9" r="2.6" /><circle cx="421.8" cy="142.2" r="2.6" /><circle cx="405.5" cy="194.5" r="2.6" /><circle cx="475.9" cy="129.7" r="2.6" /><circle cx="342.8" cy="171.6" r="2.6" /><circle cx="471.1" cy="145.6" r="2.6" /><circle cx="492.4" cy="155.9" r="2.6" /><circle cx="314.2" cy="213.4" r="2.6" /><circle cx="342.1" cy="193.6" r="2.6" /><circle cx="382.4" cy="215.6" r="2.6" /><circle cx="367.3" cy="161.6" r="2.6" /><circle cx="380.5" cy="185.8" r="2.6" /><circle cx="342.2" cy="184.1" r="2.6" /><circle cx="321.6" cy="198.7" r="2.6" /><circle cx="426.9" cy="176.7" r="2.6" /><circle cx="368.4" cy="170.7" r="2.6" /><circle cx="418.5" cy="200.6" r="2.6" /><circle cx="411.5" cy="140.1" r="2.6" /><circle cx="394.0" cy="145.9" r="2.6" /><circle cx="485.3" cy="126.6" r="2.6" /><circle cx="341.0" cy="195.4" r="2.6" /><circle cx="397.0" cy="159.2" r="2.6" /><circle cx="334.9" cy="174.3" r="2.6" /><circle cx="363.8" cy="146.4" r="2.6" /><circle cx="412.9" cy="174.8" r="2.6" /><circle cx="365.3" cy="150.3" r="2.6" /><circle cx="377.8" cy="162.4" r="2.6" /><circle cx="407.6" cy="156.6" r="2.6" /><circle cx="420.3" cy="147.9" r="2.6" /><circle cx="419.6" cy="191.9" r="2.6" /><circle cx="402.8" cy="169.4" r="2.6" /><circle cx="369.7" cy="198.4" r="2.6" /><circle cx="352.0" cy="179.9" r="2.6" /><circle cx="475.7" cy="150.6" r="2.6" /><circle cx="315.6" cy="195.2" r="2.6" /><circle cx="377.1" cy="187.6" r="2.6" /><circle cx="432.5" cy="165.2" r="2.6" /><circle cx="377.6" cy="135.9" r="2.6" /><circle cx="365.7" cy="172.2" r="2.6" /><circle cx="417.7" cy="159.2" r="2.6" /><circle cx="363.5" cy="215.2" r="2.6" /><circle cx="428.1" cy="114.1" r="2.6" /><circle cx="320.3" cy="199.3" r="2.6" /><circle cx="397.7" cy="168.2" r="2.6" /><circle cx="404.6" cy="169.4" r="2.6" /><circle cx="351.8" cy="212.4" r="2.6" /><circle cx="351.4" cy="190.3" r="2.6" /><circle cx="421.0" cy="148.5" r="2.6" /><circle cx="392.7" cy="197.5" r="2.6" /><circle cx="441.6" cy="127.0" r="2.6" /><circle cx="406.1" cy="199.2" r="2.6" /><circle cx="420.1" cy="173.2" r="2.6" /><circle cx="362.1" cy="144.5" r="2.6" /><circle cx="363.0" cy="185.2" r="2.6" /><circle cx="451.0" cy="159.6" r="2.6" /><circle cx="399.0" cy="143.4" r="2.6" /><circle cx="397.1" cy="143.6" r="2.6" /><circle cx="411.1" cy="165.4" r="2.6" /><circle cx="310.6" cy="212.3" r="2.6" /><circle cx="397.5" cy="126.9" r="2.6" /><circle cx="403.7" cy="207.4" r="2.6" /><circle cx="429.9" cy="195.3" r="2.6" /><circle cx="423.4" cy="145.6" r="2.6" /><circle cx="463.6" cy="160.6" r="2.6" /><circle cx="448.0" cy="163.0" r="2.6" /><circle cx="346.7" cy="200.9" r="2.6" /><circle cx="407.9" cy="184.3" r="2.6" /><circle cx="393.0" cy="175.5" r="2.6" /><circle cx="411.3" cy="166.0" r="2.6" /><circle cx="333.4" cy="174.4" r="2.6" /><circle cx="375.9" cy="229.2" r="2.6" /><circle cx="347.5" cy="209.9" r="2.6" /><circle cx="456.6" cy="156.8" r="2.6" /><circle cx="446.8" cy="131.6" r="2.6" /><circle cx="436.8" cy="148.9" r="2.6" /><circle cx="355.4" cy="185.3" r="2.6" /><circle cx="464.9" cy="177.1" r="2.6" /><circle cx="474.2" cy="146.9" r="2.6" /><circle cx="375.4" cy="160.9" r="2.6" /><circle cx="347.9" cy="202.2" r="2.6" /><circle cx="457.6" cy="156.8" r="2.6" /><circle cx="303.0" cy="183.9" r="2.6" /><circle cx="440.0" cy="167.7" r="2.6" /><circle cx="319.6" cy="189.5" r="2.6" /><circle cx="107.3" cy="168.3" r="2.6" /><circle cx="200.9" cy="249.8" r="2.6" />
+          </g>
+          <text class="axis-label" x="329" y="378" text-anchor="middle">Рост, см</text>
+          <text class="axis-label" x="-180" y="24" text-anchor="middle" transform="rotate(-90)">Вес, кг</text>
+        </svg>
+        <figcaption>Синтетическая иллюстрация с параметрами реальной выборки (n = 9905, средние и границы — из таблицы выше): облако вытянуто вдоль возрастающей линии, но далеко не сжато в нить.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>Проведя через это облако линию МНК, для каждого наблюдения получаем два числа: то, что модель <em>предсказала</em> при данном росте, и то, что <em>оказалось на самом деле</em>. Разница между ними — <strong>остаток</strong> (residual):</p>
+      </div>
+
+      <div class="formula-box">
+        <div class="eq">e<sub>i</sub> = y<sub>i</sub> − ŷ<sub>i</sub></div>
+        <div class="formula-legend">
+          <div class="item"><b>y<sub>i</sub></b>фактическое значение веса</div>
+          <div class="item"><b>ŷ<sub>i</sub></b>значение, предсказанное линией регрессии</div>
+          <div class="item"><b>e<sub>i</sub></b>остаток — оценка случайного члена ε<sub>i</sub> по выборке</div>
+        </div>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Что такое остаток</p>
+        <svg viewBox="0 0 630 386" role="img" aria-label="Та же диаграмма с проведённой линией регрессии и отмеченным остатком e1 для одного наблюдения с ростом 110 см и весом 80 кг">
+          <line class="axis-line" x1="58" y1="18" x2="58" y2="340"/>
+          <line class="axis-line" x1="58" y1="340" x2="600" y2="340"/>
+          <g class="tick-label">
+            <text x="58" y="356" text-anchor="middle">100</text>
+            <text x="156.5" y="356" text-anchor="middle">120</text>
+            <text x="255.1" y="356" text-anchor="middle">140</text>
+            <text x="353.6" y="356" text-anchor="middle">160</text>
+            <text x="452.2" y="356" text-anchor="middle">180</text>
+            <text x="550.7" y="356" text-anchor="middle">200</text>
+            <text x="50" y="343" text-anchor="end">0</text>
+            <text x="50" y="235.7" text-anchor="end">50</text>
+            <text x="50" y="128.3" text-anchor="end">100</text>
+            <text x="50" y="21" text-anchor="end">150</text>
+          </g>
+          <g class="data-dot" opacity=".28" r="2.6">
+<circle cx="418.8" cy="162.4" r="2.6" /><circle cx="442.8" cy="161.1" r="2.6" /><circle cx="441.6" cy="178.7" r="2.6" /><circle cx="403.3" cy="209.6" r="2.6" /><circle cx="406.9" cy="198.8" r="2.6" /><circle cx="364.4" cy="208.4" r="2.6" /><circle cx="439.0" cy="173.1" r="2.6" /><circle cx="396.5" cy="142.9" r="2.6" /><circle cx="414.5" cy="163.7" r="2.6" /><circle cx="381.9" cy="193.2" r="2.6" /><circle cx="446.2" cy="168.6" r="2.6" /><circle cx="417.5" cy="173.1" r="2.6" /><circle cx="427.6" cy="177.2" r="2.6" /><circle cx="432.6" cy="165.0" r="2.6" /><circle cx="401.9" cy="208.0" r="2.6" /><circle cx="391.1" cy="195.5" r="2.6" /><circle cx="388.3" cy="167.4" r="2.6" /><circle cx="464.9" cy="157.2" r="2.6" /><circle cx="448.7" cy="154.7" r="2.6" /><circle cx="411.4" cy="201.8" r="2.6" /><circle cx="425.6" cy="178.4" r="2.6" /><circle cx="333.8" cy="240.5" r="2.6" /><circle cx="446.8" cy="128.1" r="2.6" /><circle cx="405.2" cy="167.1" r="2.6" /><circle cx="408.5" cy="137.0" r="2.6" /><circle cx="361.5" cy="161.2" r="2.6" /><circle cx="394.9" cy="160.1" r="2.6" /><circle cx="434.7" cy="130.1" r="2.6" /><circle cx="456.2" cy="126.3" r="2.6" /><circle cx="372.7" cy="147.7" r="2.6" /><circle cx="410.3" cy="178.7" r="2.6" /><circle cx="390.1" cy="182.5" r="2.6" /><circle cx="416.1" cy="140.3" r="2.6" /><circle cx="424.1" cy="174.4" r="2.6" /><circle cx="401.5" cy="175.9" r="2.6" /><circle cx="377.9" cy="208.4" r="2.6" /><circle cx="376.9" cy="218.4" r="2.6" /><circle cx="409.7" cy="148.6" r="2.6" /><circle cx="327.7" cy="190.9" r="2.6" /><circle cx="442.1" cy="170.9" r="2.6" /><circle cx="385.5" cy="138.0" r="2.6" /><circle cx="452.1" cy="127.8" r="2.6" /><circle cx="331.7" cy="194.1" r="2.6" /><circle cx="352.0" cy="205.1" r="2.6" /><circle cx="318.5" cy="200.9" r="2.6" /><circle cx="339.4" cy="205.1" r="2.6" /><circle cx="312.5" cy="213.4" r="2.6" /><circle cx="400.9" cy="150.4" r="2.6" /><circle cx="370.5" cy="186.9" r="2.6" /><circle cx="316.6" cy="201.2" r="2.6" /><circle cx="421.9" cy="167.4" r="2.6" /><circle cx="383.8" cy="149.9" r="2.6" /><circle cx="447.1" cy="168.6" r="2.6" /><circle cx="361.5" cy="176.1" r="2.6" /><circle cx="354.3" cy="158.2" r="2.6" /><circle cx="395.7" cy="184.0" r="2.6" /><circle cx="398.6" cy="158.9" r="2.6" /><circle cx="541.1" cy="107.8" r="2.6" /><circle cx="308.4" cy="233.5" r="2.6" /><circle cx="377.2" cy="185.1" r="2.6" /><circle cx="344.5" cy="193.6" r="2.6" /><circle cx="395.1" cy="155.3" r="2.6" /><circle cx="394.4" cy="189.6" r="2.6" /><circle cx="407.2" cy="171.2" r="2.6" /><circle cx="400.1" cy="167.5" r="2.6" /><circle cx="489.2" cy="142.9" r="2.6" /><circle cx="422.5" cy="122.9" r="2.6" /><circle cx="363.0" cy="207.3" r="2.6" /><circle cx="395.2" cy="151.1" r="2.6" /><circle cx="338.1" cy="176.5" r="2.6" /><circle cx="356.0" cy="166.4" r="2.6" /><circle cx="380.9" cy="193.9" r="2.6" /><circle cx="311.9" cy="177.4" r="2.6" /><circle cx="393.5" cy="222.8" r="2.6" /><circle cx="303.2" cy="222.3" r="2.6" /><circle cx="389.0" cy="154.4" r="2.6" /><circle cx="462.0" cy="174.9" r="2.6" /><circle cx="359.0" cy="231.0" r="2.6" /><circle cx="347.1" cy="189.8" r="2.6" /><circle cx="330.5" cy="202.5" r="2.6" /><circle cx="372.7" cy="154.0" r="2.6" /><circle cx="461.9" cy="154.0" r="2.6" /><circle cx="413.2" cy="165.3" r="2.6" /><circle cx="397.9" cy="182.1" r="2.6" /><circle cx="445.0" cy="164.5" r="2.6" /><circle cx="313.1" cy="182.7" r="2.6" /><circle cx="324.4" cy="224.0" r="2.6" /><circle cx="415.4" cy="139.6" r="2.6" /><circle cx="334.4" cy="197.7" r="2.6" /><circle cx="462.1" cy="162.4" r="2.6" /><circle cx="339.0" cy="151.6" r="2.6" /><circle cx="429.3" cy="171.9" r="2.6" /><circle cx="397.8" cy="153.1" r="2.6" /><circle cx="477.6" cy="141.6" r="2.6" /><circle cx="472.4" cy="149.7" r="2.6" /><circle cx="406.1" cy="179.0" r="2.6" /><circle cx="347.0" cy="184.7" r="2.6" /><circle cx="454.3" cy="153.6" r="2.6" /><circle cx="461.3" cy="178.9" r="2.6" /><circle cx="388.7" cy="204.8" r="2.6" /><circle cx="408.8" cy="160.9" r="2.6" /><circle cx="426.3" cy="180.9" r="2.6" /><circle cx="345.0" cy="202.9" r="2.6" /><circle cx="278.3" cy="198.7" r="2.6" /><circle cx="426.0" cy="180.0" r="2.6" /><circle cx="334.0" cy="197.8" r="2.6" /><circle cx="386.9" cy="177.9" r="2.6" /><circle cx="378.2" cy="184.5" r="2.6" /><circle cx="356.6" cy="195.6" r="2.6" /><circle cx="303.6" cy="195.9" r="2.6" /><circle cx="399.9" cy="168.9" r="2.6" /><circle cx="413.1" cy="153.1" r="2.6" /><circle cx="454.0" cy="152.5" r="2.6" /><circle cx="455.1" cy="165.3" r="2.6" /><circle cx="287.0" cy="199.5" r="2.6" /><circle cx="381.1" cy="182.7" r="2.6" /><circle cx="418.4" cy="193.9" r="2.6" /><circle cx="473.4" cy="128.3" r="2.6" /><circle cx="324.8" cy="188.8" r="2.6" /><circle cx="409.5" cy="172.2" r="2.6" /><circle cx="404.6" cy="214.8" r="2.6" /><circle cx="327.7" cy="191.4" r="2.6" /><circle cx="313.4" cy="189.2" r="2.6" /><circle cx="390.5" cy="194.9" r="2.6" /><circle cx="315.1" cy="182.9" r="2.6" /><circle cx="340.8" cy="229.8" r="2.6" /><circle cx="328.2" cy="181.7" r="2.6" /><circle cx="396.8" cy="136.3" r="2.6" /><circle cx="260.0" cy="237.2" r="2.6" /><circle cx="414.1" cy="192.4" r="2.6" /><circle cx="348.4" cy="214.4" r="2.6" /><circle cx="331.2" cy="190.7" r="2.6" /><circle cx="388.4" cy="153.4" r="2.6" /><circle cx="394.1" cy="170.4" r="2.6" /><circle cx="351.4" cy="158.9" r="2.6" /><circle cx="349.1" cy="189.9" r="2.6" /><circle cx="368.5" cy="185.8" r="2.6" /><circle cx="394.3" cy="173.5" r="2.6" /><circle cx="373.8" cy="185.5" r="2.6" /><circle cx="430.6" cy="148.9" r="2.6" /><circle cx="405.5" cy="164.9" r="2.6" /><circle cx="290.9" cy="202.0" r="2.6" /><circle cx="342.4" cy="241.6" r="2.6" /><circle cx="365.0" cy="167.2" r="2.6" /><circle cx="386.9" cy="214.3" r="2.6" /><circle cx="425.9" cy="174.1" r="2.6" /><circle cx="432.3" cy="163.9" r="2.6" /><circle cx="421.8" cy="142.2" r="2.6" /><circle cx="405.5" cy="194.5" r="2.6" /><circle cx="475.9" cy="129.7" r="2.6" /><circle cx="342.8" cy="171.6" r="2.6" /><circle cx="471.1" cy="145.6" r="2.6" /><circle cx="492.4" cy="155.9" r="2.6" /><circle cx="314.2" cy="213.4" r="2.6" /><circle cx="342.1" cy="193.6" r="2.6" /><circle cx="382.4" cy="215.6" r="2.6" /><circle cx="367.3" cy="161.6" r="2.6" /><circle cx="380.5" cy="185.8" r="2.6" /><circle cx="342.2" cy="184.1" r="2.6" /><circle cx="321.6" cy="198.7" r="2.6" /><circle cx="426.9" cy="176.7" r="2.6" /><circle cx="368.4" cy="170.7" r="2.6" /><circle cx="418.5" cy="200.6" r="2.6" /><circle cx="411.5" cy="140.1" r="2.6" /><circle cx="394.0" cy="145.9" r="2.6" /><circle cx="485.3" cy="126.6" r="2.6" /><circle cx="341.0" cy="195.4" r="2.6" /><circle cx="397.0" cy="159.2" r="2.6" /><circle cx="334.9" cy="174.3" r="2.6" /><circle cx="363.8" cy="146.4" r="2.6" /><circle cx="412.9" cy="174.8" r="2.6" /><circle cx="365.3" cy="150.3" r="2.6" /><circle cx="377.8" cy="162.4" r="2.6" /><circle cx="407.6" cy="156.6" r="2.6" /><circle cx="420.3" cy="147.9" r="2.6" /><circle cx="419.6" cy="191.9" r="2.6" /><circle cx="402.8" cy="169.4" r="2.6" /><circle cx="369.7" cy="198.4" r="2.6" /><circle cx="352.0" cy="179.9" r="2.6" /><circle cx="475.7" cy="150.6" r="2.6" /><circle cx="315.6" cy="195.2" r="2.6" /><circle cx="377.1" cy="187.6" r="2.6" /><circle cx="432.5" cy="165.2" r="2.6" /><circle cx="377.6" cy="135.9" r="2.6" /><circle cx="365.7" cy="172.2" r="2.6" /><circle cx="417.7" cy="159.2" r="2.6" /><circle cx="363.5" cy="215.2" r="2.6" /><circle cx="428.1" cy="114.1" r="2.6" /><circle cx="320.3" cy="199.3" r="2.6" /><circle cx="397.7" cy="168.2" r="2.6" /><circle cx="404.6" cy="169.4" r="2.6" /><circle cx="351.8" cy="212.4" r="2.6" /><circle cx="351.4" cy="190.3" r="2.6" /><circle cx="421.0" cy="148.5" r="2.6" /><circle cx="392.7" cy="197.5" r="2.6" /><circle cx="441.6" cy="127.0" r="2.6" /><circle cx="406.1" cy="199.2" r="2.6" /><circle cx="420.1" cy="173.2" r="2.6" /><circle cx="362.1" cy="144.5" r="2.6" /><circle cx="363.0" cy="185.2" r="2.6" /><circle cx="451.0" cy="159.6" r="2.6" /><circle cx="399.0" cy="143.4" r="2.6" /><circle cx="397.1" cy="143.6" r="2.6" /><circle cx="411.1" cy="165.4" r="2.6" /><circle cx="310.6" cy="212.3" r="2.6" /><circle cx="397.5" cy="126.9" r="2.6" /><circle cx="403.7" cy="207.4" r="2.6" /><circle cx="429.9" cy="195.3" r="2.6" /><circle cx="423.4" cy="145.6" r="2.6" /><circle cx="463.6" cy="160.6" r="2.6" /><circle cx="448.0" cy="163.0" r="2.6" /><circle cx="346.7" cy="200.9" r="2.6" /><circle cx="407.9" cy="184.3" r="2.6" /><circle cx="393.0" cy="175.5" r="2.6" /><circle cx="411.3" cy="166.0" r="2.6" /><circle cx="333.4" cy="174.4" r="2.6" /><circle cx="375.9" cy="229.2" r="2.6" /><circle cx="347.5" cy="209.9" r="2.6" /><circle cx="456.6" cy="156.8" r="2.6" /><circle cx="446.8" cy="131.6" r="2.6" /><circle cx="436.8" cy="148.9" r="2.6" /><circle cx="355.4" cy="185.3" r="2.6" /><circle cx="464.9" cy="177.1" r="2.6" /><circle cx="474.2" cy="146.9" r="2.6" /><circle cx="375.4" cy="160.9" r="2.6" /><circle cx="347.9" cy="202.2" r="2.6" /><circle cx="457.6" cy="156.8" r="2.6" /><circle cx="303.0" cy="183.9" r="2.6" /><circle cx="440.0" cy="167.7" r="2.6" /><circle cx="319.6" cy="189.5" r="2.6" />
+          </g>
+          <line class="fit-line" x1="58" y1="297.3" x2="600" y2="100.6"/>
+          <g stroke="currentColor" stroke-width="1.3">
+            <line x1="97" y1="168.3" x2="118" y2="168.3"/>
+            <line x1="97" y1="279.4" x2="118" y2="279.4"/>
+            <line x1="100" y1="168.3" x2="100" y2="279.4" stroke-dasharray="3 3"/>
+          </g>
+          <circle cx="107.3" cy="168.3" r="5" fill="var(--ink)"/>
+          <text class="axis-label" x="78" y="228" text-anchor="end" font-weight="700">остаток e₁</text>
+          <text class="axis-label" x="329" y="378" text-anchor="middle">Рост, см</text>
+          <text class="axis-label" x="-180" y="24" text-anchor="middle" transform="rotate(-90)">Вес, кг</text>
+        </svg>
+        <figcaption>Наблюдение с ростом 110 см весит 80 кг, а линия регрессии при таком росте предсказывает ≈28 кг — остаток <b>e₁ ≈ 52 кг</b> отражает всё, что модель «Вес = α + β·Рост» не смогла объяснить для этого человека.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>Тот же приём работает для любой пары «фактор — результат». Вернёмся к мороженому из начала конспекта: та же логика линейной регрессии, только вместо роста — температура воздуха, а вместо веса — продажи:</p>
+      </div>
+
+      <div class="formula-box">
+        <div class="eq">Продажи<sub>i</sub> = <span class="var">α</span> + <span class="var">β</span>×Температура<sub>i</sub> + <span class="var">ε</span><sub>i</sub></div>
+        <div class="formula-legend">
+          <div class="item"><b>β</b>на сколько в среднем меняются продажи при росте температуры на 1°</div>
+          <div class="item"><b>ε<sub>i</sub></b>всё остальное: реклама, день недели, конкуренты рядом</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 06 LITERATURA ============ -->
+    <section class="sec" id="literatura">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Литература</p>
+        <h2 class="sec-title">Источники</h2>
+      </div>
+      <ul class="lit-list">
+        <li><span class="idx">01</span>Verbeek M. (2004). A guide to modern econometrics. Ch. 2.</li>
+        <li><span class="idx">02</span>Катышев и др. (2004). Введение в эконометрику. Гл. 2.</li>
+        <li><span class="idx">03</span>Картаев Ф. Дружелюбная эконометрика. Гл. 1.</li>
+        <li><span class="idx">04</span>Грин У. (2016). Эконометрический анализ. Книга 1. Глава 1.</li>
+        <li><span class="idx">05</span>Доугерти К. Введение в эконометрику. 2-е изд. М.: Инфра-М, 2009. С. 44–68.</li>
+        <li><span class="idx">06</span>Берндт Э. Р. Практика эконометрики: классика и современность. М.: Юнити-Дана, 2005. Глава 2.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект лекции · Эконометрика — 1 · НИУ ВШЭ, 2026</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>
