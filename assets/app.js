@@ -2,8 +2,28 @@
   const grid = document.getElementById("grid");
   const searchInput = document.getElementById("search");
   const filtersEl = document.getElementById("filters");
+  const controlsEl = document.getElementById("controls");
 
-  const notes = [...NOTES].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const division = window.SECTION_DIVISION || null;
+  const emptyTitle = window.SECTION_EMPTY_TITLE || "Пока здесь пусто";
+  const emptyText = window.SECTION_EMPTY_TEXT || "Конспекты появятся здесь, как только будут готовы.";
+
+  const notes = (division ? NOTES.filter((n) => n.division === division) : [...NOTES]).sort((a, b) =>
+    a.date < b.date ? 1 : -1
+  );
+
+  if (notes.length === 0) {
+    if (controlsEl) controlsEl.hidden = true;
+    grid.innerHTML = "";
+    const empty = document.createElement("div");
+    empty.className = "empty-section";
+    empty.innerHTML =
+      '<div class="glyph">&#9679;&#9675;&#9675;</div><h2></h2><p></p>';
+    empty.querySelector("h2").textContent = emptyTitle;
+    empty.querySelector("p").textContent = emptyText;
+    grid.appendChild(empty);
+    return;
+  }
 
   const categories = ["Все", ...new Set(notes.map((n) => n.category))];
   let activeCategory = "Все";

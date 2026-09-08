@@ -6,28 +6,167 @@
   <title>Цифровые конспекты</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/sidebar.css">
+  <style>
+    :root {
+      --bg: #faf9f6;
+      --paper: #ffffff;
+      --border: #e7e4dc;
+      --text: #201f1c;
+      --text-muted: #6b6659;
+      --accent: #2f5590;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 72px 24px 100px;
+    }
+    .eyebrow {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 14px;
+    }
+    h1 {
+      font-family: "Fraunces", Georgia, serif;
+      font-weight: 700;
+      font-size: clamp(2.2rem, 5vw, 3.2rem);
+      margin: 0 0 20px;
+      line-height: 1.12;
+    }
+    .lede {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 62ch;
+      margin: 0 0 18px;
+    }
+    .prose p {
+      max-width: 62ch;
+      color: var(--text-muted);
+      margin: 0 0 16px;
+    }
+    .prose strong {
+      color: var(--text);
+    }
+    .sections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin: 44px 0 8px;
+    }
+    .section-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 24px;
+      border-radius: 16px;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid var(--border);
+      background: var(--paper);
+      box-shadow: 0 2px 10px rgba(30, 25, 15, 0.05);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .section-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 26px rgba(30, 25, 15, 0.1);
+    }
+    .section-card .icon {
+      width: 30px;
+      height: 30px;
+      display: inline-flex;
+    }
+    .section-card .icon svg {
+      width: 100%;
+      height: 100%;
+    }
+    .section-card h2 {
+      font-family: "Fraunces", Georgia, serif;
+      font-size: 1.25rem;
+      margin: 0;
+    }
+    .section-card p {
+      margin: 0;
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+    .section-card.math { border-color: #dcdcdc; }
+    .section-card.math .icon { color: #141414; }
+    .section-card.it { background: #0a0a0d; border-color: #26262f; }
+    .section-card.it h2 { color: #f2f2f5; }
+    .section-card.it p { color: #9a9aa8; }
+    .section-card.it .icon { color: #00e5ff; }
+    .section-card.economics .icon { color: #2f5590; }
+
+    footer.site-footer {
+      margin-top: 70px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-family: "IBM Plex Mono", monospace;
+    }
+  </style>
 </head>
 <body>
-  <div class="page">
-    <header class="site-header">
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="index.html">Цифровые<br>конспекты</a>
+    <nav class="sidebar-nav">
+      <a class="sidebar-item" href="sections/math.html">
+        <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18c2-8 5-12 8-12s6 4 8 12"/><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/><circle cx="20" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+        <span>Математика</span>
+      </a>
+      <a class="sidebar-item" href="sections/it.html">
+        <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 6 2 12 8 18"/><polyline points="16 6 22 12 16 18"/></svg></span>
+        <span>IT</span>
+      </a>
+      <a class="sidebar-item" href="sections/economics.html">
+        <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="14"/><line x1="10" y1="20" x2="10" y2="9"/><line x1="16" y1="20" x2="16" y2="4"/><line x1="20" y1="20" x2="20" y2="12"/></svg></span>
+        <span>Экономика</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="content-area">
+    <div class="page">
+      <p class="eyebrow">Личный проект</p>
       <h1>Цифровые конспекты</h1>
-      <p>Личная библиотека HTML-конспектов по предметам</p>
-    </header>
+      <p class="lede">Место, где я собираю свои лекционные конспекты в аккуратном цифровом виде — вместо стопки тетрадей и разрозненных PDF.</p>
 
-    <div class="search-bar">
-      <input type="text" id="search" placeholder="Искать по названию, тегу, предмету…" autocomplete="off">
+      <div class="prose">
+        <p>Каждый конспект — это отдельная HTML-страница с текстом лекции, формулами, графиками и иногда самопроверкой в конце. Конспекты сгруппированы по разделам — выберите нужный слева на панели, чтобы увидеть список конспектов по теме, с поиском и фильтром по предметам.</p>
+        <p><strong>Математика</strong> оформлена в строгой чёрно-белой гамме, <strong>IT</strong> — тёмная тема с неоновыми акцентами, а <strong>Экономика</strong> — в тёплых кремовых тонах. У каждого раздела свой характер, но структура одна и та же.</p>
+      </div>
+
+      <div class="sections-grid">
+        <a class="section-card math" href="sections/math.html">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18c2-8 5-12 8-12s6 4 8 12"/><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/><circle cx="20" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+          <h2>Математика</h2>
+          <p>Анализ, алгебра, теория вероятностей — в строгой ч/б гамме.</p>
+        </a>
+        <a class="section-card it" href="sections/it.html">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 6 2 12 8 18"/><polyline points="16 6 22 12 16 18"/></svg></span>
+          <h2>IT</h2>
+          <p>Программирование и алгоритмы — тёмная тема, неоновые акценты.</p>
+        </a>
+        <a class="section-card economics" href="sections/economics.html">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="14"/><line x1="10" y1="20" x2="10" y2="9"/><line x1="16" y1="20" x2="16" y2="4"/><line x1="20" y1="20" x2="20" y2="12"/></svg></span>
+          <h2>Экономика</h2>
+          <p>Макроэкономика и эконометрика — тёплая кремовая тема.</p>
+        </a>
+      </div>
+
+      <footer class="site-footer">Цифровые конспекты</footer>
     </div>
-
-    <div class="filters" id="filters"></div>
-
-    <div class="grid" id="grid"></div>
-
-    <footer class="site-footer">Цифровые конспекты</footer>
   </div>
-
-  <script src="assets/data.js"></script>
-  <script src="assets/app.js"></script>
 </body>
 </html>

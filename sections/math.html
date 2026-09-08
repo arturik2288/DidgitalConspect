@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Математика — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/theme-math.css">
+  <link rel="stylesheet" href="../assets/section.css">
+  <link rel="stylesheet" href="../assets/sidebar.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="sidebar-logo" href="../index.html">Цифровые<br>конспекты</a>
+    <nav class="sidebar-nav">
+      <a class="sidebar-item active" href="math.html">
+        <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18c2-8 5-12 8-12s6 4 8 12"/><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/><circle cx="20" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></span>
+        <span>Математика</span>
+      </a>
+      <a class="sidebar-item" href="it.html">
+        <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 6 2 12 8 18"/><polyline points="16 6 22 12 16 18"/></svg></span>
+        <span>IT</span>
+      </a>
+      <a class="sidebar-item" href="economics.html">
+        <span class="sidebar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="14"/><line x1="10" y1="20" x2="10" y2="9"/><line x1="16" y1="20" x2="16" y2="4"/><line x1="20" y1="20" x2="20" y2="12"/></svg></span>
+        <span>Экономика</span>
+      </a>
+    </nav>
+  </aside>
+
+  <div class="content-area">
+    <div class="page">
+      <header class="site-header">
+        <p class="eyebrow">Раздел</p>
+        <h1>Математика</h1>
+        <p>Конспекты по математическим дисциплинам — от анализа и алгебры до теории вероятностей.</p>
+      </header>
+
+      <div id="controls">
+        <div class="search-bar">
+          <input type="text" id="search" placeholder="Искать по названию, тегу, предмету…" autocomplete="off">
+        </div>
+
+        <div class="filters" id="filters"></div>
+      </div>
+
+      <div class="grid" id="grid"></div>
+
+      <footer class="site-footer">Цифровые конспекты · Математика</footer>
+    </div>
+  </div>
+
+  <script>
+    window.SECTION_DIVISION = "math";
+    window.SECTION_EMPTY_TITLE = "Пока здесь пусто";
+    window.SECTION_EMPTY_TEXT = "Математические конспекты появятся здесь в ближайшее время.";
+  </script>
+  <script src="../assets/data.js"></script>
+  <script src="../assets/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+:root {
+  --bg: #0a0a0d;
+  --card-bg: #131318;
+  --card-border: #26262f;
+  --text: #f2f2f5;
+  --text-muted: #9a9aa8;
+  --accent: #00e5ff;
+  --accent-ring: rgba(0, 229, 255, 0.25);
+  --accent-contrast: #06131a;
+  --accent-soft-bg: #0d2b30;
+  --accent-soft-text: #4de8ff;
+  --tag-bg: #241030;
+  --tag-text: #ff5fd1;
+  --badge-bg: #ff5fd1;
+  --badge-text: #170a1c;
+  --pill-border: #2c2c38;
+  --shadow: 0 2px 14px rgba(0, 229, 255, 0.06);
+  --shadow-hover: 0 10px 30px rgba(0, 229, 255, 0.14);
+}

@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Модель IS-LM-BP — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#f6f2e9;
+      --surface:#ffffff;
+      --surface-2:#efe7d4;
+      --ink:#232019;
+      --ink-soft:#6b6353;
+      --ink-faint:#9a927e;
+      --accent:#2f5590;
+      --accent-strong:#1f3d66;
+      --accent-soft:#dde9e8;
+      --accent-2:#a8703a;
+      --accent-2-soft:#f3e3cd;
+      --accent-3:#3f7d5c;
+      --accent-3-soft:#e1efe4;
+      --rule:#ddd2b8;
+      --shadow: 0 1px 2px rgba(35,32,25,0.06), 0 6px 20px -8px rgba(35,32,25,0.15);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent-2);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    blockquote.quote{
+      margin:20px 0; padding:4px 0 4px 20px;
+      border-left:3px solid var(--accent-2);
+      font-family:'Fraunces',serif; font-style:italic; color:var(--ink);
+      font-size:15.5px; max-width:68ch;
+    }
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.result .mark{ color:var(--accent-2); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.fact .mark{ color:var(--accent-3); }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:520px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    .fig-grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+    @media (max-width:760px){ .fig-grid-3{grid-template-columns:1fr;} }
+    @media (max-width:640px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:13px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/economics.html">← Раздел «Экономика»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Макроэкономика-1 · Лекции 9–10 · конспект</p>
+      <h1 class="title">Модель открытой экономики IS-LM-BP</h1>
+      <p class="subtitle">Платёжный баланс, условие Маршалла-Лернера, мобильность капитала и наклон кривой BP, а также то, почему эффективность фискальной и монетарной политики переворачивается местами в зависимости от режима валютного курса.</p>
+      <div class="meta-row">
+        <span><strong>А.О. Мишин</strong>, НИУ ВШЭ</span>
+        <span>Макроэкономика-1 (углублённый курс)</span>
+        <span>Доп.: Бланшар О., «Макроэкономика», гл. 19</span>
+        <span>07.09.2026</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#platbal"><span class="n">01</span>Платёжный баланс</a>
+      <a href="#ca"><span class="n">02</span>Текущий счёт</a>
+      <a href="#ml"><span class="n">03</span>Маршалл-Лернер</a>
+      <a href="#cf"><span class="n">04</span>Счёт капитала</a>
+      <a href="#fx"><span class="n">05</span>Валютный рынок</a>
+      <a href="#intro"><span class="n">06</span>Введение в модель</a>
+      <a href="#is"><span class="n">07</span>Кривая IS</a>
+      <a href="#bp"><span class="n">08</span>Кривая BP</a>
+      <a href="#full"><span class="n">09</span>Полная модель</a>
+      <a href="#policy"><span class="n">10</span>Логика политики</a>
+      <a href="#fiscal"><span class="n">11</span>Фискальная экспансия</a>
+      <a href="#monetary"><span class="n">12</span>Монетарная экспансия</a>
+      <a href="#trilemma"><span class="n">13</span>Трилемма</a>
+      <a href="#summary"><span class="n">14</span>Итоги</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 ПЛАТЁЖНЫЙ БАЛАНС ============ -->
+    <section class="sec" id="platbal">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Платёжный баланс</p>
+        <h2 class="sec-title">Три счёта одной формы записи</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Платёжный баланс (balance of payments)</strong> — форма записи всех сделок между резидентами данной страны и остальным миром за определённый период времени. Состоит из трёх счетов.</p>
+        <ol>
+          <li><strong>Счёт текущих операций (current account), $CA$</strong> — $CA = Ex - Im + NFI + B_{Tr}$, где $Ex$ — экспорт, $Im$ — импорт, $NFI$ — чистые факторные доходы из-за рубежа, $B_{Tr}$ — чистые трансферты. В упрощённых моделях обычно считают, что $CA$ полностью определяется торговым балансом (см. §02).</li>
+          <li><strong>Счёт операций с капиталом (financial account), $CF$</strong> — $CF = \Delta(\text{частные потоки капитала})$, то есть разница между притоком капитала в страну и оттоком капитала из страны.</li>
+          <li><strong>Счёт резервных активов (official reserves), $OR$</strong> — $OR = -\Delta(\text{золотовалютные резервы ЦБ})$.</li>
+        </ol>
+      </div>
+
+      <div class="formula-box">
+        <div class="eq">$BP = CA + CF + OR = 0$</div>
+        <div class="formula-legend">
+          <div class="item"><b>BP</b>равновесие платёжного баланса (равновесие валютного рынка)</div>
+        </div>
+      </div>
+
+      <div class="prose">
+        <p>Эквивалентная запись через изменение резервов: $CA + CF = \Delta(\text{золотовалютные резервы ЦБ})$.</p>
+        <p><strong>Интерпретация.</strong> Излишек счёта текущих операций ($CA \gt 0$) может быть использован для покупки иностранных активов частным сектором <strong>или</strong> для увеличения золотовалютных резервов. $CF \lt 0$ означает приобретение иностранных активов частным сектором (отток капитала).</p>
+      </div>
+    </section>
+
+    <!-- ============ 02 CA И ЧИСТЫЙ ЭКСПОРТ ============ -->
+    <section class="sec" id="ca">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Текущий счёт</p>
+        <h2 class="sec-title">Счёт текущих операций и чистый экспорт</h2>
+      </div>
+      <div class="prose">
+        <p>Основной компонент $CA$ — чистый экспорт $Xn$:</p>
+      </div>
+      <div class="formula-box">
+        <div class="eq">$Xn = Xn(Q,\,Y,\,Y^{*})$</div>
+        <div class="formula-legend">
+          <div class="item"><b>Q</b>реальный валютный курс</div>
+          <div class="item"><b>Y</b>доход домашней страны</div>
+          <div class="item"><b>Y*</b>доход внешнего мира</div>
+        </div>
+      </div>
+      <div class="formula-box">
+        <div class="eq">$Q = \dfrac{S P^{*}}{P}$</div>
+        <div class="formula-legend">
+          <div class="item"><b>S</b>номинальный курс (ед. нац. валюты за ед. иностранной)</div>
+          <div class="item"><b>P, P*</b>уровень цен внутри страны / во внешнем мире</div>
+        </div>
+      </div>
+      <div class="prose">
+        <p><strong>Знаки частных производных:</strong></p>
+        <ul>
+          <li>$Xn'_Y \lt 0$ — чем больше доход $Y$, тем больше потребление товаров (в т.ч. импортных), следовательно, тем меньше чистый экспорт.</li>
+          <li>$Xn'_{Y^{*}} \gt 0$ — чем выше доход внешнего мира $Y^{*}$, тем больше спрос внешнего мира на отечественные (экспортные) товары.</li>
+          <li>Знак $Xn'_Q$ зависит от условия Маршалла-Лернера (§03).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 03 МАРШАЛЛ-ЛЕРНЕР ============ -->
+    <section class="sec" id="ml">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Маршалл-Лернер</p>
+        <h2 class="sec-title">Условие Маршалла-Лернера</h2>
+      </div>
+      <div class="prose">
+        <p>Раскладываем чистый экспорт через экспорт и импорт в реальном выражении:</p>
+      </div>
+      <div class="eq-box">$$Xn = Xn(Q,Y,Y^{*}) = Ex(Q,Y^{*}) - Im(Q,Y)\cdot Q$$</div>
+      <div class="prose">
+        <p>(импорт домашней страны $Im$ измеряется в единицах иностранных товаров, поэтому переводится в единицы отечественных товаров через умножение на $Q$). При изменении $Q$ действуют два разнонаправленных эффекта:</p>
+        <ol>
+          <li><strong>Эффект объёма (volume effect):</strong> при $Q\uparrow$ отечественные товары дешевеют относительно иностранных ⟹ $Ex(Q,Y^{*})\uparrow$, $Im(Q,Y)\downarrow$.</li>
+          <li><strong>Эффект стоимости (cost effect):</strong> при $Q\uparrow$ каждая единица импорта в реальном выражении дорожает — это действует против роста $Xn$.</li>
+        </ol>
+        <p><strong>Условие Маршалла-Лернера:</strong> эффект роста объёма чистого экспорта доминирует над эффектом роста стоимости импорта:</p>
+      </div>
+      <div class="eq-box">$$Q\uparrow \Rightarrow Xn\uparrow \iff \varepsilon_{Ex} - \varepsilon_{Im} \gt 1$$
+        <span class="eq-note">$\varepsilon_{Ex}$, $\varepsilon_{Im}$ — эластичности экспорта и импорта по реальному обменному курсу.</span>
+      </div>
+      <div class="prose">
+        <p><strong>Вывод условия.</strong> По определению эластичностей $\varepsilon_{Ex} = \dfrac{dEx}{dQ}\cdot\dfrac{Q}{Ex}$, $\varepsilon_{Im} = \dfrac{dIm}{dQ}\cdot\dfrac{Q}{Im}$. Берём производную чистого экспорта по $Q$:</p>
+      </div>
+      <div class="eq-box">$$Xn'_Q = Ex'_Q - Im'_Q\cdot Q - Im$$</div>
+      <div class="prose"><p>Подставляя эластичности:</p></div>
+      <div class="eq-box">$$Xn'_Q = Im\left(\varepsilon_{Ex}\dfrac{Ex}{Q\cdot Im} - \varepsilon_{Im} - 1\right)$$</div>
+      <div class="prose"><p>Оценивая при нулевом торговом балансе ($Ex = Q\cdot Im$), получаем:</p></div>
+      <div class="eq-box">$$Xn'_Q \gt 0 \iff \varepsilon_{Ex} - \varepsilon_{Im} \gt 1$$</div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>В модели IS-LM-BP по умолчанию <strong>предполагается, что условие Маршалла-Лернера выполнено</strong>, т.е. $Xn'_Q \gt 0$: реальное обесценение (рост $Q$) увеличивает чистый экспорт.</p>
+      </div>
+    </section>
+
+    <!-- ============ 04 СЧЁТ КАПИТАЛА ============ -->
+    <section class="sec" id="cf">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Счёт капитала</p>
+        <h2 class="sec-title">Счёт движения капитала</h2>
+      </div>
+      <div class="prose">
+        <p>Детерминанты счёта движения капитала:</p>
+        <ol>
+          <li>Относительная доходность внутренних активов страны по сравнению с доходностью аналогичных активов за рубежом.</li>
+          <li>Фактор риска.</li>
+          <li>Степень регулируемости (открытости) данного рынка.</li>
+        </ol>
+      </div>
+      <div class="formula-box">
+        <div class="eq">$CF \equiv CF(r - r^{*} - \theta)$</div>
+        <div class="formula-legend">
+          <div class="item"><b>r, r*</b>внутренняя / мировая ставка процента</div>
+          <div class="item"><b>θ</b>премия за риск</div>
+        </div>
+      </div>
+      <div class="prose"><p>Чем выше $r$ относительно $r^{*}+\theta$, тем больше приток капитала в страну ($CF$ растёт).</p></div>
+    </section>
+
+    <!-- ============ 05 ВАЛЮТНЫЙ РЫНОК ============ -->
+    <section class="sec" id="fx">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Валютный рынок</p>
+        <h2 class="sec-title">Фиксированный и плавающий курс</h2>
+      </div>
+      <div class="prose">
+        <p>На валютном рынке спрос и предложение иностранной валюты ($D^{cur}$, $S^{cur}$) формируют равновесный номинальный курс $S$.</p>
+        <p><strong>Плавающий курс.</strong> При увеличении предложения иностранной валюты (например, рост притока капитала или экспортной выручки) кривая $S^{cur}$ сдвигается вправо, равновесный курс $S$ снижается (национальная валюта дорожает) — курс подстраивается автоматически, резервы ЦБ не меняются.</p>
+        <p><strong>Фиксированный курс.</strong> При увеличении спроса на иностранную валюту рыночный курс должен был бы вырасти, но ЦБ, поддерживая паритет $S^{*}$, компенсирует избыточный спрос, <strong>продавая</strong> иностранную валюту из резервов ($\Delta NFA^{cb}\lt0$).</p>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Режим валютного курса определяет, что является эндогенной переменной, «поглощающей» шок на валютном рынке — курс $S$ (при плавающем режиме) или резервы $NFA^{CB}$ (при фиксированном режиме).</p>
+      </div>
+    </section>
+
+    <!-- ============ 06 ВВЕДЕНИЕ В МОДЕЛЬ ============ -->
+    <section class="sec" id="intro">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Введение в модель</p>
+        <h2 class="sec-title">Модель IS-LM-BP: постановка</h2>
+      </div>
+      <div class="prose">
+        <p>Модель предложена в работах <strong>Mundell (1963)</strong> и <strong>Fleming (1962)</strong>. Описывает <strong>малую открытую экономику</strong> (small open economy) — изменение внутренней процентной ставки не влияет на общемировую ставку.</p>
+        <p><strong>Предпосылки модели:</strong></p>
+        <ol>
+          <li>Счёт текущих операций определяется только чистым экспортом: $CA = Xn$.</li>
+          <li>Счёт движения капитала определяется относительной доходностью активов: $CF(r-r^{*})$ — растущая функция от $r-r^{*}$.</li>
+          <li>Малая открытая экономика (внутренняя ставка не влияет на мировую).</li>
+          <li>Уровень цен постоянен ($P = \text{const}$).</li>
+          <li>Переменные иностранного сектора (включая $P^{*}$) постоянны.</li>
+          <li>Выполнено условие Маршалла-Лернера ($Xn'_Q \gt 0$).</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ 07 IS ============ -->
+    <section class="sec" id="is">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Кривая IS</p>
+        <h2 class="sec-title">Равновесие товарного рынка</h2>
+      </div>
+      <div class="prose">
+        <p>Условие равновесия товарного рынка в открытой экономике:</p>
+      </div>
+      <div class="eq-box">$$Y = C(Y-T) + I(r) + G + Xn(Q,Y,Y^{*})$$</div>
+      <div class="prose"><p>Полный дифференциал:</p></div>
+      <div class="eq-box system">$$dY = C'_{Y-T}\,dY - C'_{Y-T}\,dT + I'_r\,dr + dG + Xn'_Q\,dQ + Xn'_Y\,dY + Xn'_{Y^{*}}\,dY^{*}$$</div>
+      <div class="prose"><p><strong>Наклон IS</strong> в координатах $(Y,r)$:</p></div>
+      <div class="eq-box">$$\frac{dr}{dY} = \frac{1 - C'_{Y-T} - Xn'_Y}{I'_r} \lt 0$$
+        <span class="eq-note">Отрицательный наклон, как и в закрытой экономике — числитель положителен ($C'_{Y-T}\lt1$, $Xn'_Y\lt0$), знаменатель $I'_r\lt0$.</span>
+      </div>
+      <div class="prose"><p><strong>Факторы сдвигов IS</strong> (в дополнение к стандартным $G$ и $T$: вправо при $G\uparrow$ или $T\downarrow$):</p></div>
+      <div class="eq-box">$$\frac{dY}{dQ} = \frac{Xn'_Q}{1 - C'_{Y-T} - Xn'_Y} \gt 0, \qquad \frac{dY}{dY^{*}} = \frac{Xn'_{Y^{*}}}{1 - C'_{Y-T} - Xn'_Y} \gt 0$$</div>
+      <div class="prose"><p>То есть реальное обесценение отечественной валюты ($Q\uparrow$) и/или рост дохода внешнего мира ($Y^{*}\uparrow$) сдвигают IS вправо (через рост чистого экспорта).</p></div>
+    </section>
+
+    <!-- ============ 08 BP ============ -->
+    <section class="sec" id="bp">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Кривая BP</p>
+        <h2 class="sec-title">Равновесие платёжного баланса</h2>
+      </div>
+      <div class="prose">
+        <p>$BP = CA + CF + OR$: $BP\gt0$ — профицит платёжного баланса, $BP\lt0$ — дефицит, $BP=0$ — равновесие. В равновесии (используя предпосылки модели, $CA=Xn$, $CF=CF(r-r^{*})$):</p>
+      </div>
+      <div class="eq-box">$$Xn(Q,Y,Y^{*}) + CF(r-r^{*}) + OR = 0$$</div>
+      <div class="prose"><p>Строим линию <strong>BP</strong> в координатах $(Y,r)$, отражающую внешнее равновесие.</p>
+        <h3 class="sub">Вывод наклона BP</h3>
+        <p>Полный дифференциал (обозначим $NFA^{CB}$ — международные резервы ЦБ, $dOR = -dNFA^{CB}$):</p>
+      </div>
+      <div class="eq-box system">$$Xn'_Q\,dQ + Xn'_Y\,dY + Xn'_{Y^{*}}\,dY^{*} + CF'_{r-r^{*}}\,dr - CF'_{r-r^{*}}\,dr^{*} - dNFA^{CB} = 0$$</div>
+      <div class="prose"><p>Кривая BP строится при $dQ = dY^{*} = dr^{*} = dNFA^{CB} = 0$:</p></div>
+      <div class="eq-box">$$\left.\frac{dr}{dY}\right|_{BP} = -\frac{Xn'_Y}{CF'_{r-r^{*}}} \geq 0$$
+        <span class="eq-note">Наклон BP положителен (в отличие от IS): при росте $Y$ падает чистый экспорт ($Xn'_Y\lt0$) — чтобы компенсировать это притоком капитала и сохранить $BP=0$, требуется рост ставки $r$.</span>
+      </div>
+
+      <h3 class="sub">Мобильность капитала и наклон BP</h3>
+      <div class="prose">
+        <ol>
+          <li><strong>Отсутствие мобильности капитала:</strong> $CF'_{r-r^{*}} = 0 \Rightarrow -Xn'_Y/CF'_{r-r^{*}} \to \infty$ — BP <strong>вертикальная</strong> линия.</li>
+          <li><strong>Несовершенная мобильность:</strong> $CF'_{r-r^{*}} \gt 0 \Rightarrow$ BP имеет <strong>положительный конечный наклон</strong>.</li>
+          <li><strong>Абсолютная мобильность:</strong> $CF'_{r-r^{*}} \to \infty \Rightarrow -Xn'_Y/CF'_{r-r^{*}} = 0$ — BP <strong>горизонтальная</strong> линия на уровне $r=r^{*}$.</li>
+        </ol>
+      </div>
+
+      <div class="fig-grid-3">
+        <figure class="chart">
+          <p class="chart-title">Нет мобильности капитала</p>
+          <svg viewBox="0 0 220 200" role="img" aria-label="BP — вертикальная линия при отсутствии мобильности капитала">
+            <line x1="30" y1="170" x2="30" y2="20" stroke="var(--ink-faint)" stroke-width="1.2"/>
+            <line x1="30" y1="170" x2="205" y2="170" stroke="var(--ink-faint)" stroke-width="1.2"/>
+            <line x1="115" y1="30" x2="115" y2="165" stroke="var(--accent-3)" stroke-width="2.4"/>
+            <text x="122" y="42" class="curve-label" fill="var(--accent-3)">BP</text>
+            <text x="200" y="184" class="axis-label" text-anchor="end">Y</text>
+            <text x="16" y="26" class="axis-label">r</text>
+          </svg>
+          <figcaption>$CF'_{r-r^{*}}=0$ — приток капитала не реагирует на ставку.</figcaption>
+        </figure>
+        <figure class="chart">
+          <p class="chart-title">Несовершенная мобильность</p>
+          <svg viewBox="0 0 220 200" role="img" aria-label="BP — восходящая линия при несовершенной мобильности капитала">
+            <line x1="30" y1="170" x2="30" y2="20" stroke="var(--ink-faint)" stroke-width="1.2"/>
+            <line x1="30" y1="170" x2="205" y2="170" stroke="var(--ink-faint)" stroke-width="1.2"/>
+            <line x1="45" y1="160" x2="180" y2="35" stroke="var(--accent-3)" stroke-width="2.4"/>
+            <text x="184" y="34" class="curve-label" fill="var(--accent-3)">BP</text>
+            <text x="200" y="184" class="axis-label" text-anchor="end">Y</text>
+            <text x="16" y="26" class="axis-label">r</text>
+          </svg>
+          <figcaption>$CF'_{r-r^{*}}\gt0$ — конечный положительный наклон.</figcaption>
+        </figure>
+        <figure class="chart">
+          <p class="chart-title">Абсолютная мобильность</p>
+          <svg viewBox="0 0 220 200" role="img" aria-label="BP — горизонтальная линия на уровне мировой ставки при абсолютной мобильности капитала">
+            <line x1="30" y1="170" x2="30" y2="20" stroke="var(--ink-faint)" stroke-width="1.2"/>
+            <line x1="30" y1="170" x2="205" y2="170" stroke="var(--ink-faint)" stroke-width="1.2"/>
+            <line x1="40" y1="95" x2="200" y2="95" stroke="var(--accent-3)" stroke-width="2.4"/>
+            <text x="44" y="86" class="curve-label" fill="var(--accent-3)">BP</text>
+            <text x="16" y="91" class="axis-label" text-anchor="end">r*</text>
+            <text x="200" y="184" class="axis-label" text-anchor="end">Y</text>
+            <text x="16" y="26" class="axis-label">r</text>
+          </svg>
+          <figcaption>$CF'_{r-r^{*}}\to\infty$ — любое отклонение $r$ от $r^{*}$ вызывает неограниченный поток капитала.</figcaption>
+        </figure>
+      </div>
+
+      <div class="prose">
+        <h3 class="sub">Графическая интерпретация: внешнее неравновесие</h3>
+        <p>На графике $(Y,r)$ (BP с положительным наклоном): точки <strong>выше</strong> линии BP соответствуют $BP\gt0$ (профицит — при данном $Y$ ставка $r$ выше равновесной, приток капитала избыточен), точки <strong>ниже</strong> линии — $BP\lt0$ (дефицит).</p>
+        <h3 class="sub">Сдвиги кривой BP</h3>
+        <p>Из полного дифференциала:</p>
+      </div>
+      <div class="eq-box system">$$d\overline{Xn} + Xn'_Q\,dQ + Xn'_Y\,dY + Xn'_{Y^{*}}\,dY^{*} + d\overline{CF} + CF'_{r-r^{*}}\,dr - CF'_{r-r^{*}}\,dr^{*} - dNFA^{CB} = 0$$</div>
+
+      <div class="fig-grid">
+        <figure class="chart">
+          <p class="chart-title">Горизонтальный сдвиг BP</p>
+          <svg viewBox="0 0 360 240" role="img" aria-label="Горизонтальный сдвиг кривой BP вправо при росте реального курса или дохода внешнего мира">
+            <line x1="55" y1="205" x2="55" y2="25" stroke="var(--ink-faint)" stroke-width="1.2"/>
+            <line x1="55" y1="205" x2="335" y2="205" stroke="var(--ink-faint)" stroke-width="1.2"/>
+            <line x1="70" y1="195" x2="270" y2="45" stroke="var(--accent-3)" stroke-width="2.4"/>
+            <text x="252" y="42" class="curve-label" fill="var(--accent-3)">BP₀</text>
+            <line x1="130" y1="195" x2="330" y2="45" stroke="var(--accent-2)" stroke-width="2.4" stroke-dasharray="7 5"/>
+            <text x="300" y="38" class="curve-label" fill="var(--accent-2)">BP₁</text>
+            <line x1="150" y1="140" x2="200" y2="140" stroke="var(--ink)" stroke-width="1.6" marker-end="url(#arrH)"/>
+            <defs><marker id="arrH" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--ink)"/></marker></defs>
+            <text x="335" y="220" class="axis-label" text-anchor="end">Y</text>
+            <text x="40" y="30" class="axis-label">r</text>
+          </svg>
+          <figcaption>Рост $Q$ или $Y^{*}$ сдвигает BP <b>вправо</b>; рост резервов $NFA^{CB}$ — <b>влево</b> (в обратную сторону).</figcaption>
+        </figure>
+        <figure class="chart">
+          <p class="chart-title">Вертикальный сдвиг BP</p>
+          <svg viewBox="0 0 360 240" role="img" aria-label="Вертикальный сдвиг кривой BP вверх при росте мировой процентной ставки">
+            <line x1="55" y1="205" x2="55" y2="25" stroke="var(--ink-faint)" stroke-width="1.2"/>
+            <line x1="55" y1="205" x2="335" y2="205" stroke="var(--ink-faint)" stroke-width="1.2"/>
+            <line x1="70" y1="195" x2="300" y2="90" stroke="var(--accent-3)" stroke-width="2.4"/>
+            <text x="278" y="88" class="curve-label" fill="var(--accent-3)">BP₀</text>
+            <line x1="70" y1="145" x2="300" y2="40" stroke="var(--accent-2)" stroke-width="2.4" stroke-dasharray="7 5"/>
+            <text x="278" y="38" class="curve-label" fill="var(--accent-2)">BP₁</text>
+            <line x1="150" y1="165" x2="150" y2="115" stroke="var(--ink)" stroke-width="1.6" marker-end="url(#arrV)"/>
+            <defs><marker id="arrV" markerWidth="8" markerHeight="8" refX="3" refY="6" orient="auto"><path d="M0,7 L3,0 L6,7 Z" fill="var(--ink)"/></marker></defs>
+            <text x="335" y="220" class="axis-label" text-anchor="end">Y</text>
+            <text x="40" y="30" class="axis-label">r</text>
+          </svg>
+          <figcaption>Рост мировой ставки $r^{*}$ сдвигает BP <b>вверх</b> ($dr/dr^{*}=1$).</figcaption>
+        </figure>
+      </div>
+
+      <div class="prose">
+        <ol>
+          <li><strong>Обесценение (удорожание) валюты</strong> ($dQ$) и рост (падение) привлекательности домашних активов вне ставок ($d\overline{CF}$) сдвигают BP <strong>вправо (влево)</strong>: $\dfrac{dY}{dQ}=-\dfrac{Xn'_Q}{Xn'_Y}\gt0$, $\dfrac{dY}{d\overline{CF}}=-\dfrac{1}{Xn'_Y}\gt0$.</li>
+          <li><strong>Рост (падение) $Y^{*}$</strong> или автономного $\overline{Xn}$ сдвигают BP <strong>вправо (влево)</strong>: $\dfrac{dY}{dY^{*}}=-\dfrac{Xn'_{Y^{*}}}{Xn'_Y}\gt0$.</li>
+          <li><strong>Рост (снижение) мировой ставки $r^{*}$</strong> сдвигает BP <strong>вверх (вниз)</strong>: $\dfrac{dr}{dr^{*}}=1\gt0$.</li>
+          <li><strong>Рост (снижение) резервов $NFA^{CB}$</strong> сдвигает BP <strong>влево (вправо)</strong>: $\dfrac{dY}{dNFA^{CB}}=\dfrac{1}{Xn'_Y}\lt0$.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ 09 ПОЛНАЯ МОДЕЛЬ ============ -->
+    <section class="sec" id="full">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>Полная модель</p>
+        <h2 class="sec-title">Система IS-LM-BP</h2>
+      </div>
+      <div class="eq-box system">
+$$
+\begin{cases}
+Y = C(Y-T) + I(r) + G + Xn(Q,Y,Y^{*}) & \text{(IS)}\\[4pt]
+\dfrac{M^{S}}{P} = L(Y,r) & \text{(LM)}\\[4pt]
+0 = Xn(Q,Y,Y^{*}) + CF(r-r^{*}) - NFA^{CB} & \text{(BP)}
+\end{cases}
+$$
+      </div>
+      <div class="prose">
+        <p>Набор эндогенных/экзогенных переменных зависит от <strong>режима валютного курса</strong>:</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Режим курса</th><th>Эндогенные</th><th>Что подстраивается</th></tr></thead>
+          <tbody>
+            <tr><td>Плавающий</td><td class="sym">Y, r, Q</td><td>курс $S/Q$; $NFA^{CB}=\text{const}$</td></tr>
+            <tr><td>Фиксированный</td><td class="sym">Y, r, M<sup>S</sup></td><td>денежная масса через резервы $NFA^{CB}$; $Q$ фиксирован</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Совместное равновесие IS, LM и BP</p>
+        <svg viewBox="0 0 640 400" role="img" aria-label="Три кривые IS, LM и BP на плоскости доход-ставка, пересекающиеся в единой точке равновесия E; BP положе LM (несовершенная мобильность капитала)">
+          <line x1="60" y1="360" x2="600" y2="360" stroke="var(--ink-faint)" stroke-width="1.3"/>
+          <line x1="60" y1="360" x2="60" y2="20" stroke="var(--ink-faint)" stroke-width="1.3"/>
+          <text x="606" y="366" class="axis-label">Y</text>
+          <text x="48" y="16" class="axis-label">r</text>
+
+          <line x1="140" y1="100" x2="460" y2="260" stroke="var(--accent)" stroke-width="2.6"/>
+          <text x="468" y="266" class="curve-label" fill="var(--accent)">IS</text>
+
+          <line x1="200" y1="280" x2="400" y2="80" stroke="var(--accent-2)" stroke-width="2.6"/>
+          <text x="392" y="70" class="curve-label" fill="var(--accent-2)">LM</text>
+
+          <line x1="120" y1="240" x2="480" y2="120" stroke="var(--accent-3)" stroke-width="2.6"/>
+          <text x="486" y="118" class="curve-label" fill="var(--accent-3)">BP</text>
+
+          <line x1="300" y1="360" x2="300" y2="180" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="3 4"/>
+          <line x1="60" y1="180" x2="300" y2="180" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="3 4"/>
+          <circle cx="300" cy="180" r="4.5" fill="var(--ink)"/>
+          <text x="308" y="176" class="curve-label" fill="var(--ink)">E</text>
+          <text x="300" y="378" class="axis-label" text-anchor="middle">Y*</text>
+          <text x="46" y="184" class="axis-label" text-anchor="end">r*</text>
+        </svg>
+        <figcaption>Равновесие товарного (IS), денежного (LM) и валютного (BP) рынков — единая точка $E=(Y^{*},r^{*})$. На рисунке BP положе LM — случай несовершенной мобильности капитала (§11.1).</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>Перенося $dY, dr, dM^{S}$ в левую часть системы в дифференциалах (при $dT=dY^{*}=dr^{*}=dQ=dP=0$, $M^S/\mu = DC + NFA^{CB}$), получаем систему для <strong>фиксированного курса</strong>:</p>
+      </div>
+      <div class="eq-box system">
+$$
+\begin{cases}
+(1-C'_{Y-T}-Xn'_Y)\,dY - I'_r\,dr = Xn'_{Y^{*}}\,dY^{*} - C'_{Y-T}\,dT + dG\\[4pt]
+L'_Y\,dY + L'_r\,dr - \dfrac{1}{\mu}\,dM^{S} = -\dfrac{M^{S}}{P^{2}}\,dP\\[4pt]
+Xn'_Y\,dY + CF'_{r-r^{*}}\,dr - \dfrac{1}{\mu}\,dM^{S} = CF'_{r-r^{*}}\,dr^{*} - Xn'_{Y^{*}}\,dY^{*}
+\end{cases}\tag{1}
+$$
+      </div>
+      <div class="prose"><p>И для <strong>плавающего курса</strong> ($dNFA^{CB}=0$, эндогенной становится $dQ$):</p></div>
+      <div class="eq-box system">
+$$
+\begin{cases}
+(1-C'_{Y-T}-Xn'_Y)\,dY - I'_r\,dr - Xn'_Q\,dQ = Xn'_{Y^{*}}\,dY^{*} - C'_{Y-T}\,dT + dG\\[4pt]
+L'_Y\,dY + L'_r\,dr = \dfrac{1}{P}\,dM^{S} - \dfrac{M^{S}}{P^{2}}\,dP\\[4pt]
+Xn'_Y\,dY + CF'_{r-r^{*}}\,dr + Xn'_Q\,dQ = CF'_{r-r^{*}}\,dr^{*} - Xn'_{Y^{*}}\,dY^{*}
+\end{cases}\tag{2}
+$$
+      </div>
+    </section>
+
+    <!-- ============ 10 ЛОГИКА ПОЛИТИКИ ============ -->
+    <section class="sec" id="policy">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">10</span>Логика политики</p>
+        <h2 class="sec-title">Макроэкономическая политика в открытой экономике</h2>
+      </div>
+      <div class="prose">
+        <ul>
+          <li><strong>Внешний баланс</strong> — равновесие платёжного баланса (точка на линии BP).</li>
+          <li>Равновесие на товарном и денежном рынках (IS∩LM) может <strong>не совпадать</strong> с точкой внешнего баланса: при <strong>плавающем</strong> курсе приспосабливается <strong>номинальный курс</strong>; при <strong>фиксированном</strong> — ЦБ проводит операции на валютном рынке, меняя предложение денег.</li>
+          <li>В краткосрочном периоде равновесие на всех трёх рынках может не соответствовать выпуску при полной занятости — отсюда потребность в макрополитике.</li>
+          <li>Эффекты фискальной и монетарной политики принципиально различаются в зависимости от режима курса.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 11 ФИСКАЛЬНАЯ ЭКСПАНСИЯ ============ -->
+    <section class="sec" id="fiscal">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">11</span>Фискальная экспансия</p>
+        <h2 class="sec-title">Рост госрасходов при разных режимах курса</h2>
+      </div>
+      <div class="prose"><p>Общий механизм: положительный шок госрасходов $G\uparrow$ сдвигает <strong>IS вправо</strong> (в обоих режимах курса это первый шаг).</p></div>
+
+      <h3 class="sub">11.1 Фиксированный курс (случай несовершенной мобильности, BP положе LM)</h3>
+      <div class="prose">
+        <ol>
+          <li>Рост $G$ сдвигает IS вправо: новая точка пересечения IS и LM ($E'$) лежит <strong>выше</strong> BP.</li>
+          <li>В $E'$ выполняется $BP\gt0$ (профицит) — более высокая ставка $r$ привлекает избыточный приток капитала, перекрывающий ухудшение торгового баланса. Избыточное <strong>предложение</strong> иностранной валюты на валютном рынке.</li>
+          <li>Чтобы удержать фиксированный курс, ЦБ <strong>скупает</strong> избыточную валюту, наращивая резервы $NFA^{CB}\uparrow$.</li>
+          <li>Рост резервов увеличивает денежную базу и денежную массу $M^{S}\uparrow$ — <strong>LM сдвигается вниз (вправо)</strong>.</li>
+          <li>Одновременно накопление резервов уменьшает профицит платёжного баланса — <strong>BP сдвигается влево</strong>.</li>
+          <li>LM и BP двигаются навстречу друг другу, пока не пересекутся в общей точке $E_1$ вместе с $IS_1$.</li>
+        </ol>
+      </div>
+      <div class="callout result">
+        <span class="mark">Итог</span>
+        <p>Выпуск $Y$ и ставка $r$ растут сильнее, чем в закрытой экономике (LM тоже сдвинулась вправо благодаря притоку резервов) — <strong>фискальная политика при фиксированном курсе усилена</strong> эндогенным ростом денежной массы.</p>
+      </div>
+      <div class="eq-box system">$$\frac{dY}{dG} = \frac{1 - \dfrac{L'_r P}{\mu\, CF'_{r-r^{*}}}}{\Omega_1} \gt 0 \tag{3}$$</div>
+      <div class="eq-box system">$$\frac{dr}{dG} = \frac{-\dfrac{Xn'_Y}{CF'_{r-r^{*}}} - \dfrac{L'_Y P}{\mu\, CF'_{r-r^{*}}}}{\Omega_1} \gt 0 \tag{4}$$</div>
+      <div class="eq-box system">$$\frac{dM^{S}}{dG} = \frac{P\left(L'_Y - \dfrac{L'_r\,Xn'_Y}{CF'_{r-r^{*}}}\right)}{\Omega_1} \tag{5}$$
+        <span class="eq-note">$\Omega_1 = (1-C'_{Y-T}-Xn'_Y)\left(1 - \dfrac{L'_r P}{\mu\, CF'_{r-r^{*}}}\right) + \dfrac{I'_r\,Xn'_Y}{CF'_{r-r^{*}}} - \dfrac{L'_Y\,I'_r\,P}{\mu\, CF'_{r-r^{*}}} \gt 0$</span>
+      </div>
+      <div class="prose">
+        <p><strong>Знак $dM^S/dG$</strong> зависит от относительного наклона LM и BP: положителен, если наклон LM больше наклона BP ($L'_Y - L'_r\,Xn'_Y/CF'_{r-r^{*}} \gt 0$), и отрицателен в обратном случае.</p>
+        <p><strong>Три случая мобильности капитала (фиксированный курс, фискальная экспансия):</strong></p>
+        <ol>
+          <li><strong>BP положе LM</strong> (разобранный случай): $Y$ растёт сильнее, чем в закрытой экономике, $M^S\uparrow$ — политика <strong>усилена</strong>.</li>
+          <li><strong>Отсутствие мобильности</strong> (BP вертикальна): канал ставки в BP отсутствует; ЦБ вынужден нейтрализовать давление на резервы так, чтобы удержать $Y$ на уровне пересечения BP — LM подстраивается под вертикальную BP.</li>
+          <li><strong>Абсолютная мобильность</strong> (BP горизонтальна на $r=r^{*}$): ЦБ вынужден полностью аккомодировать рост $M^S$ — <strong>фискальная политика максимально эффективна</strong>, весь прирост IS транслируется в рост $Y$ при неизменной $r=r^{*}$.</li>
+        </ol>
+      </div>
+
+      <h3 class="sub">11.2 Плавающий курс</h3>
+      <div class="prose">
+        <ol>
+          <li>Шок $G$ сдвигает IS вправо; внутреннее равновесие (IS₁∩LM, точка A) характеризуется $BP\gt0$ — избыточное предложение валюты.</li>
+          <li>Рост предложения валюты снижает номинальный курс $S$ — отечественная валюта <strong>дорожает</strong>; при постоянных ценах $Q\downarrow$.</li>
+          <li>Удорожание валюты снижает конкурентоспособность: $Xn\downarrow$ ⟹ совокупные расходы падают ⟹ <strong>IS сдвигается влево</strong>.</li>
+          <li>Падение $Xn$ также означает, что новое внешнее равновесие возможно только при более низком $Y$ ⟹ <strong>BP сдвигается влево</strong>.</li>
+          <li>IS и BP двигаются влево (LM неизменна) до нового равновесия B, где пересекаются все три кривые.</li>
+        </ol>
+      </div>
+      <div class="callout result">
+        <span class="mark">Итог</span>
+        <p>$Y\uparrow$ (слабее, чем в закрытой экономике или при фиксированном курсе), $r\uparrow$, $Q\downarrow$ — удорожание валюты частично «съедает» фискальный стимул через вытеснение чистого экспорта.</p>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Утверждение</span>
+        <p>Если IS и BP сдвигаются вправо/влево <strong>в силу одной и той же причины</strong> (изменения $Q$), то <strong>BP сдвигается сильнее, чем IS</strong>. Следствие: новая точка пересечения IS и BP соответствует более <strong>низкой</strong> ставке, чем в точке пересечения исходной $IS_1$ и новой BP — так как чистый экспорт убывает по доходу, $\Delta Y^{BP} \gt \Delta Y^{IS}$, а IS имеет отрицательный, BP — положительный наклон.</p>
+      </div>
+      <div class="eq-box system">$$\frac{dY}{dG} = -\frac{L'_r\,Xn'_Q/CF'_{r-r^{*}}}{|\Delta_1|} \gt 0, \qquad \frac{dr}{dG} = \frac{L'_Y\,Xn'_Q/CF'_{r-r^{*}}}{|\Delta_1|} \gt 0$$</div>
+      <div class="eq-box system">$$\frac{dQ}{dG} = \frac{L'_r\,Xn'_Y/CF'_{r-r^{*}} - L'_Y}{|\Delta_1|}$$
+        <span class="eq-note">$|\Delta_1| = Xn'_Q\left[L'_Y(1-I'_r/CF'_{r-r^{*}}) - L'_r(1-C'_{Y-T})/CF'_{r-r^{*}}\right] \gt 0$</span>
+      </div>
+      <div class="prose">
+        <p><strong>Три случая мобильности капитала (плавающий курс, фискальная экспансия):</strong></p>
+        <ol>
+          <li><strong>Отсутствие мобильности</strong> (BP вертикальна): единственный способ восстановить внешний баланс — падение $Y$ обратно к исходному уровню через удорожание валюты; в пределе <strong>выпуск почти не меняется</strong>, весь эффект уходит в $Q$ и $r$.</li>
+          <li><strong>Несовершенная мобильность</strong>: промежуточный случай, как выше.</li>
+          <li><strong>Абсолютная мобильность</strong> (BP горизонтальна): $Y_0=Y_1$ — <strong>фискальная политика полностью неэффективна</strong> в отношении выпуска: удорожание валюты полностью вытесняет чистый экспорт ($dY=0$, $r=r^{*}$).</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ 12 МОНЕТАРНАЯ ЭКСПАНСИЯ ============ -->
+    <section class="sec" id="monetary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">12</span>Монетарная экспансия</p>
+        <h2 class="sec-title">Рост денежного предложения при разных режимах курса</h2>
+      </div>
+      <div class="prose"><p>Общий механизм: рост денежного предложения $M^{S}\uparrow$ сдвигает <strong>LM вниз (вправо)</strong> — первый шаг в обоих режимах курса.</p></div>
+
+      <h3 class="sub">12.1 Фиксированный курс</h3>
+      <div class="prose">
+        <p>При фиксированном курсе $M^S$ — эндогенная переменная, поэтому вопрос ставится иначе: что будет, если ЦБ попытается стимулировать экономику через изменение <strong>внутреннего кредита</strong> $DC$?</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Активы баланса ЦБ</th><th>Пассивы</th></tr></thead>
+          <tbody>
+            <tr><td>Государственные облигации ($DC$)</td><td>Резервы банков + наличные ($C$)</td></tr>
+            <tr><td>Золотовалютные резервы ($NFA^{CB}$)</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="formula-box">
+        <div class="eq">$M^{S} = \mu H = \mu(DC + NFA^{CB})$</div>
+        <div class="formula-legend">
+          <div class="item"><b>H</b>денежная база</div>
+          <div class="item"><b>μ</b>денежный мультипликатор</div>
+        </div>
+      </div>
+      <div class="prose">
+        <p><strong>Механизм при $DC\uparrow$:</strong></p>
+        <ol>
+          <li>$DC\uparrow$ ⟹ LM сдвигается вниз (первичный рост $M^S$).</li>
+          <li>В новой точке $E'$ наблюдается $BP\lt0$ (дефицит): более низкая $r$ вызывает отток капитала.</li>
+          <li>Дефицит означает избыточный <strong>спрос</strong> на иностранную валюту.</li>
+          <li>Чтобы удержать курс, ЦБ <strong>продаёt</strong> валюту из резервов: $NFA^{CB}\downarrow$.</li>
+          <li>Падение резервов сокращает $M^{S}$ — LM сдвигается <strong>обратно вверх</strong>, одновременно <strong>BP сдвигается вправо</strong>.</li>
+          <li>Процесс продолжается, пока LM не вернётся в $LM_0$ и не установится $E_1=E_0$.</li>
+        </ol>
+      </div>
+      <div class="eq-box system">$$\frac{dY}{dDC} = -\frac{\mu\,I'_r/P}{\Omega_2} \gt 0, \qquad \frac{dr}{dDC} = -\frac{\mu\,(1-C'_{Y-T}-Xn'_Y)/P}{\Omega_2} \lt 0$$</div>
+      <div class="eq-box system">$$\frac{dNFA^{CB}}{dDC} = \frac{\mu\left(I'_r\,Xn'_Y - CF'_{r-r^{*}}(1-C'_{Y-T}-Xn'_Y)\right)/P}{\Omega_2} \lt 0$$
+        <span class="eq-note">$\Omega_2 = \dfrac{\mu}{P}\,I'_r\,Xn'_Y + \dfrac{\mu}{P}\,CF'_{r-r^{*}}(1-C'_{Y-T}-Xn'_Y) - L'_r(1-C'_{Y-T}-Xn'_Y) - L'_Y\,I'_r \gt 0$</span>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Ключевой вывод</span>
+        <p>При <strong>абсолютной мобильности капитала</strong> $CF'_{r-r^{*}}\to\infty$, откуда $\Omega_2\to\infty$, и $dY/dDC\to0$, $dr/dDC\to0$, $dNFA^{CB}/dDC\to-1$ — то есть $dM^S/dDC\to0$: при фиксированном курсе и абсолютной мобильности у ЦБ <strong>нет возможности проводить независимую монетарную политику</strong>: расширение внутреннего кредита один в один компенсируется оттоком резервов.</p>
+      </div>
+      <div class="prose">
+        <p><strong>Три случая мобильности капитала (фиксированный курс, монетарная экспансия):</strong></p>
+        <ol>
+          <li><strong>Несовершенная мобильность</strong>: LM сначала уходит вниз, затем частично возвращается — эффект на $Y$ и $r$ промежуточный.</li>
+          <li><strong>Отсутствие мобильности</strong> (BP вертикальна, $Y_0=Y_1$): весь эффект гасится изменением резервов при неизменном выпуске — <strong>монетарная политика полностью неэффективна</strong>.</li>
+          <li><strong>Абсолютная мобильность</strong>: LM возвращается в исходное положение ещё быстрее — $dY\to0$, $dr\to0$, <strong>монетарная политика полностью неэффективна</strong>.</li>
+        </ol>
+      </div>
+
+      <h3 class="sub">12.2 Плавающий курс</h3>
+      <div class="prose">
+        <ol>
+          <li>Монетарный шок сдвигает <strong>LM вниз</strong>.</li>
+          <li>Внутреннее равновесие (точка A) характеризуется $BP\lt0$ (дефицит) — избыточный спрос на валюту.</li>
+          <li>Рост спроса на валюту увеличивает $S$, т.е. <strong>удешевляет</strong> отечественную валюту; при постоянных ценах $Q\uparrow$.</li>
+          <li>Удешевление валюты повышает конкурентоспособность: $Xn\uparrow$ ⟹ <strong>IS сдвигается вправо</strong>.</li>
+          <li>Рост $Xn$ означает, что новое внешнее равновесие возможно только при более высоком $Y$ ⟹ <strong>BP сдвигается вправо</strong>.</li>
+          <li>Устанавливается новое равновесие на пересечении $IS_1$, $LM_1$, $BP_1$.</li>
+        </ol>
+      </div>
+      <div class="callout result">
+        <span class="mark">Итог</span>
+        <p>$Y\uparrow$, $r\downarrow$, $Q\uparrow$ — при плавающем курсе монетарный импульс <strong>усиливается</strong> через канал обменного курса (в отличие от фискальной политики, где курсовой канал его ослаблял).</p>
+      </div>
+      <div class="eq-box system">$$\frac{dY}{dM^{S}} = \frac{Xn'_Q\,(I'_r - CF'_{r-r^{*}})}{P\,|\Delta_2|} \gt 0, \qquad \frac{dr}{dM^{S}} = \frac{Xn'_Q\,(1-C'_{Y-T})}{P\,|\Delta_2|} \lt 0$$</div>
+      <div class="eq-box system">$$\frac{dQ}{dM^{S}} = -\frac{I'_r\,Xn'_Y + CF'_{r-r^{*}}(1-C'_{Y-T}-Xn'_Y)}{P\,|\Delta_2|} \gt 0$$
+        <span class="eq-note">$|\Delta_2| = Xn'_Q\left[L'_Y(I'_r - CF'_{r-r^{*}}) + L'_r(1-C'_{Y-T})\right] \lt 0$</span>
+      </div>
+      <div class="prose">
+        <p><strong>Три случая мобильности капитала (плавающий курс, монетарная экспансия):</strong></p>
+        <ol>
+          <li><strong>Несовершенная мобильность</strong>: промежуточный случай.</li>
+          <li><strong>Отсутствие мобильности</strong> (BP вертикальна, $Y_0=Y_1$): новое равновесие — за счёт полного сдвига IS и BP на одну величину, $r$ падает сильно (канал ставки заблокирован).</li>
+          <li><strong>Абсолютная мобильность</strong> (BP горизонтальна на $r=r^{*}$): <strong>монетарная политика максимально эффективна</strong> — весь прирост $M^S$ транслируется в рост $Y$ через удешевление валюты, при неизменной $r=r^{*}$.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ 13 ТРИЛЕММА ============ -->
+    <section class="sec" id="trilemma">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">13</span>Трилемма</p>
+        <h2 class="sec-title">Трилемма невозможности (impossible trinity)</h2>
+      </div>
+      <blockquote class="quote">
+        Невозможно одновременно иметь: (1) фиксированный валютный курс, (2) независимую монетарную политику и (3) свободные потоки капитала (абсолютную мобильность капитала). Можно реализовать одновременно <strong>не более двух</strong> из этих трёх целей.
+      </blockquote>
+      <div class="prose">
+        <p>Три вершины треугольника трилеммы:</p>
+        <div class="pill-row">
+          <span class="pill">Фиксированный валютный курс</span>
+          <span class="pill">Абсолютная мобильность капитала</span>
+          <span class="pill">Независимая монетарная политика</span>
+        </div>
+        <p>Это прямое следствие результата §12.1: при фиксированном курсе и абсолютной мобильности капитала $dM^S/dDC \to 0$ — независимая монетарная политика невозможна.</p>
+      </div>
+    </section>
+
+    <!-- ============ 14 ИТОГИ ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">14</span>Итоги</p>
+        <h2 class="sec-title">Итоги и практические рекомендации</h2>
+      </div>
+      <div class="prose">
+        <p><strong>В условиях абсолютной мобильности капитала:</strong></p>
+        <ul>
+          <li><strong>Монетарные шоки</strong> (LM) не влияют на равновесие при <strong>фиксированном</strong> курсе (нейтрализуются потоком резервов).</li>
+          <li><strong>Шоки на товарном рынке</strong> (IS, включая фискальную политику) не влияют на равновесный выпуск при <strong>плавающем</strong> курсе (эффект гасится изменением курса и вытеснением чистого экспорта).</li>
+        </ul>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Режим курса</th><th>Фискальная политика</th><th>Монетарная политика</th></tr></thead>
+          <tbody>
+            <tr><td>Фиксированный</td><td>Усилена; при абс. мобильности — максимально эффективна</td><td>Неэффективна; при абс. мобильности — полностью неэффективна</td></tr>
+            <tr><td>Плавающий</td><td>Ослаблена; при абс. мобильности — полностью неэффективна</td><td>Усилена; при абс. мобильности — максимально эффективна</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose">
+        <p><strong>Рекомендации по выбору режима курса:</strong></p>
+        <ul>
+          <li>Если преобладают <strong>монетарные шоки</strong>, предпочтительнее <strong>фиксированный курс</strong> — автоматическое приспособление денежного предложения через резервы гасит шоки, не доводя их до реального сектора.</li>
+          <li>Если преобладают <strong>шоки на товарном рынке</strong> (IS), предпочтительнее <strong>плавающий курс</strong> — изменение курса и чистого экспорта нейтрализует последствия шока для выпуска.</li>
+        </ul>
+      </div>
+
+      <h3 class="sub">Приложение: сводка обозначений</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Символ</th><th>Значение</th></tr></thead>
+          <tbody>
+            <tr><td class="sym">CA</td><td>счёт текущих операций</td></tr>
+            <tr><td class="sym">CF</td><td>счёт операций с капиталом (чистый приток частных финансовых активов)</td></tr>
+            <tr><td class="sym">OR</td><td>счёт резервных активов</td></tr>
+            <tr><td class="sym">Xn</td><td>чистый экспорт</td></tr>
+            <tr><td class="sym">Q</td><td>реальный валютный курс, $Q=SP^{*}/P$</td></tr>
+            <tr><td class="sym">S</td><td>номинальный валютный курс</td></tr>
+            <tr><td class="sym">Y, Y*</td><td>доход домашней страны / внешнего мира</td></tr>
+            <tr><td class="sym">r, r*</td><td>внутренняя / мировая ставка процента</td></tr>
+            <tr><td class="sym">θ</td><td>премия за риск</td></tr>
+            <tr><td class="sym">NFA<sup>CB</sup></td><td>чистые иностранные активы (золотовалютные резервы) ЦБ</td></tr>
+            <tr><td class="sym">DC</td><td>внутренний кредит ЦБ</td></tr>
+            <tr><td class="sym">H</td><td>денежная база</td></tr>
+            <tr><td class="sym">μ</td><td>денежный мультипликатор ($M^S=\mu H$)</td></tr>
+            <tr><td class="sym">ε<sub>Ex</sub>, ε<sub>Im</sub></td><td>эластичности экспорта / импорта по реальному курсу</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект лекции · Модель IS-LM-BP · Макроэкономика-1, НИУ ВШЭ, 2026</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>
