@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deep Learning. Лекция 2: NLL, Dropout и Batch Norm — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#0a0a0d;
+      --surface:#131318;
+      --surface-2:#1a1a22;
+      --ink:#f5f5fa;
+      --ink-soft:#c3c3d2;
+      --ink-faint:#83839a;
+      --accent:#00e5ff;
+      --accent-strong:#7df3ff;
+      --accent-soft:#0d2b30;
+      --accent-2:#ff5fd1;
+      --accent-2-soft:#2a0f24;
+      --accent-3:#a6ff4d;
+      --accent-3-soft:#182408;
+      --rule:#26262f;
+      --shadow: 0 1px 2px rgba(0,229,255,.07), 0 10px 28px -12px rgba(0,0,0,.7);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 90%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.result .mark{ color:var(--accent-3); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.fact .mark{ color:var(--accent-2); }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:700px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+    mjx-container[jax="CHTML"]{ color: var(--ink); }
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/it.html">← Раздел «IT»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Deep Learning · Лекция 2 · конспект</p>
+      <h1 class="title">NLL, Dropout и Batch Normalization</h1>
+      <p class="subtitle">Почему для классификации нужен softmax и log-sum-exp трюк, как label smoothing и blending лечат переобучение, зачем на трейне «выключают» нейроны, и почему нормализация активаций внутри сети ускоряет обучение.</p>
+      <div class="meta-row">
+        <span><strong>Архипов Виктор</strong>, ФКН ВШЭ</span>
+        <span>Глубинное обучение 1, 2025/26 · Лекция 2</span>
+        <span>10.09.2026</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#classification"><span class="n">01</span>Classification &amp; Softmax</a>
+      <a href="#nll"><span class="n">02</span>NLL и Cross-Entropy</a>
+      <a href="#smoothing"><span class="n">03</span>Label Smoothing, Blending</a>
+      <a href="#dropout"><span class="n">04</span>Dropout</a>
+      <a href="#batchnorm"><span class="n">05</span>Batch Normalization</a>
+      <a href="#summary"><span class="n">06</span>Итоги</a>
+      <a href="#refs"><span class="n">07</span>Литература</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 CLASSIFICATION & SOFTMAX ============ -->
+    <section class="sec" id="classification">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Classification</p>
+        <h2 class="sec-title">От доли ошибок к дифференцируемому loss</h2>
+      </div>
+      <div class="prose">
+        <p>Естественная метрика качества классификации — доля ошибок (error rate):</p>
+      </div>
+      <div class="eq-box">$$\frac{1}{l}\sum_{i=1}^{l}\mathbb{1}[\alpha(x_i)\ne y_i]$$
+        <span class="eq-note">$l$ — число примеров; $\alpha(x_i)=\hat y_i$ — предсказанная метка; $y_i\in\{1,\ldots,c\}$ — истинная метка; $\mathbb{1}[\cdot]$ — индикатор.</span>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Проблема</span>
+        <p>Эта функция потерь <strong>дискретна и недифференцируема</strong>. Она не даёт осмысленного градиентного сигнала для backprop через глубокие слои: индикатор $\mathbb{1}[\cdot]$ возвращает только 0 или 1, а его производная почти всюду равна нулю. Стандартная градиентная оптимизация здесь попросту невозможна.</p>
+      </div>
+      <div class="prose"><p><strong>Решение:</strong> нужна непрерывная, дифференцируемая функция потерь (например, кросс-энтропия), которая даёт полезные градиенты для обучения глубоких сетей. Вместо жёсткой метки сеть должна выдавать <strong>распределение вероятностей</strong> по классам:</p></div>
+      <div class="formula-box">
+        <div class="eq">$p=\big(p(\hat y_i=1),\ldots,p(\hat y_i=c)\big)^T$</div>
+        <div class="formula-legend">
+          <div class="item"><b>p<sub>i</sub> ≥ 0</b>вероятность класса i</div>
+          <div class="item"><b>Σp<sub>i</sub> = 1</b>вероятности нормированы</div>
+        </div>
+      </div>
+      <div class="prose"><p>Сеть, как и в лекции 1, — композиция слоёв $z_i=\sigma(W_iz_{i-1}+b_i)$, только последний слой даёт вектор «сырых» чисел (<strong>логитов</strong>) размерности $c$:</p></div>
+      <div class="eq-box">$$z_n\in\mathbb{R}^c, \qquad z_n = W_nz_{n-1}+b_n$$</div>
+      <div class="prose"><p>Логиты $z_n$ могут быть любыми вещественными числами — чтобы превратить их в корректное распределение вероятностей ($p_i\ge0$, $\sum p_i=1$), применяют <strong>softmax</strong>:</p></div>
+      <div class="eq-box">$$\mathrm{Softmax}: \quad p_i = \frac{e^{z_i}}{\sum_{j=1}^{c}e^{z_j}}, \qquad z_i - \text{логит}$$</div>
+      <div class="prose">
+        <p>Экспонента гарантирует $p_i\gt0$ для любых входных $z_i$ (даже отрицательных), а деление на сумму — нормировку $\sum p_i=1$. Поскольку softmax монотонен по каждому входу, $z_i\gt z_j\Rightarrow p_i\gt p_j$: чем больше логит, тем выше итоговая вероятность класса, порядок классов сохраняется.</p>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p><strong>Инвариантность к сдвигу.</strong> Softmax не меняется, если ко <em>всем</em> логитам прибавить одну и ту же константу $C$: $\dfrac{e^{z_i+C}}{\sum_j e^{z_j+C}}=\dfrac{e^{z_i}e^{C}}{e^{C}\sum_j e^{z_j}}=\dfrac{e^{z_i}}{\sum_j e^{z_j}}$. Важны только <em>разности</em> между логитами. Это свойство — основа трюка с численной стабильностью в §02.</p>
+      </div>
+
+      <h3 class="sub">Численный пример</h3>
+      <div class="prose"><p>Пусть сеть выдала для трёх классов логиты $z=(2.0,\,1.0,\,0.1)$:</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Класс</th><th>Логит $z_i$</th><th>$e^{z_i}$</th><th>$p_i = e^{z_i}/\sum e^{z_j}$</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>2.0</td><td>7.39</td><td>0.659</td></tr>
+            <tr><td>2</td><td>1.0</td><td>2.72</td><td>0.242</td></tr>
+            <tr><td>3</td><td>0.1</td><td>1.11</td><td>0.099</td></tr>
+            <tr><td><em>Σ</em></td><td>—</td><td>11.22</td><td>1.000</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Класс с наибольшим логитом (2.0) получает наибольшую вероятность (0.659), но не «съедает» всю вероятностную массу — softmax оставляет ненулевую вероятность и у менее уверенных классов, в этом его отличие от жёсткого $\arg\max$.</p></div>
+    </section>
+
+    <!-- ============ 02 NLL И CROSS-ENTROPY ============ -->
+    <section class="sec" id="nll">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>NLL</p>
+        <h2 class="sec-title">Negative Log Likelihood и Cross-Entropy</h2>
+      </div>
+      <div class="prose"><p>Для истинного класса $y\in\{1,\ldots,c\}$ функция потерь:</p></div>
+      <div class="eq-box">$$L = -\sum_{k=1}^{c}\mathbb{1}[k=y]\log p_k = -\log p_y \longrightarrow \min$$</div>
+      <div class="prose"><p>Для всей обучающей выборки $\{(x_i,y_i)\}_{i=1}^{l}$:</p></div>
+      <div class="eq-box system">$$-\sum_{i=1}^{l}\sum_{k=1}^{c}\mathbb{1}[k=y_i]\log p_k^{(i)} \longrightarrow \min_{W,b} \quad\Longleftrightarrow\quad -\sum_{i=1}^{l}\log p_{y_i}^{(i)} \longrightarrow \min_{W,b} \quad\Longleftrightarrow\quad \prod_{i=1}^{l}p_{y_i}^{(i)} \longrightarrow \max$$</div>
+      <div class="prose"><p>В терминах вероятности как $\mathrm{Softmax}(z_i)$: $\mathrm{NLLLoss}(\mathrm{Softmax}(z),y)\longrightarrow\min$.</p></div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Эта идея приходит из математической статистики (метод максимального правдоподобия). Мы хотим максимизировать вероятность, приписанную <strong>истинному</strong> классу — это эквивалентно минимизации отрицательного логарифма правдоподобия. Произведение $\prod_i p_{y_i}^{(i)}$ — это в точности правдоподобие выборки при условии, что метки независимы; логарифм превращает произведение в сумму, а знак «минус» превращает максимизацию в привычную минимизацию.</p>
+      </div>
+
+      <h3 class="sub">Почему -log(p) — хороший loss</h3>
+      <figure class="chart">
+        <p class="chart-title">Форма функции потерь L = -log(p)</p>
+        <svg viewBox="0 0 460 250" role="img" aria-label="График -log(p): резко растёт к бесконечности при p, стремящемся к нулю, и плавно приближается к нулю при p, стремящемся к единице; отмечена точка p=0.3 с loss примерно 1.2">
+          <line x1="40" y1="220" x2="420" y2="220" stroke="var(--ink-faint)" stroke-width="1.2"/>
+          <line x1="40" y1="220" x2="40" y2="30" stroke="var(--ink-faint)" stroke-width="1.2"/>
+          <g class="axis-label">
+            <text x="40" y="236">0</text><text x="230" y="236">0.5</text><text x="414" y="236">1</text>
+            <text x="18" y="224">0</text><text x="18" y="60">высокий</text>
+            <text x="426" y="216">p</text><text x="30" y="22">L</text>
+          </g>
+          <path d="M47.6,79.2 L59,112 L78,137.1 L154,176.7 L230,195 L306,207.2 L420,220" fill="none" stroke="var(--accent)" stroke-width="2.4"/>
+          <circle cx="154" cy="176.7" r="4.5" fill="var(--accent-2)"/>
+          <line x1="154" y1="176.7" x2="154" y2="220" stroke="var(--accent-2)" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="160" y="172" class="curve-label" fill="var(--accent-2)">p=0.3, L≈1.2</text>
+          <text x="330" y="70" class="curve-label" fill="var(--accent)">L = -log(p)</text>
+        </svg>
+        <figcaption>Если модель уверена и <b>права</b> ($p\to1$), потери стремятся к нулю. Если модель уверенно <b>ошибается</b> ($p\to0$, вероятность истинного класса мала), потери улетают в бесконечность — loss резко штрафует именно уверенные ошибки, а не просто «неправильный ответ».</figcaption>
+      </figure>
+
+      <h3 class="sub">Численная стабильность: log-sum-exp трюк</h3>
+      <div class="prose"><p>Формула $L=-\log p_y$ напрямую (через явное вычисление softmax, а затем логарифма) численно нестабильна: экспоненты больших логитов переполняют float. Поэтому:</p></div>
+      <div class="eq-box system">$$\log\mathrm{softmax}(z_i) = \log\frac{\exp(z_i)}{\sum_{j=1}^{c}\exp(z_j)} = \log\exp(z_i) - \log\left(\sum_{j=1}^{c}\exp(z_j)\right) = z_i - \log\sum_{j=1}^{c}\exp(z_j) = z_i - \mathrm{logsumexp}$$</div>
+      <div class="prose"><p>где $z_i$ — сырой логит класса $i$, а $\log\sum_j\exp(z_j)$ — <strong>log-sum-exp</strong> (численно стабильное выражение). Чтобы повысить стабильность ещё сильнее, используют:</p></div>
+      <div class="eq-box">$$\log\frac{\exp(z_i-\max_j z_j)}{\sum_{j=1}^{c}\exp(z_j-\max_j z_j)}$$</div>
+      <div class="callout result">
+        <span class="mark">Почему это корректно</span>
+        <p>Это работает <em>именно</em> благодаря инвариантности softmax к сдвигу (§01): вычитание $\max_j z_j$ из всех логитов <strong>не меняет</strong> итоговый результат softmax математически, зато гарантирует, что самый большой показатель экспоненты — ровно $e^0=1$, а все остальные — $\le 1$, что предотвращает переполнение (overflow) при вычислении с плавающей точкой (IEEE 754).</p>
+      </div>
+
+      <h3 class="sub">Cross-Entropy как обобщение NLL</h3>
+      <div class="prose"><p>В PyTorch эта комбинация (softmax + логарифм + NLL) реализована как <code>CrossEntropyLoss</code>. В общем виде кросс-энтропия сравнивает предсказанное распределение $\{p_i\}$ с целевым распределением $\{q_i\}$:</p></div>
+      <div class="eq-box">$$\mathrm{CE}(\{p_i\}_{i=1}^{c},\{q_i\}_{i=1}^{c}) = -\sum_{i=1}^{c}q_i\log p_i, \qquad q_i=\mathbb{1}[i=y]$$</div>
+      <div class="prose"><p>Для обычной классификации $q$ — one-hot вектор ($q_i=1$ для истинного класса, иначе $0$), и формула схлопывается ровно в $-\log p_y$ из начала параграфа. Но $q$ не обязано быть one-hot — на этом устроен label smoothing (§03).</p></div>
+    </section>
+
+    <!-- ============ 03 LABEL SMOOTHING, BLENDING ============ -->
+    <section class="sec" id="smoothing">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Регуляризация целей</p>
+        <h2 class="sec-title">Label Smoothing и Blending</h2>
+      </div>
+      <div class="prose">
+        <p>Как показано выше, one-hot таргет приписывает истинному классу вероятность 1, а всем остальным — 0:</p>
+      </div>
+      <div class="eq-box">$$q_i = \begin{cases}1, & i=y\\0, & \text{иначе}\end{cases}$$</div>
+      <div class="callout fact">
+        <span class="mark">Проблема</span>
+        <p>Требование $p_y\to1$ для one-hot таргета достижимо только при $z_y\to+\infty$ — сеть вынуждена делать логиты сколь угодно большими, что ведёт к <strong>переуверенности (overconfidence)</strong> и ухудшает обобщение на новых данных: модель «слишком верит» обучающей выборке, включая её шум.</p>
+      </div>
+      <div class="prose"><p><strong>Label smoothing</strong> вводит небольшую равномерную вероятность для всех классов:</p></div>
+      <div class="eq-box">$$q_i = \begin{cases}1-\dfrac{c-1}{c}\epsilon, & i=y\\[6pt] \dfrac{\epsilon}{c}, & \text{иначе}\end{cases}$$
+        <span class="eq-note">$\epsilon$ — параметр сглаживания (обычно $\epsilon=0.1$). Проверка: сумма по всем $c$ классам по-прежнему равна 1.</span>
+      </div>
+      <div class="prose"><p>Такой метод действует как техника регуляризации и улучшает обобщение на новых данных — сеть больше не стремится к бесконечно большим логитам, поскольку целевая вероятность истинного класса теперь строго меньше единицы.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">One-hot vs Label Smoothing (c=5, ε=0.1)</p>
+        <svg viewBox="0 0 460 240" role="img" aria-label="Столбчатая диаграмма распределения целевых вероятностей по 5 классам: one-hot таргет — один столбец высотой 1, остальные 0; сглаженный таргет — столбец истинного класса высотой 0.92, остальные по 0.02">
+          <line x1="40" y1="200" x2="420" y2="200" stroke="var(--ink-faint)" stroke-width="1.2"/>
+          <line x1="40" y1="200" x2="40" y2="30" stroke="var(--ink-faint)" stroke-width="1.2"/>
+          <g class="axis-label">
+            <text x="18" y="204">0</text><text x="10" y="120">0.5</text><text x="18" y="40">1</text>
+          </g>
+          <!-- one-hot bars (muted) -->
+          <g fill="var(--ink-faint)" opacity="0.55">
+            <rect x="55" y="196" width="26" height="4"/>
+            <rect x="115" y="196" width="26" height="4"/>
+            <rect x="175" y="30" width="26" height="170"/>
+            <rect x="235" y="196" width="26" height="4"/>
+            <rect x="295" y="196" width="26" height="4"/>
+          </g>
+          <!-- smoothed bars (neon) -->
+          <g fill="var(--accent)">
+            <rect x="85" y="197" width="26" height="3"/>
+            <rect x="145" y="197" width="26" height="3"/>
+            <rect x="205" y="44" width="26" height="156"/>
+            <rect x="265" y="197" width="26" height="3"/>
+            <rect x="325" y="197" width="26" height="3"/>
+          </g>
+          <g class="axis-label" text-anchor="middle">
+            <text x="83" y="216">1</text><text x="143" y="216">2</text><text x="203" y="216">3 (y)</text><text x="263" y="216">4</text><text x="323" y="216">5</text>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="12">
+            <rect x="330" y="46" width="110" height="52" rx="6" fill="var(--surface)" stroke="var(--rule)"/>
+            <rect x="340" y="58" width="14" height="10" fill="var(--ink-faint)" opacity="0.55"/><text x="360" y="67" fill="var(--ink-soft)">one-hot</text>
+            <rect x="340" y="78" width="14" height="10" fill="var(--accent)"/><text x="360" y="87" fill="var(--ink-soft)">smoothed</text>
+          </g>
+        </svg>
+        <figcaption>Сглаженный таргет (циан) «размазывает» немного вероятностной массы с истинного класса ($1\to0.92$) на все остальные классы (каждый получает $0.02$ вместо $0$) — сеть больше не гонится за бесконечно уверенным предсказанием.</figcaption>
+      </figure>
+
+      <h3 class="sub">Blending</h3>
+      <div class="prose">
+        <p>Blending комбинирует два объекта (например, изображения) с фиксированным весом:</p>
+      </div>
+      <div class="formula-box">
+        <div class="eq">$x_{\text{blend}} = \alpha x_1 + (1-\alpha)x_2$</div>
+        <div class="formula-legend">
+          <div class="item"><b>α ∈ [0,1]</b>фиксированный коэффициент смешивания (например, 0.5)</div>
+        </div>
+      </div>
+      <div class="prose"><p>Таргет смешивается точно так же:</p></div>
+      <div class="eq-box">$$y_{\text{blend}} = \alpha y_1 + (1-\alpha)y_2$$</div>
+      <div class="prose"><p>Это создаёт «мягкий» таргет, который отражает <strong>оба</strong> класса на смешанном изображении — по сути, ещё один способ сгенерировать нецелочисленный, «нежёсткий» вектор $q$ вместо one-hot, той же природы, что и label smoothing, но с содержательным (а не равномерным) распределением массы между конкретными двумя классами.</p></div>
+    </section>
+
+    <!-- ============ 04 DROPOUT ============ -->
+    <section class="sec" id="dropout">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Dropout</p>
+        <h2 class="sec-title">Dropout</h2>
+      </div>
+      <div class="prose"><p><strong>Dropout</strong> — техника регуляризации, которая случайно «выключает» нейроны во время обучения, чтобы предотвратить переобучение.</p></div>
+      <div class="formula-box">
+        <div class="eq">$z_k\in\mathbb{R}^{B\times d_k}$</div>
+        <div class="formula-legend">
+          <div class="item"><b>B</b>размер батча</div>
+          <div class="item"><b>d<sub>k</sub></b>размерность скрытого слоя (число нейронов)</div>
+        </div>
+      </div>
+
+      <h3 class="sub">Режим обучения (train mode)</h3>
+      <div class="prose"><p>Сэмплируем бинарную маску $m\in\{0,1\}^{B\times d_k}$, где $m_{ij}\sim\mathrm{Bernoulli}(1-p)$ для каждой активации:</p></div>
+      <div class="eq-box">$$y = \mathrm{dropout}(z_k) = m\odot z_k$$</div>
+      <div class="prose"><p>Посчитаем математическое ожидание такого выхода:</p></div>
+      <div class="eq-box">$$\mathbb{E}[y_i] = \mathbb{E}\big[m_i\odot z_k^{(i)}\big] = \mathbb{E}[m_i]\odot z_k^{(i)} = (1-p)z_k^{(i)}$$</div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Без поправки среднее значение активаций во время обучения было бы <strong>в $(1-p)$ раз меньше</strong>, чем на выводе (где маска не применяется вовсе) — из-за этого распределение входов следующего слоя отличалось бы между train и eval. Чтобы сохранить математическое ожидание активаций, нужно масштабировать на $\dfrac{1}{1-p}$, поскольку $\mathbb{E}[m_{ij}]=1-p$:</p>
+      </div>
+      <div class="eq-box">$$y = \mathrm{dropout}(z_k) = \frac{m}{1-p}\odot z_k$$</div>
+      <div class="prose"><p>Это гарантирует $\mathbb{E}[y]=\mathbb{E}[z_k]$ во время обучения — этот приём называется <strong>inverted dropout</strong> (масштабирование на $1/(1-p)$ применяется на трейне).</p></div>
+
+      <h3 class="sub">Режим вывода (eval mode)</h3>
+      <div class="prose"><p>Dropout не применяется, используются все нейроны:</p></div>
+      <div class="eq-box">$$y_{\text{inference}} = z$$</div>
+      <div class="prose"><p>Иными словами: масштабирование на $1/(1-p)$ происходит на train, а на inference — никакого масштабирования и никакого выключения нейронов не нужно (именно так, через inverted dropout, это реализовано в PyTorch/TensorFlow).</p></div>
+
+      <h3 class="sub">Почему Dropout работает</h3>
+      <div class="prose">
+        <p>Dropout заставляет сеть учить <strong>избыточные (redundant)</strong> представления: поскольку каждый нейрон в любой момент может быть выключен, ни один нейрон не может «полагаться» на конкретный набор других нейронов — сеть не может допустить <strong>со-адаптацию (co-adaptation)</strong> нейронов, при которой несколько нейронов совместно кодируют признак так, что без одного из них признак разрушается. По сути, dropout действует как <strong>ансамбль</strong> из очень многих «прорежённых» подсетей, обучаемых с общими весами, усреднённых на выводе.</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Стандартная сеть vs сеть с dropout</p>
+        <svg viewBox="0 0 460 260" role="img" aria-label="Слева стандартная полносвязная сеть со всеми связями активными, справа та же сеть после применения dropout: часть нейронов помечена крестом как выключенные, а все связи, ведущие к ним и от них, отсутствуют">
+          <text x="105" y="24" text-anchor="middle" class="axis-label">(a) Standard Neural Net</text>
+          <text x="355" y="24" text-anchor="middle" class="axis-label">(b) After dropout</text>
+
+          <!-- LEFT: standard net, all connected -->
+          <g stroke="rgba(0,229,255,0.28)" stroke-width="1">
+            <line x1="45" y1="70" x2="105" y2="45"/><line x1="45" y1="70" x2="105" y2="95"/><line x1="45" y1="70" x2="105" y2="145"/><line x1="45" y1="70" x2="105" y2="195"/>
+            <line x1="45" y1="220" x2="105" y2="45"/><line x1="45" y1="220" x2="105" y2="95"/><line x1="45" y1="220" x2="105" y2="145"/><line x1="45" y1="220" x2="105" y2="195"/>
+            <line x1="105" y1="45" x2="165" y2="45"/><line x1="105" y1="45" x2="165" y2="95"/><line x1="105" y1="45" x2="165" y2="145"/><line x1="105" y1="45" x2="165" y2="195"/>
+            <line x1="105" y1="95" x2="165" y2="45"/><line x1="105" y1="95" x2="165" y2="95"/><line x1="105" y1="95" x2="165" y2="145"/><line x1="105" y1="95" x2="165" y2="195"/>
+            <line x1="105" y1="145" x2="165" y2="45"/><line x1="105" y1="145" x2="165" y2="95"/><line x1="105" y1="145" x2="165" y2="145"/><line x1="105" y1="145" x2="165" y2="195"/>
+            <line x1="105" y1="195" x2="165" y2="45"/><line x1="105" y1="195" x2="165" y2="95"/><line x1="105" y1="195" x2="165" y2="145"/><line x1="105" y1="195" x2="165" y2="195"/>
+            <line x1="165" y1="45" x2="210" y2="120"/><line x1="165" y1="95" x2="210" y2="120"/><line x1="165" y1="145" x2="210" y2="120"/><line x1="165" y1="195" x2="210" y2="120"/>
+          </g>
+          <g>
+            <circle cx="45" cy="70" r="8" fill="var(--accent-3)"/><circle cx="45" cy="220" r="8" fill="var(--accent-3)"/>
+            <circle cx="105" cy="45" r="8" fill="var(--accent)"/><circle cx="105" cy="95" r="8" fill="var(--accent)"/><circle cx="105" cy="145" r="8" fill="var(--accent)"/><circle cx="105" cy="195" r="8" fill="var(--accent)"/>
+            <circle cx="165" cy="45" r="8" fill="var(--accent)"/><circle cx="165" cy="95" r="8" fill="var(--accent)"/><circle cx="165" cy="145" r="8" fill="var(--accent)"/><circle cx="165" cy="195" r="8" fill="var(--accent)"/>
+            <circle cx="210" cy="120" r="9" fill="var(--accent-2)"/>
+          </g>
+
+          <!-- RIGHT: dropout net, some neurons dropped (105,95),(105,195),(165,45),(165,145) -->
+          <g stroke="rgba(0,229,255,0.28)" stroke-width="1">
+            <line x1="295" y1="70" x2="355" y2="45"/><line x1="295" y1="70" x2="355" y2="195"/>
+            <line x1="295" y1="220" x2="355" y2="45"/><line x1="295" y1="220" x2="355" y2="195"/>
+            <line x1="355" y1="45" x2="415" y2="95"/><line x1="355" y1="45" x2="415" y2="195"/>
+            <line x1="355" y1="195" x2="415" y2="95"/><line x1="355" y1="195" x2="415" y2="195"/>
+            <line x1="415" y1="95" x2="460" y2="120"/><line x1="415" y1="195" x2="460" y2="120"/>
+          </g>
+          <g stroke="rgba(255,95,209,0.35)" stroke-width="1" stroke-dasharray="3 3">
+            <line x1="295" y1="70" x2="355" y2="95"/><line x1="295" y1="70" x2="355" y2="145"/>
+            <line x1="295" y1="220" x2="355" y2="95"/><line x1="295" y1="220" x2="355" y2="145"/>
+            <line x1="355" y1="95" x2="415" y2="95"/><line x1="355" y1="95" x2="415" y2="195"/>
+            <line x1="355" y1="145" x2="415" y2="95"/><line x1="355" y1="145" x2="415" y2="195"/>
+          </g>
+          <g>
+            <circle cx="295" cy="70" r="8" fill="var(--accent-3)"/><circle cx="295" cy="220" r="8" fill="var(--accent-3)"/>
+            <circle cx="355" cy="45" r="8" fill="var(--accent)"/><circle cx="355" cy="195" r="8" fill="var(--accent)"/>
+            <circle cx="415" cy="95" r="8" fill="var(--accent)"/><circle cx="415" cy="195" r="8" fill="var(--accent)"/>
+            <circle cx="460" cy="120" r="9" fill="var(--accent-2)"/>
+            <circle cx="355" cy="95" r="8" fill="var(--surface-2)" stroke="var(--accent-2)" stroke-width="1.4"/>
+            <circle cx="355" cy="145" r="8" fill="var(--surface-2)" stroke="var(--accent-2)" stroke-width="1.4"/>
+            <circle cx="415" cy="45" r="8" fill="var(--surface-2)" stroke="var(--accent-2)" stroke-width="1.4"/>
+            <circle cx="415" cy="145" r="8" fill="var(--surface-2)" stroke="var(--accent-2)" stroke-width="1.4"/>
+          </g>
+          <g stroke="var(--accent-2)" stroke-width="1.6">
+            <line x1="350" y1="90" x2="360" y2="100"/><line x1="360" y1="90" x2="350" y2="100"/>
+            <line x1="350" y1="140" x2="360" y2="150"/><line x1="360" y1="140" x2="350" y2="150"/>
+            <line x1="410" y1="40" x2="420" y2="50"/><line x1="420" y1="40" x2="410" y2="50"/>
+            <line x1="410" y1="140" x2="420" y2="150"/><line x1="420" y1="140" x2="410" y2="150"/>
+          </g>
+        </svg>
+        <figcaption>По мотивам Srivastava, Nitish, et al. «Dropout: a simple way to prevent neural networks from overfitting», JMLR 2014. Справа: перечёркнутые нейроны и их связи (пунктир) исключены из <b>конкретного</b> прохода — при следующем шаге обучения будет выключен уже другой случайный набор нейронов.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 05 BATCH NORMALIZATION ============ -->
+    <section class="sec" id="batchnorm">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Batch Norm</p>
+        <h2 class="sec-title">Batch Normalization</h2>
+      </div>
+      <div class="prose"><p><strong>Batch Normalization</strong> нормализует входы каждого слоя, что стабилизирует и ускоряет обучение.</p></div>
+
+      <h3 class="sub">Режим обучения (train mode)</h3>
+      <div class="formula-box">
+        <div class="eq">$z_i\in\mathbb{R}^{B\times d}$</div>
+        <div class="formula-legend">
+          <div class="item"><b>B</b>размер батча</div>
+          <div class="item"><b>d</b>размерность признаков</div>
+        </div>
+      </div>
+      <div class="prose"><p>Вычисление статистик батча:</p></div>
+      <div class="eq-box system">$$\mu = \frac{1}{B}\sum_{i=1}^{B}z_i, \qquad \sigma^2 = \frac{1}{B}\sum_{i=1}^{B}(z_i-\mu)^2$$</div>
+      <div class="eq-box">$$\hat z_i = \frac{z_i-\mu}{\sqrt{\sigma^2+\epsilon}}$$
+        <span class="eq-note">$\epsilon$ — малая константа для численной устойчивости (чтобы не делить на ноль, если $\sigma^2\approx0$).</span>
+      </div>
+      <div class="prose"><p>После нормализации распределение $\hat z_i$ имеет нулевое среднее и единичную дисперсию — но сеть может <em>захотеть</em> другой масштаб или сдвиг, поэтому добавляют обучаемые параметры:</p></div>
+      <div class="eq-box">$$y_i = \hat z_i \odot w + b$$
+        <span class="eq-note">$w,b\in\mathbb{R}^{d_k}$ — обучаются градиентным спуском наравне с остальными весами сети.</span>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Зачем нужны $w,b$, если мы только что принудительно нормализовали активации? Без них BatchNorm мог бы <em>ограничить</em> выразительную силу слоя (например, запретить сигмоиде работать в её насыщающихся «хвостах», если это по какой-то причине оптимально). Обучаемые $w,b$ позволяют сети при необходимости <strong>восстановить</strong> любой желаемый масштаб и сдвиг, сохранив при этом стабилизирующий эффект самой нормализации.</p>
+      </div>
+
+      <h3 class="sub">Режим вывода (eval mode)</h3>
+      <div class="prose"><p>На инференсе данные часто обрабатываются не батчами (иногда — по одному примеру), поэтому «батчевых» $\mu,\sigma^2$ попросту может не быть. Вместо них используют <strong>накопленные (running) статистики</strong>, собранные по всем батчам обучения — они обновляются как экспоненциальное скользящее среднее (EMA) на каждом шаге $m$:</p></div>
+      <div class="eq-box system">$$\mathrm{running\_mean}_m := \mathrm{running\_mean}_{m-1}\cdot(1-\gamma) + \mu_m\cdot\gamma$$</div>
+      <div class="eq-box system">$$\mathrm{running\_var}_m := \mathrm{running\_var}_{m-1}\cdot(1-\gamma) + \sigma_m^2\cdot\gamma\cdot\frac{B}{B-1} \quad(\text{несмещённая оценка})$$</div>
+      <div class="eq-box system">$$\hat z_i = \frac{z_i-\mathrm{running\_mean}}{\sqrt{\mathrm{running\_var}+\epsilon}}, \qquad y_i = \hat z_i\odot w+b$$</div>
+      <div class="callout fact">
+        <span class="mark">Смысл γ</span>
+        <p>$\gamma$ здесь — коэффициент момента (momentum) экспоненциального скользящего среднего, а не связан с параметром масштаба $w$. При малом $\gamma$ накопленная статистика меняется плавно и «помнит» многие предыдущие батчи; при $\gamma\to1$ она почти целиком следует за статистикой последнего батча. Множитель $B/(B-1)$ в формуле дисперсии — поправка Бесселя, делающая оценку дисперсии несмещённой.</p>
+      </div>
+
+      <h3 class="sub">Зачем это нужно: internal covariate shift</h3>
+      <div class="prose">
+        <p><strong>Internal covariate shift</strong> — явление, при котором по мере обучения (на каждом шаге веса всех предыдущих слоёв немного меняются) распределение входов текущего слоя <em>непрерывно смещается</em>. Слою приходится не просто учиться решать задачу, а ещё и постоянно подстраиваться под «уезжающую» цель — это замедляет и дестабилизирует обучение.</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Internal covariate shift: до и после Batch Norm</p>
+        <svg viewBox="0 0 460 220" role="img" aria-label="Слева три колокола распределения активаций для трёх последовательных шагов обучения без Batch Norm разъезжаются по положению и ширине; справа с Batch Norm все три колокола почти совпадают, стабильно центрированы в нуле">
+          <text x="115" y="20" text-anchor="middle" class="axis-label">без Batch Norm</text>
+          <text x="345" y="20" text-anchor="middle" class="axis-label">с Batch Norm</text>
+          <line x1="30" y1="180" x2="220" y2="180" stroke="var(--ink-faint)" stroke-width="1"/>
+          <line x1="260" y1="180" x2="450" y2="180" stroke="var(--ink-faint)" stroke-width="1"/>
+
+          <path d="M40,180 C55,180 60,90 75,90 C90,90 95,180 110,180" fill="none" stroke="var(--accent)" stroke-width="2" opacity="0.9"/>
+          <path d="M70,180 C90,180 96,110 112,110 C128,110 134,180 154,180" fill="none" stroke="var(--accent-2)" stroke-width="2" opacity="0.85"/>
+          <path d="M120,180 C145,180 152,60 178,60 C204,60 211,180 236,180" fill="none" stroke="var(--accent-3)" stroke-width="2" opacity="0.85" transform="translate(-30,0)"/>
+
+          <path d="M285,180 C298,180 303,95 318,95 C333,95 338,180 351,180" fill="none" stroke="var(--accent)" stroke-width="2"/>
+          <path d="M287,180 C300,180 305,100 320,100 C335,100 340,180 353,180" fill="none" stroke="var(--accent-2)" stroke-width="2" stroke-dasharray="1 3"/>
+          <path d="M283,180 C296,180 301,90 316,90 C331,90 336,180 349,180" fill="none" stroke="var(--accent-3)" stroke-width="2" stroke-dasharray="1 3"/>
+
+          <g class="axis-label" text-anchor="middle">
+            <text x="115" y="200">распределение «уезжает» по шагам</text>
+            <text x="345" y="200">распределение стабильно</text>
+          </g>
+        </svg>
+        <figcaption>Три кривые — распределение активаций слоя на трёх разных шагах обучения (циан → маджента → лайм). Без BatchNorm (слева) распределение смещается и меняет ширину по мере обновления весов предыдущих слоёв; с BatchNorm (справа) вход слоя остаётся стабильным на протяжении всего обучения.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>Batch Normalization снижает internal covariate shift, что позволяет сети использовать более высокий learning rate, не теряя устойчивости. Обучение становится быстрее и стабильнее за счёт того, что распределение входов каждого слоя остаётся согласованным на протяжении всего обучения.</p>
+      </div>
+    </section>
+
+    <!-- ============ 06 ИТОГИ ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Итоги</p>
+        <h2 class="sec-title">Итоговые выводы лекции</h2>
+      </div>
+      <div class="prose">
+        <ol>
+          <li>Доля ошибок (error rate) недифференцируема — для обучения градиентными методами нужен непрерывный суррогат: softmax превращает логиты в распределение вероятностей, NLL/Cross-Entropy штрафует за низкую вероятность истинного класса.</li>
+          <li>Cross-entropy $-\sum_i q_i\log p_i$ — общая формула: при $q$ = one-hot получаем обычный NLL, при «размазанном» $q$ — label smoothing или blending.</li>
+          <li>Log-sum-exp трюк с вычитанием $\max_j z_j$ решает проблему численной нестабильности softmax, опираясь на инвариантность softmax к сдвигу всех логитов на константу.</li>
+          <li>Label smoothing и blending — оба способа сделать целевое распределение менее «жёстким», чем one-hot, что борется с переуверенностью сети и улучшает обобщение.</li>
+          <li>Dropout на трейне случайно зануляет активации с вероятностью $p$ и масштабирует оставшиеся на $1/(1-p)$ (inverted dropout), чтобы сохранить матожидание; на инференсе используются все нейроны без изменений.</li>
+          <li>Dropout работает как регуляризация через запрет на со-адаптацию нейронов и как имплицитный ансамбль многих «прорежённых» подсетей.</li>
+          <li>Batch Normalization нормализует активации слоя по статистикам батча на трейне; на инференсе использует накопленные (EMA) running-статистики, поскольку батчевых статистик может не быть.</li>
+          <li>Обучаемые параметры $w,b$ в BatchNorm возвращают слою возможность настроить масштаб и сдвиг после принудительной нормализации, не теряя её стабилизирующего эффекта.</li>
+          <li>Batch Normalization снижает internal covariate shift — смещение распределения входов слоя по мере обучения — что позволяет использовать более высокий learning rate и ускоряет сходимость.</li>
+          <li>И Dropout, и Batch Normalization — техники, которые ведут себя <strong>по-разному</strong> в train и eval режимах; при экспорте/оценке модели критично не забыть переключить сеть в eval mode.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ 07 ЛИТЕРАТУРА ============ -->
+    <section class="sec" id="refs">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Литература</p>
+        <h2 class="sec-title">Источники</h2>
+      </div>
+      <ul class="lit-list">
+        <li><span class="idx">01</span>Srivastava, Nitish, et al. <em>Dropout: A Simple Way to Prevent Neural Networks from Overfitting.</em> Journal of Machine Learning Research (JMLR), 2014.</li>
+        <li><span class="idx">02</span>Ioffe, Sergey; Szegedy, Christian. <em>Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift.</em> ICML, 2015.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект лекции · Глубинное обучение 1, ФКН ВШЭ, 2025/26 · Лекция 2: NLLLoss, Dropout and Batch Norm</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>

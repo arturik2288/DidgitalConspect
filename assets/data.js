@@ -15,6 +15,30 @@
 
 const NOTES = [
   {
+    id: "dl-lecture2-dropout-batchnorm",
+    title: "Deep Learning. Лекция 2: NLL, Dropout и Batch Norm",
+    division: "it",
+    category: "Глубокое обучение",
+    date: "2026-09-10",
+    displayDate: "10 сен 2026",
+    description: "Softmax и log-sum-exp трюк, NLL/Cross-Entropy, label smoothing и blending, dropout (train/eval, inverted dropout) и batch normalization (running-статистики, internal covariate shift).",
+    tags: ["dropout", "batch normalization"],
+    file: "../notes/dl-lecture2-dropout-batchnorm.html",
+    example: false
+  },
+  {
+    id: "dl-lecture1-mlp",
+    title: "Deep Learning. Лекция 1: MLP и backpropagation",
+    division: "it",
+    category: "Глубокое обучение",
+    date: "2026-09-09",
+    displayDate: "9 сен 2026",
+    description: "Чем DL отличается от классического ML, вычислительный граф и backpropagation по цепному правилу, слои сети, MLP и функции активации (sigmoid, ReLU, Leaky ReLU, tanh, softplus) в контексте затухающего градиента.",
+    tags: ["backpropagation", "MLP"],
+    file: "../notes/dl-lecture1-mlp.html",
+    example: false
+  },
+  {
     id: "olg-model",
     title: "Модель перекрывающихся поколений (OLG)",
     division: "economics",

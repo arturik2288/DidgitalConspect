@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deep Learning. Лекция 1: MLP и backpropagation — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#0a0a0d;
+      --surface:#131318;
+      --surface-2:#1a1a22;
+      --ink:#f5f5fa;
+      --ink-soft:#c3c3d2;
+      --ink-faint:#83839a;
+      --accent:#00e5ff;
+      --accent-strong:#7df3ff;
+      --accent-soft:#0d2b30;
+      --accent-2:#ff5fd1;
+      --accent-2-soft:#2a0f24;
+      --accent-3:#a6ff4d;
+      --accent-3-soft:#182408;
+      --rule:#26262f;
+      --shadow: 0 1px 2px rgba(0,229,255,.07), 0 10px 28px -12px rgba(0,0,0,.7);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 90%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    blockquote.quote{
+      margin:20px 0; padding:4px 0 4px 20px;
+      border-left:3px solid var(--accent-2);
+      font-family:'Fraunces',serif; font-style:italic; color:var(--ink);
+      font-size:15.5px; max-width:68ch;
+    }
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.result .mark{ color:var(--accent-3); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.fact .mark{ color:var(--accent-2); }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:520px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:700px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+    mjx-container[jax="CHTML"]{ color: var(--ink); }
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/it.html">← Раздел «IT»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Deep Learning · Лекция 1 · конспект</p>
+      <h1 class="title">MLP и обратное распространение ошибки</h1>
+      <p class="subtitle">Чем глубокое обучение отличается от классического ML, как считается градиент через вычислительный граф, что такое слои и функции активации — и почему без нелинейности глубина сети вообще ничего не даёт.</p>
+      <div class="meta-row">
+        <span><strong>Kalinin Nikita</strong>, Deep Learning — Lecture 1</span>
+        <span>MLP · Backpropagation · Activation Functions</span>
+        <span>09.09.2026</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#dlml"><span class="n">01</span>DL vs ML</a>
+      <a href="#core"><span class="n">02</span>Базовые понятия</a>
+      <a href="#alt"><span class="n">03</span>Альтернативы backprop</a>
+      <a href="#grad"><span class="n">04</span>Градиент и chain rule</a>
+      <a href="#graph"><span class="n">05</span>Вычислительный граф</a>
+      <a href="#example"><span class="n">06</span>Forward/backward pass</a>
+      <a href="#layers"><span class="n">07</span>Слои сети</a>
+      <a href="#arch"><span class="n">08</span>Архитектуры</a>
+      <a href="#activations"><span class="n">09</span>Функции активации</a>
+      <a href="#summary"><span class="n">10</span>Итоги</a>
+      <a href="#refs"><span class="n">11</span>Литература</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 DL vs ML ============ -->
+    <section class="sec" id="dlml">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>DL vs ML</p>
+        <h2 class="sec-title">Чем глубокое обучение отличается от классического ML</h2>
+      </div>
+      <div class="prose">
+        <p>Deep Learning (DL) — это не отдельная дисциплина рядом с машинным обучением (ML), а его <strong>подмножество</strong>: та часть ML, где в качестве модели используются <strong>глубокие</strong> (многослойные) нейронные сети. Формально обе постановки задачи совпадают — есть обучающая выборка $\{(x_i,y_i)\}_{i=1}^{l}$, есть класс функций $f(x,w)$ с параметрами $w$, и обучение сводится к минимизации эмпирического риска $Q(w)$ (см. §02). Разница — в том, <em>какой</em> класс функций $f(x,w)$ выбирается и <em>откуда</em> берутся признаки, по которым эта функция принимает решение.</p>
+
+        <h3 class="sub">Признаки: вручную vs автоматически</h3>
+        <p>Классический ML-пайплайн почти всегда выглядит так: сырые данные → <strong>ручной feature engineering</strong> (эксперт придумывает информативные признаки: TF-IDF для текста, гистограммы градиентов для картинок, агрегаты по транзакциям для скоринга) → вектор признаков фиксированной размерности → сравнительно простая модель (линейная/логистическая регрессия, SVM, решающие деревья, градиентный бустинг, k-NN). Качество решения здесь во многом определяется качеством признаков, а не сложностью модели.</p>
+        <p>DL убирает этап ручного feature engineering: сеть получает почти сырые данные (пиксели, аудио-сэмплы, токены текста) и <strong>сама учит иерархию признаков</strong> — это называется <em>representation learning</em>. Ранние слои сети выучивают простые паттерны (границы, короткие n-граммы), более глубокие слои комбинируют их во всё более абстрактные признаки (текстуры → части объектов → объекты целиком). Именно это стоит за уравнением из §07: композицией $z_n = W_n\ldots W_2W_1x+b$ мы, по сути, последовательно пересобираем представление входа слой за слоем.</p>
+
+        <h3 class="sub">Класс моделей и оптимизация</h3>
+        <p>Классические ML-модели чаще всего <strong>неглубокие</strong> — одно линейное/ядровое преобразование или неглубокий ансамбль деревьев. У многих из них — выпуклая (convex) задача оптимизации с теоретическими гарантиями сходимости к глобальному оптимуму (линейная регрессия решается аналитически, SVM — выпуклая квадратичная задача). DL-модели — глубокая композиция <strong>нелинейных</strong> слоёв $z_i=\sigma(W_iz_{i-1}+b_i)$ (§07); из-за нелинейностей $\sigma$ задача становится существенно <strong>невыпуклой</strong>, глобальный оптимум не гарантирован, и обучение ведётся приближённо — стохастическим градиентным спуском с градиентами, посчитанными через backpropagation (§04–06).</p>
+
+        <h3 class="sub">Данные, вычисления, интерпретируемость</h3>
+        <p>Число параметров в DL-моделях — от миллионов до сотен миллиардов, против десятков-тысяч у классических моделей. Отсюда — принципиально другие требования к данным (DL обычно нужны существенно большие датасеты, чтобы не переобучиться) и к вычислениям (обучение практически всегда требует GPU/TPU для параллельных матричных операций; классический ML часто прекрасно обучается на CPU). Обратная сторона гибкости DL — низкая интерпретируемость: решающее дерево можно прочитать как набор правил, а что именно «понял» слой с тысячей нейронов — вопрос отдельной области исследований (saliency maps, attention-визуализации и т.п.).</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Признак</th><th>Классический ML</th><th>Deep Learning</th></tr></thead>
+          <tbody>
+            <tr><td>Признаки</td><td>Ручной feature engineering</td><td>Автоматическое representation learning</td></tr>
+            <tr><td>Класс моделей</td><td>Неглубокий: линейные/ядровые модели, деревья</td><td>Глубокая композиция нелинейных слоёв</td></tr>
+            <tr><td>Оптимизация</td><td>Часто выпуклая, есть гарантии сходимости</td><td>Невыпуклая, приближённая (SGD + backprop)</td></tr>
+            <tr><td>Объём данных</td><td>Работает и на малых выборках</td><td>Обычно нужны большие датасеты</td></tr>
+            <tr><td>Вычисления</td><td>Достаточно CPU</td><td>Практически всегда нужен GPU/TPU</td></tr>
+            <tr><td>Интерпретируемость</td><td>Как правило выше (веса, правила, важности признаков)</td><td>Как правило ниже («чёрный ящик»)</td></tr>
+            <tr><td>Типичные алгоритмы</td><td>Линейная/логистическая регрессия, SVM, Random Forest, XGBoost/LightGBM</td><td>MLP, CNN, RNN/LSTM, Transformer</td></tr>
+            <tr><td>Где обычно сильнее</td><td>Табличные/структурированные данные</td><td>Изображения, аудио, текст, видео — данные с пространственной/временной структурой</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Граница не абсолютна: градиентный бустинг на табличных данных нередко обгоняет нейросети, а MLP — это тоже DL-модель, просто «неглубокая» глубокая сеть. Ключевой концептуальный водораздел — не «нейросеть или нет», а <strong>учится ли представление данных внутри модели</strong>, или оно задано вручную до модели.</p>
+      </div>
+    </section>
+
+    <!-- ============ 02 БАЗОВЫЕ ПОНЯТИЯ ============ -->
+    <section class="sec" id="core">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Базовые понятия</p>
+        <h2 class="sec-title">Ключевые понятия и математические обозначения</h2>
+      </div>
+      <div class="prose">
+        <ul>
+          <li><strong>Backpropagation</strong> — ключевой алгоритм обучения нейросетей: ошибка распространяется <em>назад</em> по сети, чтобы посчитать, как нужно скорректировать веса.</li>
+          <li><strong>Fully-connected (полносвязные) сети</strong> — каждый нейрон соединён с каждым нейроном предыдущего слоя; хорошо подходят, например, для классификации.</li>
+        </ul>
+        <p>Обучающая выборка задаётся как $\{(x_i,y_i)\}_{i=1}^{l}$, где $x_i\in\mathbb{R}^d$ — входной вектор, $y_i$ — соответствующий целевой ответ. Обозначения:</p>
+        <ul>
+          <li>$x\in\mathbb{R}^d$ — входной вектор размерности $d$;</li>
+          <li>$w\in\mathcal{W}$ — вектор весов сети.</li>
+        </ul>
+        <p>Выход сети для входа $x$ (в простейшем, однослойном случае):</p>
+      </div>
+      <div class="formula-box">
+        <div class="eq">$a(x) = w_1x_1+\cdots+w_dx_d = f(x,w)$</div>
+        <div class="formula-legend">
+          <div class="item"><b>a(x)</b>взвешенная сумма входов</div>
+          <div class="item"><b>f(x,w)</b>функция, реализуемая моделью</div>
+        </div>
+      </div>
+      <div class="prose"><p>Цель обучения — минимизировать функцию потерь $L(\hat y,y)$, усреднённую по обучающей выборке:</p></div>
+      <div class="eq-box">$$Q(w) = \frac{1}{l}\sum_{i=1}^{l} L\big(f(x_i,w),\,y_i\big)$$</div>
+      <div class="prose"><p>Это средний loss по всей обучающей выборке (эмпирический риск). Цель — найти веса $w$, минимизирующие $Q(w)$.</p></div>
+    </section>
+
+    <!-- ============ 03 АЛЬТЕРНАТИВЫ BACKPROP ============ -->
+    <section class="sec" id="alt">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Альтернативы</p>
+        <h2 class="sec-title">Альтернативы backpropagation</h2>
+      </div>
+      <div class="prose"><p>Backpropagation — стандарт де-факто, но исторически (и до сих пор в исследовательских работах) предлагались и другие способы обучения сетей.</p></div>
+      <h3 class="sub">Исторические подходы</h3>
+      <div class="prose">
+        <ul>
+          <li><strong>Эволюционные алгоритмы (1950-е)</strong> — методы оптимизации, вдохновлённые естественным отбором; как правило, вычислительно дороги для больших сетей.</li>
+          <li><strong>Reservoir Computing (2000)</strong> — использует фиксированные случайные веса в большой рекуррентной сети (RNN), полезен для задач с последовательными данными.</li>
+        </ul>
+      </div>
+      <h3 class="sub">Современные подходы</h3>
+      <div class="prose">
+        <ul>
+          <li><strong>Direct Feedback Alignment (2016)</strong> — вариант backprop, где путь обратной связи использует не точные градиенты, а фиксированный случайный путь.</li>
+          <li><strong>Forward-Forward Algorithm (2022, Hinton)</strong> — подход, стремящийся заменить backpropagation, используя только прямые проходы, потенциально снижая вычислительную сложность обучения.</li>
+        </ul>
+      </div>
+      <div class="pill-row">
+        <span class="pill">Evolutionary Algorithms</span>
+        <span class="pill">Reservoir Computing</span>
+        <span class="pill">Direct Feedback Alignment</span>
+        <span class="pill">Forward-Forward</span>
+      </div>
+    </section>
+
+    <!-- ============ 04 ГРАДИЕНТ И CHAIN RULE ============ -->
+    <section class="sec" id="grad">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Chain rule</p>
+        <h2 class="sec-title">Вычисление градиента для нейросетей</h2>
+      </div>
+      <div class="prose"><p>В нейросети выход $y$ почти всегда — функция от промежуточных слоёв: $y=f(g(x))$. Градиент считается по цепному правилу:</p></div>
+      <div class="eq-box">$$\frac{dy}{dx} = \frac{dy}{df}\cdot\frac{dg}{dx}$$</div>
+      <div class="prose"><p>где $g(x)$ — промежуточное преобразование входа $x$, а $\dfrac{dy}{df}$ считается исходя из loss относительно выходного слоя.</p></div>
+
+      <h3 class="sub">Backpropagation: два случая chain rule</h3>
+      <div class="prose"><p><strong>1.</strong> Для композиции функций $y=f(g(x))$ производная $dy/dx$ даётся цепным правилом:</p></div>
+      <div class="eq-box">$$\frac{dy}{dx} = \frac{df}{dg}\cdot\frac{dg}{dx}$$</div>
+      <div class="prose"><p><strong>2.</strong> В общем случае, если $y=f(g_1(x),g_2(x),\ldots,g_n(x))$, то:</p></div>
+      <div class="eq-box">$$\frac{dy}{dx} = \sum_{i=1}^{n} D_if \cdot \frac{dg_i}{dx}, \qquad D_if = \frac{\partial f}{\partial z_i}$$
+        <span class="eq-note">$f(z_1,\ldots,z_n)$ — функция нескольких переменных $z_i$. Именно этот случай отвечает за то, что в реальных сетях градиент от одного узла нужно <strong>суммировать</strong> по всем путям, которые через него проходят — см. пример в §06.</span>
+      </div>
+
+      <h3 class="sub">Символьное vs численное дифференцирование</h3>
+      <div class="prose">
+        <ul>
+          <li><strong>Символьное дифференцирование</strong> — для выражений вида $x^2$ даёт общую формулу $2x$, верную для любого $x$.</li>
+          <li><strong>Численное дифференцирование</strong> — для выражения $x^2$ при конкретном значении $x:=3$ даёт конкретный результат, например $6$.</li>
+        </ul>
+        <p>Backpropagation — это, по сути, <strong>символьно-численный</strong> гибрид: граф вычислений и формулы производных для каждого узла известны символьно (заранее, для каждой операции), а конкретные числа подставляются на каждом forward/backward проходе — отсюда высокая эффективность по сравнению с «наивным» численным дифференцированием по каждому из миллионов весов отдельно.</p>
+      </div>
+    </section>
+
+    <!-- ============ 05 ВЫЧИСЛИТЕЛЬНЫЙ ГРАФ ============ -->
+    <section class="sec" id="graph">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Вычислительный граф</p>
+        <h2 class="sec-title">Интуиция на простом примере</h2>
+      </div>
+      <div class="prose">
+        <p>Прежде чем переходить к более сложному примеру из лекции, полезно увидеть механику backprop на минимальном графе с двумя узлами: $f(x,y,z)=(x+y)z$. Пусть $x=-2$, $y=5$, $z=-4$.</p>
+      </div>
+      <div class="formula-box">
+        <div class="eq">$q = x+y,\quad f = qz$</div>
+        <div class="formula-legend">
+          <div class="item"><b>∂q/∂x</b> = 1, <b>∂q/∂y</b> = 1</div>
+          <div class="item"><b>∂f/∂q</b> = z, <b>∂f/∂z</b> = q</div>
+        </div>
+      </div>
+      <div class="prose"><p><strong>Forward pass</strong> (числа сверху на графе, вычисляются слева направо): $q=x+y=-2+5=3$; $f=qz=3\cdot(-4)=-12$.</p>
+      <p><strong>Backward pass</strong> (числа снизу, вычисляются справа налево): $\partial f/\partial f=1$; $\partial f/\partial z=q=3$; $\partial f/\partial q=z=-4$; и по цепному правилу $\partial f/\partial x=\dfrac{\partial f}{\partial q}\cdot\dfrac{\partial q}{\partial x}=-4\cdot1=-4$, аналогично $\partial f/\partial y=-4$.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Вычислительный граф f(x,y,z) = (x+y)z</p>
+        <svg viewBox="0 0 560 300" role="img" aria-label="Вычислительный граф: узлы x=-2, y=5, z=-4 сходятся через гейт сложения в q=3, затем через гейт умножения в f=-12; на каждой связи сверху зелёным подписано прямое значение, снизу розовым — обратный градиент; розовая стрелка показывает путь ∂f/∂x от выхода назад к x">
+          <line x1="90" y1="70" x2="220" y2="110" stroke="var(--ink-faint)" stroke-width="1.6"/>
+          <line x1="90" y1="150" x2="220" y2="110" stroke="var(--ink-faint)" stroke-width="1.6"/>
+          <line x1="240" y1="110" x2="360" y2="150" stroke="var(--ink-faint)" stroke-width="1.6"/>
+          <line x1="90" y1="230" x2="360" y2="150" stroke="var(--ink-faint)" stroke-width="1.6"/>
+          <line x1="380" y1="150" x2="470" y2="150" stroke="var(--ink-faint)" stroke-width="1.6"/>
+
+          <rect x="40" y="52" width="50" height="36" rx="6" fill="var(--surface)" stroke="var(--rule)"/>
+          <text x="65" y="75" text-anchor="middle" fill="var(--ink)" font-family="IBM Plex Mono, monospace" font-size="14">x</text>
+          <rect x="40" y="132" width="50" height="36" rx="6" fill="var(--surface)" stroke="var(--rule)"/>
+          <text x="65" y="155" text-anchor="middle" fill="var(--ink)" font-family="IBM Plex Mono, monospace" font-size="14">y</text>
+          <rect x="40" y="212" width="50" height="36" rx="6" fill="var(--surface)" stroke="var(--rule)"/>
+          <text x="65" y="235" text-anchor="middle" fill="var(--ink)" font-family="IBM Plex Mono, monospace" font-size="14">z</text>
+
+          <circle cx="230" cy="110" r="20" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.8"/>
+          <text x="230" y="116" text-anchor="middle" fill="var(--accent)" font-family="IBM Plex Mono, monospace" font-size="16">+</text>
+          <circle cx="370" cy="150" r="20" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.8"/>
+          <text x="370" y="156" text-anchor="middle" fill="var(--accent)" font-family="IBM Plex Mono, monospace" font-size="16">×</text>
+
+          <rect x="480" y="132" width="50" height="36" rx="6" fill="var(--surface)" stroke="var(--rule)"/>
+          <text x="505" y="155" text-anchor="middle" fill="var(--ink)" font-family="IBM Plex Mono, monospace" font-size="14">f</text>
+
+          <g font-family="IBM Plex Mono, monospace" font-size="12.5">
+            <text x="30" y="46" fill="var(--accent-3)">x = -2</text>
+            <text x="30" y="126" fill="var(--accent-3)">y = 5</text>
+            <text x="30" y="206" fill="var(--accent-3)">z = -4</text>
+            <text x="280" y="102" fill="var(--accent-3)">q = 3</text>
+            <text x="480" y="126" fill="var(--accent-3)">f = -12</text>
+
+            <text x="30" y="100" fill="var(--accent-2)">∂f/∂x = -4</text>
+            <text x="30" y="180" fill="var(--accent-2)">∂f/∂y = -4</text>
+            <text x="30" y="262" fill="var(--accent-2)">∂f/∂z = 3</text>
+            <text x="280" y="136" fill="var(--accent-2)">∂f/∂q = -4</text>
+            <text x="480" y="188" fill="var(--accent-2)">∂f/∂f = 1</text>
+          </g>
+
+          <path d="M470,166 C 350,270 150,260 70,90" fill="none" stroke="var(--accent-2)" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#dlArrow)"/>
+          <defs>
+            <marker id="dlArrow" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L7,3 L0,6 Z" fill="var(--accent-2)"/>
+            </marker>
+          </defs>
+          <text x="150" y="278" fill="var(--accent-2)" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="700">∂f/∂x</text>
+        </svg>
+        <figcaption>Зелёным — <b>прямой проход</b> (forward pass): значения вычисляются слева направо. Розовым — <b>обратный проход</b> (backward pass): градиенты вычисляются справа налево по цепному правилу, «протекая» через каждый гейт.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>Теперь — более развёрнутый пример из лекции. Рассмотрим функцию:</p>
+      </div>
+      <div class="eq-box">$$f = x_1^2(x_2x_3 - 2x_1^2) = x_1^2x_2x_3 - 2x_1^4$$</div>
+      <div class="prose"><p>Частные производные по каждому $x_i$:</p></div>
+      <div class="eq-box system">$$\frac{\partial f}{\partial x_1} = 2x_1x_2x_3 - 8x_1^3 = 4 \;\; (\text{при } x=(1,2,3)), \qquad \frac{\partial f}{\partial x_2} = x_1^2x_3 = 3, \qquad \frac{\partial f}{\partial x_3} = x_1^2x_2 = 2$$</div>
+      <div class="prose"><p>При $x=(1,2,3)$ значение самой функции: $y=x_1^2(x_2x_3-2x_1^2)=1^2(2\cdot3-2\cdot1^2)=1\cdot(6-2)=4$.</p></div>
+    </section>
+
+    <!-- ============ 06 FORWARD/BACKWARD ============ -->
+    <section class="sec" id="example">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Forward/Backward</p>
+        <h2 class="sec-title">Пример вычислительного графа: полный проход</h2>
+      </div>
+      <div class="prose"><p>Разложим ту же функцию на элементарные операции — именно так граф выглядит внутри фреймворка глубокого обучения. Для функции:</p></div>
+      <div class="formula-box">
+        <div class="eq">$y=z_1z_4$</div>
+        <div class="formula-legend">
+          <div class="item"><b>z₁</b> = x₁²</div>
+          <div class="item"><b>z₂</b> = x₂x₃</div>
+          <div class="item"><b>z₃</b> = 2z₁</div>
+          <div class="item"><b>z₄</b> = z₂ − z₃</div>
+        </div>
+      </div>
+
+      <h3 class="sub">Forward pass</h3>
+      <div class="eq-box system">$$z_1=x_1^2,\quad z_2=x_2x_3,\quad z_3=2z_1,\quad z_4=z_2-z_3,\quad y=z_1z_4$$</div>
+      <div class="prose"><p>При $x=(1,2,3)$: $z_1=1$, $z_2=6$, $z_3=2$, $z_4=4$, $y=1\cdot4=4$ — совпадает со значением, посчитанным напрямую в §05.</p></div>
+
+      <h3 class="sub">Backward pass</h3>
+      <div class="prose"><p>Идём по графу справа налево, на каждом шаге применяя цепное правило:</p></div>
+      <div class="eq-box system">$$\frac{dy}{dy}=1$$</div>
+      <div class="eq-box system">$$\frac{dy}{dz_4} = \frac{dy}{dy}\cdot z_1 = 1\cdot z_1 = 1, \qquad \frac{dy}{dz_3} = \frac{dy}{dz_4}\cdot\frac{dz_4}{dz_3} = 1\cdot(-1) = -1$$</div>
+      <div class="prose"><p>Узел $z_1$ влияет на $y$ <strong>двумя путями</strong>: напрямую (как множитель в $y=z_1z_4$) и через $z_3=2z_1$. По правилу суммирования по путям (§04, случай 2) градиенты по обоим путям складываются:</p></div>
+      <div class="eq-box system">$$\frac{dy}{dz_1} = \underbrace{z_4\cdot 1}_{\text{прямой путь}} + \underbrace{\frac{dy}{dz_3}\cdot\frac{dz_3}{dz_1}}_{\text{через } z_3} = 4 + (-1)\cdot 2 = 2$$</div>
+      <div class="prose"><p>Узел $z_2$ влияет на $y$ только через $z_4$ ($z_4=z_2-z_3$, $\partial z_4/\partial z_2=1$):</p></div>
+      <div class="eq-box system">$$\frac{dy}{dz_2} = \frac{dy}{dz_4}\cdot\frac{dz_4}{dz_2} = 1\cdot 1 = 1$$</div>
+      <div class="prose"><p>Наконец, спускаемся до входов $x$:</p></div>
+      <div class="eq-box system">$$\frac{dy}{dx_1} = \frac{dy}{dz_1}\cdot\frac{dz_1}{dx_1} = 2\cdot(2x_1) = 2\cdot2 = 4, \qquad \frac{dy}{dx_2} = \frac{dy}{dz_2}\cdot\frac{dz_2}{dx_2} = 1\cdot x_3 = 3, \qquad \frac{dy}{dx_3} = \frac{dy}{dz_2}\cdot\frac{dz_2}{dx_3} = 1\cdot x_2 = 2$$</div>
+      <div class="callout result">
+        <span class="mark">Проверка</span>
+        <p>Все три градиента $dy/dx_1=4$, $dy/dx_2=3$, $dy/dx_3=2$ в точности совпадают с частными производными, посчитанными напрямую в §05 — backpropagation даёт тот же результат, что и обычное дифференцирование, но раскладывает вычисление на элементарные, легко автоматизируемые шаги.</p>
+      </div>
+    </section>
+
+    <!-- ============ 07 СЛОИ СЕТИ ============ -->
+    <section class="sec" id="layers">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Слои сети</p>
+        <h2 class="sec-title">Что такое слой нейронной сети</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Слой (layer)</strong> — это один шаг преобразования данных внутри сети: линейное преобразование (умножение на матрицу весов + сдвиг) плюс, как правило, нелинейная функция активации. Сеть — это <strong>последовательность (композиция)</strong> таких преобразований: вход проходит через первый слой, результат — через второй, и так далее до выходного слоя.</p>
+        <p>Формально пусть $x\in\mathbb{R}^d$ — вход, $w\in\mathbb{R}^d$ — веса одного нейрона:</p>
+      </div>
+      <div class="formula-box">
+        <div class="eq">$a(x) = \langle w,x\rangle = w^Tx$</div>
+        <div class="formula-legend">
+          <div class="item"><b>⟨w,x⟩</b>скалярное произведение весов и входа одного нейрона</div>
+        </div>
+      </div>
+      <div class="prose"><p>Многослойная сеть — это цепочка таких преобразований, каждое со своей матрицей весов:</p></div>
+      <div class="eq-box system">$$z_1=W_1x+b_1,\quad z_2=W_2z_1+b_2,\quad\ldots,\quad z_n=W_nz_{n-1}+b_n$$
+        <span class="eq-note">$W_i\in\mathbb{R}^{d_i\times d_{i-1}}$, $b_i\in\mathbb{R}^{d_i}$ — матрица весов и вектор смещения (bias) $i$-го слоя.</span>
+      </div>
+      <div class="prose"><p>Без нелинейности между слоями всё это выродилось бы в одно линейное преобразование:</p></div>
+      <div class="eq-box">$$z_n = W_n\ldots W_2W_1x+b$$</div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Это ключевая причина, почему в каждый слой добавляют <strong>функцию активации</strong> $\sigma(\cdot)$ (подробно — в §09): произведение матриц $W_n\ldots W_2W_1$ — это снова просто одна матрица, то есть композиция сколь угодно многих <em>линейных</em> слоёв эквивалентна одному линейному слою. Слои начинают давать что-то принципиально новое, только когда между ними стоит нелинейность:</p>
+      </div>
+      <div class="eq-box">$$z_i = \sigma(W_iz_{i-1}+b_i)$$</div>
+      <div class="prose">
+        <p>Именно так композиция многих нелинейных слоёв способна приближать сколь угодно сложные (в том числе негладкие, кусочно устроенные) функции — это и есть содержательный смысл «глубины» в глубоком обучении.</p>
+      </div>
+    </section>
+
+    <!-- ============ 08 АРХИТЕКТУРЫ ============ -->
+    <section class="sec" id="arch">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Архитектуры</p>
+        <h2 class="sec-title">Архитектуры нейронных сетей</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Dense-слой</strong> (он же <strong>fully-connected</strong>, полносвязный слой) вычисляет латентное представление $z_i$ как комбинацию входов из предыдущего слоя:</p>
+      </div>
+      <div class="formula-box">
+        <div class="eq">$z_i = \big(z_i^{(1)}, \ldots, z_i^{(d_i)}\big)$</div>
+        <div class="formula-legend">
+          <div class="item"><b>d<sub>i</sub></b>число нейронов в слое i</div>
+        </div>
+      </div>
+      <div class="prose"><p>Каждый нейрон слоя соединён со <strong>всеми</strong> нейронами предыдущего слоя.</p></div>
+      <div class="pill-row">
+        <span class="pill">MLP — Multi-Layer Perceptron</span>
+        <span class="pill">FCN — Fully Connected Network</span>
+      </div>
+      <div class="prose"><p><strong>MLP (Multi-Layer Perceptron)</strong> — полносвязная сеть с одним или несколькими скрытыми слоями. <strong>FCN (Fully Connected Network)</strong> — другое название для сети с полносвязными слоями (по сути синоним MLP).</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Multi-Layer Perceptron</p>
+        <svg viewBox="0 0 480 220" role="img" aria-label="Схема многослойного перцептрона: три входных нейрона, два скрытых слоя по четыре нейрона, один выходной нейрон, все соседние слои полносвязны">
+          <g stroke="rgba(0,229,255,0.18)" stroke-width="1">
+            <line x1="60" y1="50" x2="180" y2="35"/><line x1="60" y1="50" x2="180" y2="78"/><line x1="60" y1="50" x2="180" y2="121"/><line x1="60" y1="50" x2="180" y2="164"/>
+            <line x1="60" y1="110" x2="180" y2="35"/><line x1="60" y1="110" x2="180" y2="78"/><line x1="60" y1="110" x2="180" y2="121"/><line x1="60" y1="110" x2="180" y2="164"/>
+            <line x1="60" y1="170" x2="180" y2="35"/><line x1="60" y1="170" x2="180" y2="78"/><line x1="60" y1="170" x2="180" y2="121"/><line x1="60" y1="170" x2="180" y2="164"/>
+            <line x1="180" y1="35" x2="300" y2="35"/><line x1="180" y1="35" x2="300" y2="78"/><line x1="180" y1="35" x2="300" y2="121"/><line x1="180" y1="35" x2="300" y2="164"/>
+            <line x1="180" y1="78" x2="300" y2="35"/><line x1="180" y1="78" x2="300" y2="78"/><line x1="180" y1="78" x2="300" y2="121"/><line x1="180" y1="78" x2="300" y2="164"/>
+            <line x1="180" y1="121" x2="300" y2="35"/><line x1="180" y1="121" x2="300" y2="78"/><line x1="180" y1="121" x2="300" y2="121"/><line x1="180" y1="121" x2="300" y2="164"/>
+            <line x1="180" y1="164" x2="300" y2="35"/><line x1="180" y1="164" x2="300" y2="78"/><line x1="180" y1="164" x2="300" y2="121"/><line x1="180" y1="164" x2="300" y2="164"/>
+            <line x1="300" y1="35" x2="420" y2="100"/><line x1="300" y1="78" x2="420" y2="100"/><line x1="300" y1="121" x2="420" y2="100"/><line x1="300" y1="164" x2="420" y2="100"/>
+          </g>
+          <g>
+            <circle cx="60" cy="50" r="9" fill="var(--accent-3)"/>
+            <circle cx="60" cy="110" r="9" fill="var(--accent-3)"/>
+            <circle cx="60" cy="170" r="9" fill="var(--accent-3)"/>
+            <circle cx="180" cy="35" r="9" fill="var(--accent)"/><circle cx="180" cy="78" r="9" fill="var(--accent)"/><circle cx="180" cy="121" r="9" fill="var(--accent)"/><circle cx="180" cy="164" r="9" fill="var(--accent)"/>
+            <circle cx="300" cy="35" r="9" fill="var(--accent)"/><circle cx="300" cy="78" r="9" fill="var(--accent)"/><circle cx="300" cy="121" r="9" fill="var(--accent)"/><circle cx="300" cy="164" r="9" fill="var(--accent)"/>
+            <circle cx="420" cy="100" r="10" fill="var(--accent-2)"/>
+          </g>
+          <g class="axis-label" text-anchor="middle">
+            <text x="60" y="200">Input Layer</text>
+            <text x="240" y="200">Hidden Layers</text>
+            <text x="420" y="200">Output</text>
+          </g>
+        </svg>
+        <figcaption>Входной слой (3 признака) → два скрытых dense-слоя (по 4 нейрона) → выходной нейрон. Каждая линия — отдельный вес $W_{ij}$; полносвязность означает, что связаны <b>все</b> пары соседних нейронов.</figcaption>
+      </figure>
+
+      <h3 class="sub">Вычисления внутри слоя и затухающий градиент</h3>
+      <div class="prose"><p>В типичном слое:</p></div>
+      <div class="eq-box">$$u_i = W_iz_i+b_i, \qquad z_{i+1}=\sigma(u_i)$$</div>
+      <div class="prose"><p>Градиент ошибки $E$ по $z_i$ считается как:</p></div>
+      <div class="eq-box">$$\frac{dE}{dz_i} = \frac{dE}{dz_{i+1}}\cdot\sigma'(u_i)\frac{du_i}{dz_i}$$</div>
+      <div class="callout fact">
+        <span class="mark">Затухающий градиент</span>
+        <p>$\sigma'(u_i)$ может оказаться очень маленьким числом. При прохождении через много слоёв такие маленькие множители <strong>перемножаются</strong>, и градиент, доходящий до ранних слоёв, экспоненциально затухает — это и есть <strong>vanishing gradient problem</strong>: обучение первых слоёв глубокой сети практически останавливается. Выбор функции активации напрямую определяет, насколько остро стоит эта проблема — см. §09.</p>
+      </div>
+    </section>
+
+    <!-- ============ 09 ФУНКЦИИ АКТИВАЦИИ ============ -->
+    <section class="sec" id="activations">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>Активации</p>
+        <h2 class="sec-title">Функции активации и затухающий градиент</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Функция активации</strong> $\sigma(\cdot)$ — это нелинейное преобразование, которое применяется к взвешенной сумме входов нейрона ($u_i=W_iz_i+b_i$) перед тем, как результат пойдёт на следующий слой. Без неё, как показано в §07, сколько слоёв ни складывай, вся сеть схлопывается в одно линейное преобразование — то есть по выразительной силе не отличается от обычной линейной регрессии. Функция активации — это то, что вообще даёт нейросети право называться <em>глубокой</em>: именно она позволяет композиции слоёв приближать нелинейные, сколь угодно сложные зависимости (универсальная аппроксимация).</p>
+        <p>При выборе функции активации важны два свойства: (1) сама форма нелинейности и (2) поведение <strong>производной</strong> $\sigma'$ — именно она входит множителем в каждый шаг backprop (§08), и от её величины напрямую зависит, насколько сильно затухает или взрывается градиент при прохождении через много слоёв.</p>
+      </div>
+
+      <h3 class="sub">1. Сигмоида (Sigmoid)</h3>
+      <div class="prose"><p>Сигмоида сжимает любое вещественное число в интервал $(0,1)$:</p></div>
+      <div class="eq-box">$$\sigma(x) = \frac{1}{1+e^{-x}}$$</div>
+      <div class="prose"><p>Производная, важная для расчёта градиентов в backprop:</p></div>
+      <div class="eq-box">$$\sigma'(x) = \sigma(x)\big(1-\sigma(x)\big) = \frac{e^{-x}}{(1+e^{-x})^2}$$</div>
+
+      <figure class="chart">
+        <p class="chart-title">Сигмоида и её производная</p>
+        <svg viewBox="0 0 460 260" role="img" aria-label="График сигмоиды, монотонно возрастающей от 0 до 1, и её производной в виде колокола с максимумом 0.25 в нуле">
+          <line x1="40" y1="220" x2="420" y2="220" stroke="var(--ink-faint)" stroke-width="1.2"/>
+          <line x1="230" y1="220" x2="230" y2="40" stroke="var(--ink-faint)" stroke-width="1.2"/>
+          <g class="axis-label">
+            <text x="40" y="240">-10</text><text x="135" y="240">-5</text><text x="325" y="240">5</text><text x="410" y="240">10</text>
+            <text x="16" y="180">0.5</text><text x="16" y="100">1</text>
+            <text x="426" y="216">x</text><text x="238" y="46">f(x), f'(x)</text>
+          </g>
+          <path d="M40,214 C120,214 160,140 230,140 C300,140 340,46 420,46" fill="none" stroke="var(--accent)" stroke-width="2.4"/>
+          <path d="M40,220 Q140,214 185,190 Q230,178 275,190 Q320,214 420,220" fill="none" stroke="var(--accent-2)" stroke-width="2" stroke-dasharray="6 4"/>
+          <g class="curve-label">
+            <text x="330" y="60" fill="var(--accent)">σ(x)</text>
+            <text x="290" y="200" fill="var(--accent-2)">σ'(x)</text>
+          </g>
+        </svg>
+        <figcaption>Сигмоида (циан) насыщается на обоих концах; при $|x|\gg0$ производная $\sigma'(x)$ (розовый пунктир) почти равна нулю — прямая причина затухающего градиента в глубоких сетях с сигмоидой.</figcaption>
+      </figure>
+
+      <h3 class="sub">2. ReLU (Rectified Linear Unit)</h3>
+      <div class="eq-box">$$\mathrm{ReLU}(x) = \max(0,x)$$</div>
+      <div class="prose"><p>Производная ReLU — единица для положительных входов и ноль для отрицательных — помогает смягчить проблему затухающего градиента, позволяя градиентам эффективно распространяться для положительных активаций:</p></div>
+      <div class="eq-box">$$\mathrm{ReLU}'(x) = \begin{cases}1, & x\gt0\\0,& x\le0\end{cases}$$</div>
+
+      <figure class="chart">
+        <p class="chart-title">ReLU и её производная</p>
+        <svg viewBox="0 0 460 260" role="img" aria-label="График ReLU — ноль при отрицательных x, линейный рост при положительных, и её производной — ступенчатой функции 0 и 1">
+          <line x1="40" y1="220" x2="420" y2="220" stroke="var(--ink-faint)" stroke-width="1.2"/>
+          <line x1="230" y1="220" x2="230" y2="40" stroke="var(--ink-faint)" stroke-width="1.2"/>
+          <g class="axis-label">
+            <text x="120" y="240">-2</text><text x="176" y="240">-1</text><text x="284" y="240">1</text><text x="340" y="240">2</text>
+            <text x="16" y="130">1</text><text x="16" y="40">2</text>
+            <text x="426" y="216">x</text><text x="238" y="46">f(x)</text>
+          </g>
+          <path d="M40,220 L230,220 L420,40" fill="none" stroke="var(--accent-2)" stroke-width="2.4"/>
+          <path d="M40,220 L230,220 L230,130 L420,130" fill="none" stroke="var(--accent-3)" stroke-width="2" stroke-dasharray="6 4"/>
+          <g class="curve-label">
+            <text x="340" y="70" fill="var(--accent-2)">ReLU(x)</text>
+            <text x="330" y="120" fill="var(--accent-3)">ReLU'(x)</text>
+          </g>
+        </svg>
+        <figcaption>Производная ReLU постоянна и равна 1 для всех $x\gt0$ — градиент проходит через положительные активации без затухания. Обратная сторона: при $x\le0$ производная строго нулевая («мёртвые» нейроны).</figcaption>
+      </figure>
+
+      <h3 class="sub">3. Leaky ReLU</h3>
+      <div class="prose"><p>Leaky ReLU вводит небольшой наклон $\alpha$ для отрицательных значений:</p></div>
+      <div class="eq-box">$$\mathrm{Leaky\ ReLU}(x) = \max(\alpha x, x)$$</div>
+      <div class="prose"><p>Небольшой градиент для отрицательных входов (управляемый $\alpha$) гарантирует, что нейроны не «умирают» полностью во время обучения — в отличие от обычного ReLU.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Leaky ReLU и её производная</p>
+        <svg viewBox="0 0 460 260" role="img" aria-label="График Leaky ReLU с небольшим отрицательным наклоном альфа при x меньше нуля и производной, равной альфа слева от нуля и единице справа">
+          <line x1="40" y1="200" x2="420" y2="200" stroke="var(--ink-faint)" stroke-width="1.2"/>
+          <line x1="230" y1="220" x2="230" y2="40" stroke="var(--ink-faint)" stroke-width="1.2"/>
+          <g class="axis-label">
+            <text x="120" y="238">-2</text><text x="176" y="238">-1</text><text x="284" y="238">1</text><text x="340" y="238">2</text>
+            <text x="16" y="120">1</text><text x="16" y="40">2</text>
+            <text x="426" y="196">x</text><text x="238" y="46">f(x)</text>
+          </g>
+          <path d="M40,216 L230,200 L420,40" fill="none" stroke="var(--accent)" stroke-width="2.4"/>
+          <path d="M40,192 L230,192 L230,120 L420,120" fill="none" stroke="var(--accent-3)" stroke-width="2" stroke-dasharray="6 4"/>
+          <circle cx="60" cy="213" r="3" fill="var(--accent-2)"/>
+          <text x="66" y="217" class="axis-label" fill="var(--accent-2)">α</text>
+          <g class="curve-label">
+            <text x="340" y="70" fill="var(--accent)">Leaky ReLU(x)</text>
+            <text x="330" y="112" fill="var(--accent-3)">Leaky ReLU'(x)</text>
+          </g>
+        </svg>
+        <figcaption>Слева от нуля наклон не строго ноль, а маленькое $\alpha$ (например, 0.01–0.1) — производная слева равна $\alpha$, а не 0, что оставляет нейрону путь для обучения даже при отрицательных активациях.</figcaption>
+      </figure>
+
+      <h3 class="sub">Сигмоида, tanh, ReLU и softplus — сравнение</h3>
+      <div class="prose"><p>Ещё две часто встречающиеся функции активации, которые удобно сравнить на одном графике: гиперболический тангенс (симметричная альтернатива сигмоиде, диапазон $(-1,1)$) и softplus (гладкая аппроксимация ReLU):</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Функция</th><th>Формула</th><th>Область значений</th></tr></thead>
+          <tbody>
+            <tr><td>Sigmoid</td><td>$f(a)=\dfrac{1}{1+e^{-a}}$</td><td>$(0,1)$</td></tr>
+            <tr><td>Tanh</td><td>$f(a)=\tanh(a)$</td><td>$(-1,1)$</td></tr>
+            <tr><td>ReLU</td><td>$f(a)=\max(0,a)$</td><td>$[0,\infty)$</td></tr>
+            <tr><td>Softplus</td><td>$f(a)=\log(1+e^{a})$</td><td>$(0,\infty)$</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Sigmoid vs tanh vs ReLU vs softplus</p>
+        <svg viewBox="0 0 460 320" role="img" aria-label="Сравнительный график четырёх функций активации: сигмоиды и softplus, ограниченных снизу и монотонно растущих, тангенса гиперболического, растущего от минус одного до одного, и ReLU, растущего линейно от нуля">
+          <line x1="40" y1="280" x2="420" y2="280" stroke="var(--ink-faint)" stroke-width="1.2"/>
+          <line x1="230" y1="280" x2="230" y2="40" stroke="var(--ink-faint)" stroke-width="1.2"/>
+          <line x1="40" y1="240" x2="420" y2="240" stroke="var(--ink-faint)" stroke-width="0.8" stroke-dasharray="2 4"/>
+          <g class="axis-label">
+            <text x="40" y="296">-5</text><text x="226" y="296">0</text><text x="410" y="296">5</text>
+            <text x="16" y="244">0</text><text x="16" y="204">1</text><text x="16" y="124">3</text><text x="16" y="44">5</text>
+            <text x="426" y="276">a</text><text x="14" y="30">f(a)</text>
+          </g>
+
+          <path d="M40,240 C140,240 180,220 230,220 C280,220 320,200 420,200" fill="none" stroke="var(--accent)" stroke-width="2.4"/>
+          <path d="M40,280 C130,280 175,240 230,240 C285,240 330,200 420,200" fill="none" stroke="var(--accent-3)" stroke-width="2.4"/>
+          <path d="M40,240 L230,240 L420,40" fill="none" stroke="var(--accent-2)" stroke-width="2.4"/>
+          <path d="M40,240 C140,238 190,225 230,212 C270,198 320,120 420,40" fill="none" stroke="#ff9f4d" stroke-width="2.4"/>
+
+          <g font-family="IBM Plex Mono, monospace" font-size="12">
+            <rect x="300" y="50" width="112" height="86" rx="6" fill="var(--surface)" stroke="var(--rule)"/>
+            <line x1="310" y1="66" x2="326" y2="66" stroke="var(--accent)" stroke-width="2.4"/><text x="332" y="70" fill="var(--ink-soft)">sigmoid</text>
+            <line x1="310" y1="86" x2="326" y2="86" stroke="var(--accent-3)" stroke-width="2.4"/><text x="332" y="90" fill="var(--ink-soft)">tanh</text>
+            <line x1="310" y1="106" x2="326" y2="106" stroke="var(--accent-2)" stroke-width="2.4"/><text x="332" y="110" fill="var(--ink-soft)">ReLU</text>
+            <line x1="310" y1="126" x2="326" y2="126" stroke="#ff9f4d" stroke-width="2.4"/><text x="332" y="130" fill="var(--ink-soft)">softplus</text>
+          </g>
+        </svg>
+        <figcaption>При $a\to-\infty$ sigmoid и softplus стремятся к 0, а tanh — к $-1$; при $a\to+\infty$ ReLU и softplus ведут себя почти одинаково (softplus — гладкая, всюду дифференцируемая версия ReLU, без излома в нуле).</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 10 ИТОГИ ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">10</span>Итоги</p>
+        <h2 class="sec-title">Итоговые выводы лекции</h2>
+      </div>
+      <div class="prose">
+        <ol>
+          <li>DL — подмножество ML, где признаки не задаются вручную, а выучиваются самой сетью послойно (representation learning); класс моделей — глубокая композиция нелинейных слоёв, задача оптимизации невыпуклая.</li>
+          <li>Обучение сводится к минимизации эмпирического риска $Q(w)=\frac1l\sum_i L(f(x_i,w),y_i)$ — эта формализация общая и для классического ML, и для DL.</li>
+          <li>Backpropagation — не единственный способ обучать сети (Reservoir Computing, Direct Feedback Alignment, Forward-Forward), но остаётся стандартом благодаря эффективности символьно-численного вычисления градиента по цепному правилу.</li>
+          <li>Если узел вычислительного графа влияет на выход <strong>несколькими путями</strong>, градиенты по этим путям складываются — ключевой момент, который легко упустить при ручном выводе backprop.</li>
+          <li>Слой сети — линейное преобразование $W_iz_{i-1}+b_i$ плюс нелинейная функция активации; без нелинейности любое число слоёв эквивалентно одному линейному слою.</li>
+          <li>MLP / FCN — сеть из полносвязных (dense) слоёв, где каждый нейрон соединён со всеми нейронами предыдущего слоя.</li>
+          <li>Производная функции активации $\sigma'$ входит множителем в каждый шаг backprop; малые значения $\sigma'$ (как у сигмоиды при больших $|x|$) на многих слоях перемножаются и дают затухающий градиент.</li>
+          <li>ReLU и Leaky ReLU смягчают эту проблему: производная ReLU равна 1 на всей положительной полуоси, а у Leaky ReLU остаётся ненулевой (хоть и малой) и на отрицательной.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ 11 ЛИТЕРАТУРА ============ -->
+    <section class="sec" id="refs">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">11</span>Литература</p>
+        <h2 class="sec-title">Источники</h2>
+      </div>
+      <ul class="lit-list">
+        <li><span class="idx">01</span>Lee Altenberg. <em>Evolutionary Computation.</em> 2016.</li>
+        <li><span class="idx">02</span>Jonathan Dong et al. <em>Reservoir Computing Meets Recurrent Kernels and Structured Transforms.</em> NeurIPS, 2020.</li>
+        <li><span class="idx">03</span>Geoffrey Hinton. <em>The Forward-Forward Algorithm: Some Preliminary Investigations.</em> arXiv:2212.13345, 2022.</li>
+        <li><span class="idx">04</span>Arild Nøkland. <em>Direct Feedback Alignment Provides Learning in Deep Neural Networks.</em> arXiv:1609.01596, 2016.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект лекции · Deep Learning — Lecture 1 (Kalinin Nikita) · MLP, backpropagation, computational graphs, activation functions</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>
