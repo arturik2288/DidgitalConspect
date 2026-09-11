@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM Inference &amp; Serving: KV-кэш, батчинг, квантизация — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#0a0a0d;
+      --surface:#131318;
+      --surface-2:#1a1a22;
+      --ink:#f5f5fa;
+      --ink-soft:#c3c3d2;
+      --ink-faint:#83839a;
+      --accent:#00e5ff;
+      --accent-strong:#7df3ff;
+      --accent-soft:#0d2b30;
+      --accent-2:#ff5fd1;
+      --accent-2-soft:#2a0f24;
+      --accent-3:#a6ff4d;
+      --accent-3-soft:#182408;
+      --rule:#26262f;
+      --shadow: 0 1px 2px rgba(0,229,255,.07), 0 10px 28px -12px rgba(0,0,0,.7);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 90%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.result .mark{ color:var(--accent-3); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.fact .mark{ color:var(--accent-2); }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    td.num{font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums;}
+    th.num{text-align:right;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:700px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+    mjx-container[jax="CHTML"]{ color: var(--ink); }
+
+    pre{
+      background:var(--surface-2); border:1px solid var(--rule); border-radius:8px;
+      padding:14px 16px; overflow-x:auto; font-family:'IBM Plex Mono',monospace;
+      font-size:13px; line-height:1.55; margin:14px 0; color:var(--ink-soft);
+    }
+    pre .cm{color:var(--ink-faint);}
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/it.html">← Раздел «IT»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">LLM Agents · Лекция 3 · LLM Inference &amp; Serving</p>
+      <h1 class="title">KV-кэш, батчинг и квантизация</h1>
+      <p class="subtitle">Использовать LLM эффективно — не то же самое, что использовать её результативно. Разбор того, во что на самом деле упирается запрос к модели: prefill и decode, KV-кэш и его цена, PagedAttention, constrained decoding, speculative decoding и квантизация.</p>
+      <div class="meta-row">
+        <span><strong>Aleksandr Algazinov</strong>, HSE University</span>
+        <span>LLM Agent Development · Lecture 03</span>
+        <span>12.09.2026</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#motivation"><span class="n">01</span>Мотивация</a>
+      <a href="#prefill-decode"><span class="n">02</span>Prefill и Decode</a>
+      <a href="#kv-cache"><span class="n">03</span>KV-кэш</a>
+      <a href="#batching"><span class="n">04</span>Батчинг</a>
+      <a href="#paged-attention"><span class="n">05</span>PagedAttention</a>
+      <a href="#endpoint"><span class="n">06</span>От HF к эндпоинту</a>
+      <a href="#constrained"><span class="n">07</span>Constrained Decoding</a>
+      <a href="#control"><span class="n">08</span>Что вы контролируете</a>
+      <a href="#speculative"><span class="n">09</span>Speculative Decoding</a>
+      <a href="#quantization"><span class="n">10</span>Квантизация</a>
+      <a href="#stacks"><span class="n">11</span>Serving-стеки</a>
+      <a href="#levers"><span class="n">12</span>Дешёвые рычаги</a>
+      <a href="#summary"><span class="n">13</span>Итоги</a>
+      <a href="#refs"><span class="n">14</span>Литература</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 МОТИВАЦИЯ ============ -->
+    <section class="sec" id="motivation">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Мотивация</p>
+        <h2 class="sec-title">Использовать LLM эффективно — недостаточно</h2>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Тот, кто использует модель результативно (<em>effectively</em>), проигрывает тому, кто использует её результативно <strong>и</strong> экономно (<em>efficiently</em>). Сегодня — именно про второе слово: во что на самом деле обходится один вызов и где эту стоимость можно срезать.</p>
+      </div>
+      <div class="prose">
+        <p><strong>Три проблемы, которые вы встретите и пока не умеете чинить:</strong></p>
+        <ol>
+          <li><strong>Высокая задержка.</strong> Агент работает, но каждая задача занимает минуту. Как ускорить систему?</li>
+          <li><strong>Большая часть токенов уходит на промпт.</strong> Счёт формируется системным промптом, а не ответами. Как это оптимизировать?</li>
+          <li><strong>Вы скачали модель с Hugging Face.</strong> Веса лежат на диске. Как реально их обслуживать — да ещё и больше, чем одному пользователю?</li>
+        </ol>
+        <p>Один блок сегодняшней лекции отвечает на каждый вопрос. Как и вопрос прошлой недели — <strong>зачем кэшировать K и V?</strong></p>
+      </div>
+
+      <h3 class="sub">Словарь</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>TTFT</strong></td><td>Time To First Token. «Она меня услышала?»</td></tr>
+            <tr><td><strong>TPOT</strong></td><td>Time Per Output Token. Скорость «чтения».</td></tr>
+            <tr><td><strong>Latency</strong></td><td>Один запрос от начала до конца ≈ TTFT + токены вывода × TPOT.</td></tr>
+            <tr><td><strong>Throughput</strong></td><td>Токенов в секунду по <em>всем</em> запросам сразу. За это платит оператор.</td></tr>
+            <tr><td><strong>RPS</strong></td><td>Запросов в секунду. То, что считает балансировщик нагрузки — длинные и короткие запросы здесь равны, в отличие от токенов/с.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Напряжение</span>
+        <p>Батчинг повышает throughput и обычно <strong>повышает</strong> latency отдельного запроса. Почти каждое решение сегодня — точка на этом компромиссе.</p>
+      </div>
+    </section>
+
+    <!-- ============ 02 PREFILL И DECODE ============ -->
+    <section class="sec" id="prefill-decode">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Две машины</p>
+        <h2 class="sec-title">Prefill и Decode: одно имя, два разных механизма</h2>
+      </div>
+      <div class="prose"><p>Запрос — это не единая однородная нагрузка. Это <strong>две</strong> нагрузки с противоположными узкими местами — рамка, на которую опирается всё остальное в лекции.</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>PREFILL</th><th>DECODE</th></tr></thead>
+          <tbody>
+            <tr><td>Что делает</td><td>Весь промпт целиком, за один проход</td><td>Один токен за раз</td></tr>
+            <tr><td>Упирается в</td><td><strong>Compute-bound</strong> — все токены обрабатываются вместе</td><td><strong>Memory-bandwidth-bound</strong> — каждый шаг читает всю модель</td></tr>
+            <tr><td>Масштабируется с</td><td>Параллельно — с длиной промпта</td><td>Последовательно — с числом сгенерированных токенов</td></tr>
+            <tr><td>Определяет</td><td>Time-to-first-token — происходит один раз за запрос</td><td>Time-per-output-token — происходит N раз за запрос</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Prefill compute-bound</strong></td><td>Все токены промпта обрабатываются вместе, GPU занят плотной арифметикой. Длиннее промпт — больше вычислений, но это распараллеливается.</td></tr>
+            <tr><td><strong>Decode memory-bound</strong></td><td>Каждый шаг производит <em>один</em> токен, но должен прочитать веса <strong>всей</strong> модели. Арифметика тривиальна; трафик памяти — нет.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout result">
+        <span class="mark">Один факт объясняет три механизма</span>
+        <p>Этот факт (prefill — compute-bound, decode — memory-bound) объясняет батчинг, стоимость KV-кэша и то, почему вообще может работать speculative decoding.</p>
+      </div>
+      <div class="prose">
+        <p><strong>Что реально делает шаг decode:</strong> прочитать <em>каждый</em> вес модели из памяти, затем выполнить горстку арифметики на последовательность. Чтение 70 ГБ занимает одно и то же время — обслуживаете вы одну последовательность или пятьдесят. GPU простаивает не в ожидании работы, а в ожидании <strong>памяти</strong>: вычислительные блоки бездействуют, пока подъезжают веса. Батчинг заполняет этот простой последовательностями, которые всё равно бы ждали. Именно поэтому потолок — тоже про память: 33-й запрос отклоняют не потому, что кончились вычисления, а потому что негде разместить его KV-кэш.</p>
+      </div>
+    </section>
+
+    <!-- ============ 03 KV-КЭШ ============ -->
+    <section class="sec" id="kv-cache">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>KV-кэш</p>
+        <h2 class="sec-title">Ответ на вопрос прошлой лекции</h2>
+      </div>
+      <div class="formula-box">
+        <div class="eq">$K_i = h_iW_K \qquad V_i = h_iW_V$</div>
+        <div class="formula-legend">
+          <div class="item"><b>h<sub>i</sub></b>скрытое состояние токена i</div>
+          <div class="item"><b>W<sub>K</sub>, W<sub>V</sub></b>замороженные веса проекции</div>
+        </div>
+      </div>
+      <div class="prose"><p>Повтор из лекции 2: один key и один value на токен, из скрытого состояния <em>этого</em> токена и неизменных весов.</p></div>
+      <div class="prose">
+        <ol>
+          <li><strong>$K_i$ и $V_i$ зависят только от токена $i$</strong> — от его собственного скрытого состояния и весов, которые не меняются на инференсе.</li>
+          <li><strong>Каузальная маска</strong> означает, что $h_i$ вычисляется из токенов $1..i$. Это одно и то же число на шаге $i$ и на шаге $n$.</li>
+          <li><strong>Значит $K_i, V_i$ никогда не меняются</strong> после того, как однажды посчитаны. Единственная новая работа на каждом шаге — новая, самая последняя строка.</li>
+        </ol>
+        <p>Это и есть вся причина, по которой кэш вообще возможен.</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Рост кэша на трёх шагах decode</p>
+        <svg viewBox="0 0 480 260" role="img" aria-label="Три колонки для генерации токенов 5, 6 и 7: в каждой колонке предыдущие строки K V помечены как cached — read back, а самая новая строка выделена как new — единственная работа этого шага">
+          <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle">
+            <text x="80" y="18" fill="var(--ink-faint)">token 5</text>
+            <text x="240" y="18" fill="var(--ink-faint)">token 6</text>
+            <text x="400" y="18" fill="var(--ink-faint)">token 7</text>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="10.5">
+            <!-- col1 -->
+            <rect x="30" y="30" width="100" height="26" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/><text x="80" y="47" text-anchor="middle" fill="var(--ink-soft)">K1 V1</text>
+            <rect x="30" y="60" width="100" height="26" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/><text x="80" y="77" text-anchor="middle" fill="var(--ink-soft)">K2 V2</text>
+            <rect x="30" y="90" width="100" height="26" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/><text x="80" y="107" text-anchor="middle" fill="var(--ink-soft)">K3 V3</text>
+            <rect x="30" y="120" width="100" height="26" rx="4" fill="var(--accent-2)" opacity="0.9"/><text x="80" y="137" text-anchor="middle" fill="var(--bg)">K4 V4 · new</text>
+
+            <!-- col2 -->
+            <rect x="190" y="30" width="100" height="26" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/><text x="240" y="47" text-anchor="middle" fill="var(--ink-soft)">K1 V1</text>
+            <rect x="190" y="60" width="100" height="26" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/><text x="240" y="77" text-anchor="middle" fill="var(--ink-soft)">K2 V2</text>
+            <rect x="190" y="90" width="100" height="26" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/><text x="240" y="107" text-anchor="middle" fill="var(--ink-soft)">K3 V3</text>
+            <rect x="190" y="120" width="100" height="26" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/><text x="240" y="137" text-anchor="middle" fill="var(--ink-soft)">K4 V4</text>
+            <rect x="190" y="150" width="100" height="26" rx="4" fill="var(--accent-2)" opacity="0.9"/><text x="240" y="167" text-anchor="middle" fill="var(--bg)">K5 V5 · new</text>
+
+            <!-- col3 -->
+            <rect x="350" y="30" width="100" height="26" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/><text x="400" y="47" text-anchor="middle" fill="var(--ink-soft)">K1 V1</text>
+            <rect x="350" y="60" width="100" height="26" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/><text x="400" y="77" text-anchor="middle" fill="var(--ink-soft)">K2 V2</text>
+            <rect x="350" y="90" width="100" height="26" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/><text x="400" y="107" text-anchor="middle" fill="var(--ink-soft)">K3 V3</text>
+            <rect x="350" y="120" width="100" height="26" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/><text x="400" y="137" text-anchor="middle" fill="var(--ink-soft)">K4 V4</text>
+            <rect x="350" y="150" width="100" height="26" rx="4" fill="var(--surface-2)" stroke="var(--rule)"/><text x="400" y="167" text-anchor="middle" fill="var(--ink-soft)">K5 V5</text>
+            <rect x="350" y="180" width="100" height="26" rx="4" fill="var(--accent-2)" opacity="0.9"/><text x="400" y="197" text-anchor="middle" fill="var(--bg)">K6 V6 · new</text>
+          </g>
+          <path d="M133,133 L186,133" stroke="var(--ink-faint)" stroke-width="1.4" marker-end="url(#llm3arrow)"/>
+          <path d="M293,163 L346,163" stroke="var(--ink-faint)" stroke-width="1.4" marker-end="url(#llm3arrow)"/>
+          <defs><marker id="llm3arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--ink-faint)"/></marker></defs>
+          <text x="240" y="235" text-anchor="middle" class="axis-label">все строки кроме самой новой — это чтение; работает только новая</text>
+        </svg>
+        <figcaption>Ничто выше выделенной строки никогда не пересчитывается — кэш только дописывается.</figcaption>
+      </figure>
+
+      <h3 class="sub">Чего стоит кэш</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Растёт быстро</strong></td><td>Размер масштабируется как длина последовательности × размер батча × число слоёв × число голов. В этой формуле нет ничего маленького.</td></tr>
+            <tr><td><strong>И вот почему</strong></td><td>Длинный контекст стоит дороже, чем предполагают сами токены; сервер упирается в лимит памяти раньше, чем в лимит вычислений; сколько пользователей вы можете обслужить — это вопрос памяти.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Переиспользование префикса</h3>
+      <div class="prose"><p>Если два запроса начинаются с <strong>одних и тех же токенов</strong>, эта часть кэша может быть посчитана один раз и переиспользована — длинный системный промпт, few-shot преамбула или документ, о котором задают каждый вопрос. Как именно проектировать промпты, чтобы попадать в это переиспользование — тема отдельной лекции про экономику промптов; здесь важен сам механизм.</p></div>
+    </section>
+
+    <!-- ============ 04 БАТЧИНГ ============ -->
+    <section class="sec" id="batching">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Батчинг</p>
+        <h2 class="sec-title">Куда уходят простаивающие слоты</h2>
+      </div>
+      <div class="callout">
+        <span class="mark">Ключевой факт</span>
+        <p>На decode веса модели читаются из памяти <strong>один раз за шаг</strong> — независимо от того, сколько последовательностей в батче. Дополнительные последовательности «едут бесплатно».</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Throughput растёт</strong></td><td>Пока не кончится память под KV-кэш — это и есть настоящий потолок.</td></tr>
+            <tr><td><strong>Latency тоже растёт</strong></td><td>Ваш запрос теперь делит шаг с другими. Throughput и latency — не одна и та же цель.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Статический vs непрерывный батчинг</h3>
+      <div class="prose"><p>Вопрос — когда завершённый запрос отдаёт свой слот обратно.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Static vs continuous batching</p>
+        <svg viewBox="0 0 480 220" role="img" aria-label="При статическом батчинге завершившиеся запросы держат слот простаивающим до самого медленного запроса в батче; при непрерывном батчинге освободившийся слот сразу же занимает следующий запрос из очереди">
+          <text x="20" y="18" class="axis-label">STATIC</text>
+          <g font-family="IBM Plex Mono, monospace" font-size="10.5">
+            <rect x="20" y="26" width="90" height="22" fill="var(--accent-2)" opacity="0.85"/><text x="65" y="41" text-anchor="middle" fill="var(--bg)">req 1</text>
+            <rect x="110" y="26" width="150" height="22" fill="var(--surface-2)" stroke="var(--rule)"/><text x="185" y="41" text-anchor="middle" fill="var(--ink-faint)">idle</text>
+
+            <rect x="20" y="52" width="180" height="22" fill="var(--accent-2)" opacity="0.85"/><text x="110" y="67" text-anchor="middle" fill="var(--bg)">req 2</text>
+            <rect x="200" y="52" width="60" height="22" fill="var(--surface-2)" stroke="var(--rule)"/><text x="230" y="67" text-anchor="middle" fill="var(--ink-faint)">idle</text>
+
+            <rect x="20" y="78" width="60" height="22" fill="var(--accent-2)" opacity="0.85"/><text x="50" y="93" text-anchor="middle" fill="var(--bg)">req 3</text>
+            <rect x="80" y="78" width="180" height="22" fill="var(--surface-2)" stroke="var(--rule)"/><text x="170" y="93" text-anchor="middle" fill="var(--ink-faint)">idle</text>
+
+            <rect x="20" y="104" width="240" height="22" fill="var(--accent-2)" opacity="0.85"/><text x="140" y="119" text-anchor="middle" fill="var(--bg)">req 4</text>
+          </g>
+          <text x="20" y="150" class="axis-label">CONTINUOUS</text>
+          <g font-family="IBM Plex Mono, monospace" font-size="10.5">
+            <rect x="20" y="158" width="90" height="22" fill="var(--accent)" opacity="0.85"/><text x="65" y="173" text-anchor="middle" fill="var(--bg)">req 1</text>
+            <rect x="110" y="158" width="90" height="22" fill="var(--accent)" opacity="0.6"/><text x="155" y="173" text-anchor="middle" fill="var(--bg)">req 5</text>
+
+            <rect x="20" y="184" width="180" height="22" fill="var(--accent)" opacity="0.85"/><text x="110" y="199" text-anchor="middle" fill="var(--bg)">req 2</text>
+            <rect x="200" y="184" width="60" height="22" fill="var(--accent)" opacity="0.6"/><text x="230" y="199" text-anchor="middle" fill="var(--bg)">req 6</text>
+          </g>
+          <text x="20" y="215" class="axis-label">то же железо, больше запросов в секунду</text>
+        </svg>
+        <figcaption>Статический батчинг: слот держится простаивающим до самого медленного запроса. Непрерывный батчинг: освободившийся слот немедленно занимает следующий запрос из очереди.</figcaption>
+      </figure>
+
+      <div class="callout fact">
+        <span class="mark">Discussion: 32 запроса одним батчем — каждый станет в 32 раза медленнее?</span>
+        <p>Нет. Поскольку decode упирается в память, а не в арифметику, чтение весов — общая для всех последовательностей в батче стоимость: дополнительные последовательности почти не добавляют времени на шаг. Что разделяется между ними — именно это единое чтение весов из памяти. Останавливает добавление 33-й последовательности не нехватка вычислений, а нехватка места под её KV-кэш.</p>
+      </div>
+    </section>
+
+    <!-- ============ 05 PAGEDATTENTION ============ -->
+    <section class="sec" id="paged-attention">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>PagedAttention</p>
+        <h2 class="sec-title">Виртуальная память, применённая к кэшу</h2>
+      </div>
+      <div class="prose"><p>Фрагментация и способ её исправить.</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Слабы (традиционный подход)</strong></td><td>Один непрерывный блок на последовательность, размером под <strong>максимальную</strong> длину. Большая часть блока никогда не используется — реально задействовано ~20–30% памяти.</td></tr>
+            <tr><td><strong>Страницы (PagedAttention)</strong></td><td>Блоки фиксированного размера, выдаются по требованию. Таблица блоков на каждую последовательность отображает логические позиции в физические — ровно то же, что страничная организация памяти в ОС.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Traditional KV Cache vs PagedAttention</p>
+        <svg viewBox="0 0 480 220" role="img" aria-label="Слева три слэба фиксированной максимальной длины, из которых реально занята только небольшая часть — остальное выделено, но не используется; справа страницы фиксированного размера плотно заполнены реальными токенами разных запросов, почти без потерь">
+          <text x="115" y="18" text-anchor="middle" class="axis-label">TRADITIONAL · ~25% used</text>
+          <g>
+            <rect x="30" y="30" width="60" height="150" fill="none" stroke="var(--rule)" stroke-width="1.2"/>
+            <rect x="30" y="30" width="60" height="35" fill="var(--accent-2)" opacity="0.85"/>
+            <rect x="110" y="30" width="60" height="150" fill="none" stroke="var(--rule)" stroke-width="1.2"/>
+            <rect x="110" y="30" width="60" height="22" fill="var(--accent-2)" opacity="0.85"/>
+            <rect x="190" y="30" width="60" height="150" fill="none" stroke="var(--rule)" stroke-width="1.2"/>
+            <rect x="190" y="30" width="60" height="50" fill="var(--accent-2)" opacity="0.85"/>
+          </g>
+          <text x="115" y="198" text-anchor="middle" class="axis-label">выделено под максимум, занято мало</text>
+
+          <text x="380" y="18" text-anchor="middle" class="axis-label">PAGED · ~96% used</text>
+          <g font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" fill="var(--bg)">
+            <rect x="310" y="30" width="46" height="24" fill="var(--accent)"/><text x="333" y="46">A</text>
+            <rect x="360" y="30" width="46" height="24" fill="var(--accent)"/><text x="383" y="46">A</text>
+            <rect x="410" y="30" width="46" height="24" fill="var(--accent-2)"/><text x="433" y="46">C</text>
+            <rect x="310" y="58" width="46" height="24" fill="var(--accent)"/><text x="333" y="74">A</text>
+            <rect x="360" y="58" width="46" height="24" fill="var(--accent-3)"/><text x="383" y="74">B</text>
+            <rect x="410" y="58" width="46" height="24" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="310" y="86" width="46" height="24" fill="var(--accent-3)"/><text x="333" y="102">B</text>
+            <rect x="360" y="86" width="46" height="24" fill="var(--accent-2)"/><text x="383" y="102">C</text>
+            <rect x="410" y="86" width="46" height="24" fill="var(--accent)"/><text x="433" y="102">A</text>
+          </g>
+          <text x="380" y="198" text-anchor="middle" class="axis-label">выдаётся по требованию, почти без потерь</text>
+        </svg>
+        <figcaption>Слева: один слэб на запрос под максимальную длину — большая часть закрашенной области пуста. Справа: страницы фиксированного размера выдаются нескольким запросам (A, B, C) по требованию, почти без потерь.</figcaption>
+      </figure>
+
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Выше занятость</strong></td><td>Память выдаётся небольшими блоками по мере необходимости — гораздо больше последовательностей помещается на тот же GPU.</td></tr>
+            <tr><td><strong>Разделение бесплатно</strong></td><td>Две последовательности с одинаковым префиксом могут указывать на <em>одни и те же</em> физические блоки — это и есть переиспользование префикса из §03, реализованное механически.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Это ядро идеи в <strong>vLLM</strong> — и причина, по которой он стал стандартным открытым serving-стеком.</p></div>
+    </section>
+
+    <!-- ============ 06 ОТ HF К ЭНДПОИНТУ ============ -->
+    <section class="sec" id="endpoint">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>От весов к серверу</p>
+        <h2 class="sec-title">От Hugging Face к эндпоинту</h2>
+      </div>
+      <div class="prose">
+        <ol>
+          <li><strong>Веса</strong> — это repo id на Hugging Face. Сервер скачивает их при первом запуске.</li>
+          <li><strong>Запустите сервер.</strong> Он поднимает HTTP API, совместимый с OpenAI.</li>
+          <li><strong>Направьте любой клиент на него</strong>, поменяв <code>base_url</code>. Код приложения не меняется.</li>
+        </ol>
+      </div>
+      <pre>vllm serve Qwen/Qwen2.5-7B-Instruct  <span class="cm"># vLLM 0.29 — иллюстративно</span>
+
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="none")
+client.chat.completions.create(model="Qwen/Qwen2.5-7B-Instruct", messages=[...])</pre>
+      <div class="prose"><p>SGLang — те же три шага: <code>python -m sglang.launch_server --model-path &lt;repo-id&gt;</code> (SGLang 0.5), порт 30000.</p></div>
+    </section>
+
+    <!-- ============ 07 CONSTRAINED DECODING ============ -->
+    <section class="sec" id="constrained">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Constrained Decoding</p>
+        <h2 class="sec-title">Делаем невалидный вывод невозможным</h2>
+      </div>
+      <div class="prose"><p>На каждом шаге модель выдаёт оценки по всему словарю. Ограничение <strong>маскирует токены, которые не могут легально идти следующими</strong> — до сэмплирования, а не после.</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Значит</strong></td><td>Невалидный вывод <strong>невозможен</strong>, а не просто маловероятен. Модель не может «забыть» формат под давлением. Никакого парсинга и повторных попыток постфактум.</td></tr>
+            <tr><td><strong>Как выражается</strong></td><td>Грамматика или JSON Schema → компилируется в конечный автомат по допустимым токенам → применяется как маска на каждом шаге.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Издержки</strong></td><td>Построение и применение маски — работа на каждый токен. Обычно небольшая, но никогда не нулевая.</td></tr>
+            <tr><td><strong>Углы, в которые можно загнать</strong></td><td>Плохо заданная грамматика может вынудить модель пойти по пути, который невозможно осмысленно завершить. Вывод формально валиден и бесполезен по содержанию.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Почему длинный контекст обходится дважды дороже</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>На prefill</strong></td><td>Каждый токен обращается к каждому другому, поэтому работа по обработке промпта растёт <strong>быстрее линейной</strong> с его длиной.</td></tr>
+            <tr><td><strong>На decode</strong></td><td>KV-кэш для этого промпта удерживается в памяти на <em>всю</em> генерацию, занимая место, которое мог бы использовать другой запрос.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>«Просто вставить весь документ целиком» — решение с ценой по обеим осям сразу.</p></div>
+    </section>
+
+    <!-- ============ 08 ЧТО ВЫ КОНТРОЛИРУЕТЕ ============ -->
+    <section class="sec" id="control">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Поверхность управления</p>
+        <h2 class="sec-title">Что вы реально контролируете через API</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Вы контролируете</th><th>Вы не контролируете</th></tr></thead>
+          <tbody>
+            <tr><td>Длину промпта — главный рычаг, который у вас есть</td><td>Состав батча — вы делите его с незнакомцами</td></tr>
+            <tr><td>Стабильный префикс, чтобы работало кэширование</td><td>Какой GPU и насколько он загружен</td></tr>
+            <tr><td><code>max_tokens</code> и стоп-последовательности</td><td>Выжил ли ваш кэш к следующему запросу</td></tr>
+            <tr><td>Streaming — ради воспринимаемой задержки</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Hosted API или собственный сервер?</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Hosted API</strong></td><td>Никакой инфраструктуры и планирования мощностей. Модели уровня frontier, которые вы не сможетеself-host. Цена за токен растёт вместе с успехом.</td></tr>
+            <tr><td><strong>Self-hosted</strong></td><td>Данные не покидают вашу инфраструктуру. Фиксированная стоимость при достаточном объёме. Любая модель, любой файнтюн, любая версия.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Self-hosting меняет счёт за токены на <strong>инженерную команду</strong>. Для этого курса — используйте API.</p>
+      </div>
+    </section>
+
+    <!-- ============ 09 SPECULATIVE DECODING ============ -->
+    <section class="sec" id="speculative">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>Speculative Decoding</p>
+        <h2 class="sec-title">Узнать приём, не обязательно освоить его в деталях</h2>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Discussion</span>
+        <p>Маленькая дешёвая модель предлагает следующие несколько токенов черновиком. Большая модель проверяет их и оставляет те, с которыми согласна. Это измеримо быстрее. Так чем же вы жертвуете в качестве вывода ради этой скорости?</p>
+      </div>
+      <div class="callout result">
+        <span class="mark">Ничем — и это самое интересное</span>
+        <p>Модель-«черновик» лишь <strong>предполагает</strong>, что сказала бы большая модель — она никогда ничего не решает сама. Большая модель оценивает все $k$ позиций <strong>за один прямой проход</strong>, выдавая то же самое распределение, которое выдала бы токен за токеном. Каждый черновой токен принимается только если совпадает с этим распределением; первое расхождение пересэмплируется, чтобы скорректировать смещение. Результат — <strong>доказуемо то же самое распределение большой модели</strong>.</p>
+      </div>
+      <div class="prose"><p>Вы не меняете качество на задержку. Вы меняете <em>дополнительные вычисления</em> на задержку — а у decode, как memory-bound процесса, эти вычисления и так были свободны.</p></div>
+
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Идея</strong></td><td>Маленькая модель-черновик предлагает несколько токенов. Большая модель проверяет их <strong>за один проход</strong> и принимает самый длинный корректный префикс.</td></tr>
+            <tr><td><strong>Гарантия</strong></td><td>Вывод распределён идентично самостоятельному выводу большой модели. Это оптимизация задержки, а не компромисс по качеству.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Приём окупается, когда черновик обычно прав — и то, что decode memory-bound, — ровно причина, по которой проверка многих токенов разом почти ничего не стоит.</p></div>
+    </section>
+
+    <!-- ============ 10 КВАНТИЗАЦИЯ ============ -->
+    <section class="sec" id="quantization">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">10</span>Квантизация</p>
+        <h2 class="sec-title">Меньше байт на вес</h2>
+      </div>
+      <div class="prose"><p>Decode читает каждый вес на каждом шаге: байты на вес — рычаг и для скорости, и для того, сколько последовательностей поместится.</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Формат</th><th class="num">Бит</th><th>Знак / экспонента / мантисса</th><th class="num">70B, только веса</th></tr></thead>
+          <tbody>
+            <tr><td>FP32</td><td class="num">32</td><td>1 / 8 / 23</td><td class="num">280 ГБ</td></tr>
+            <tr><td>FP16</td><td class="num">16</td><td>1 / 5 / 10</td><td class="num">140 ГБ</td></tr>
+            <tr><td>BF16</td><td class="num">16</td><td>1 / 8 / 7 — диапазон FP32, точность ниже</td><td class="num">140 ГБ</td></tr>
+            <tr><td>FP8</td><td class="num">8</td><td>E4M3 или E5M2</td><td class="num">70 ГБ</td></tr>
+            <tr><td>INT8</td><td class="num">8</td><td>целое + масштаб на группу</td><td class="num">70 ГБ</td></tr>
+            <tr><td>INT4</td><td class="num">4</td><td>целое + масштаб на группу</td><td class="num">35 ГБ</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Сначала жертвуют <strong>диапазоном</strong> (FP16 переполняется там, где BF16 — нет: именно поэтому обучение использует BF16), затем — <strong>точностью</strong>. Последний столбец — арифметика (параметры × биты ÷ 8), не бенчмарк.</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">70B-модель на одном и том же GPU (160 ГБ)</p>
+        <svg viewBox="0 0 480 170" role="img" aria-label="Три горизонтальные полосы: FP16 занимает 140 из 160 ГБ, оставляя мало места под KV-кэш; INT8 занимает 70 ГБ, оставляя вдвое больше; INT4 занимает 35 ГБ, оставляя больше всего места под KV-кэш">
+          <g font-family="IBM Plex Mono, monospace" font-size="11">
+            <rect x="20" y="20" width="322" height="28" fill="var(--accent-2)" opacity="0.85"/><text x="181" y="39" text-anchor="middle" fill="var(--bg)">FP16 · 140 ГБ</text>
+            <rect x="342" y="20" width="118" height="28" fill="none" stroke="var(--accent-3)" stroke-width="1.4"/><text x="401" y="39" text-anchor="middle" fill="var(--accent-3)">KV cache</text>
+
+            <rect x="20" y="66" width="161" height="28" fill="var(--accent-2)" opacity="0.85"/><text x="100" y="85" text-anchor="middle" fill="var(--bg)">INT8 · 70 ГБ</text>
+            <rect x="181" y="66" width="279" height="28" fill="none" stroke="var(--accent-3)" stroke-width="1.4"/><text x="320" y="85" text-anchor="middle" fill="var(--accent-3)">KV cache</text>
+
+            <rect x="20" y="112" width="80" height="28" fill="var(--accent-2)" opacity="0.85"/><text x="60" y="131" text-anchor="middle" fill="var(--bg)">INT4 · 35 ГБ</text>
+            <rect x="100" y="112" width="360" height="28" fill="none" stroke="var(--accent-3)" stroke-width="1.4"/><text x="280" y="131" text-anchor="middle" fill="var(--accent-3)">KV cache</text>
+          </g>
+          <text x="20" y="158" class="axis-label">0 ГБ</text>
+          <text x="460" y="158" text-anchor="end" class="axis-label">160 ГБ</text>
+        </svg>
+        <figcaption>Каждое уполовинивание весов — это и время, сэкономленное на шаге, и место под ещё больше последовательностей в батче: тот же GPU, та же модель.</figcaption>
+      </figure>
+
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Weight-only</strong></td><td>Веса хранятся компактно, арифметика всё ещё в 16-бит. Обычный случай для serving LLM: GPTQ, AWQ, GGUF — все здесь.</td></tr>
+            <tr><td><strong>Weight-and-activation</strong></td><td>Сама арифметика выполняется в INT8 или FP8. Ещё быстрее, но нужно железо с поддержкой.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Цена</span>
+        <p>Немного качества — измеряется как разрыв в perplexity или в оценке на задаче относительно полной точности. Обычно небольшой при 8 битах, заметный при 4. Никогда не считайте его нулевым: измеряйте на своей задаче.</p>
+      </div>
+
+      <h3 class="sub">Как это делается, грубо</h3>
+      <div class="prose"><p>Без градиентов, без разметки. По одному слою за раз: подобрать округление весов, которое держит выход слоя ближе всего к полной точности, на калибровочном наборе из нескольких сотен примеров — затем следующий слой, уже с учётом того, что предыдущий уже квантован.</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>GGUF</strong></td><td>Формат файлов llama.cpp. CPU, Apple silicon, смешанное железо. То, что запускает Ollama.</td></tr>
+            <tr><td><strong>GPTQ</strong></td><td>Post-training, слой за слоем, с использованием информации об ошибке <strong>второго порядка</strong> для выбора округления.</td></tr>
+            <tr><td><strong>AWQ</strong></td><td>Post-training; несколько каналов весов с наибольшими <strong>активациями</strong> масштабируются вверх перед округлением, чтобы сохранить точность.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p><strong>Практический вывод:</strong> GGUF — для ноутбука; чекпойнт GPTQ или AWQ — для GPU-serving в vLLM или SGLang. Более низкая точность покупает память и скорость и стоит немного качества — какой формат встретить, зависит от выбранного рантайма.</p></div>
+    </section>
+
+    <!-- ============ 11 SERVING-СТЕКИ ============ -->
+    <section class="sec" id="stacks">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">11</span>Serving-стеки</p>
+        <h2 class="sec-title">vLLM и SGLang</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Ollama</strong></td><td>Один локальный пользователь, очередь FIFO, заранее квантованная GGUF-модель. Для прототипирования, не для серьёзного serving.</td></tr>
+            <tr><td><strong>vLLM</strong></td><td>Откуда взялся PagedAttention. Непрерывный батчинг, самое широкое покрытие моделей и железа, стандарт, с которым все сравнивают себя.</td></tr>
+            <tr><td><strong>SGLang</strong></td><td><strong>RadixAttention</strong>: KV-кэш в radix-дереве, ключом по префиксу — любой запрос с общим префиксом переиспользует его автоматически. Оба стека обслуживают одни и те же чекпойнты за OpenAI-совместимым эндпоинтом.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Как выбирать</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Склоняйтесь к vLLM, если</strong></td><td>Модель или железо нестандартные, либо нужен максимальный набор интеграций и квантованных чекпойнтов.</td></tr>
+            <tr><td><strong>Склоняйтесь к SGLang, если</strong></td><td>В трафике доминирует переиспользование префикса: многоходовый чат, агенты, пересылающие всю историю на каждом шаге, батч-оценка.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Честный ответ: это <strong>априорная склонность, а не решение</strong>. Оба запускаются одними и теми же тремя шагами с одной и той же моделью — часовой бенчмарк на вашем собственном трафике решает вопрос.</p>
+      </div>
+    </section>
+
+    <!-- ============ 12 ДЕШЁВЫЕ РЫЧАГИ ============ -->
+    <section class="sec" id="levers">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">12</span>Практика</p>
+        <h2 class="sec-title">Сначала — дешёвые рычаги</h2>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Discussion</span>
+        <p>Ваш пайплайн работает в пять раз медленнее ожидаемого. Он делает около десяти вызовов LLM на задачу. Что пробуете первым? А что пробует большинство?</p>
+      </div>
+      <div class="prose">
+        <ol>
+          <li><strong>Измерьте.</strong> TTFT или TPOT? Какой из десяти вызовов доминирует? Десять вызовов по 0.5с и один на 20с — это разные проблемы.</li>
+          <li><strong>Сократите промпт</strong> — сначала системный — и держите префикс стабильным, чтобы кэш срабатывал.</li>
+          <li><strong>Ограничьте <code>max_tokens</code></strong> и включите streaming, чтобы первый токен приходил рано.</li>
+          <li><strong>Распараллельте</strong> вызовы, которые не зависят друг от друга.</li>
+          <li><strong>Меньшая модель</strong> для простых шагов. Маршрутизация по сложности — тема отдельной лекции.</li>
+          <li><strong>Смените провайдера или сервер.</strong> Другой API или self-hosted стек.</li>
+          <li><strong>Если self-host:</strong> квантизация, затем speculative decoding.</li>
+        </ol>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Порядок важен. Большинство команд начинают с шага шесть и пропускают первый.</p>
+      </div>
+    </section>
+
+    <!-- ============ 13 ИТОГИ ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">13</span>Итоги</p>
+        <h2 class="sec-title">Итоговые выводы лекции</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Разобрано:</strong></p>
+        <ul>
+          <li>TTFT, TPOT, throughput — и компромисс между ними</li>
+          <li>Prefill compute-bound, decode memory-bound</li>
+          <li>KV-кэш, его цена, переиспользование префикса</li>
+          <li>Непрерывный батчинг; PagedAttention</li>
+          <li>Constrained decoding как маскирование</li>
+          <li>Квантизация: форматы, выигрыш, калибровка</li>
+          <li>vLLM vs SGLang; рычаги для медленного агента</li>
+        </ul>
+        <p><strong>Что стоит запомнить:</strong></p>
+        <ul>
+          <li>Decode memory-bound — это объясняет почти всё остальное</li>
+          <li>Потолок serving — память, а не вычисления</li>
+          <li>Throughput и latency — разные цели</li>
+          <li>Ограничение на decode лучше, чем парсер постфактум</li>
+          <li>Меньше байт на вес: быстрее decode, больше места</li>
+          <li>Сначала измерьте и сократите промпт — потом меняйте сервер</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 14 ЛИТЕРАТУРА ============ -->
+    <section class="sec" id="refs">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">14</span>Литература</p>
+        <h2 class="sec-title">Источники</h2>
+      </div>
+      <ul class="lit-list">
+        <li><span class="idx">01</span>Kwon et al. 2023 · <em>Efficient Memory Management for LLM Serving with PagedAttention</em> · arXiv:2309.06180</li>
+        <li><span class="idx">02</span>Yu et al. 2022 · <em>Orca: A Distributed Serving System for Transformer-Based Generative Models</em> · OSDI '22</li>
+        <li><span class="idx">03</span>Leviathan et al. 2023 · <em>Fast Inference from Transformers via Speculative Decoding</em> · arXiv:2211.17192</li>
+        <li><span class="idx">04</span>Willard &amp; Louf 2023 · <em>Efficient Guided Generation for Large Language Models</em> · arXiv:2307.09702</li>
+        <li><span class="idx">05</span>Frantar et al. 2022 · <em>GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers</em> · arXiv:2210.17323</li>
+        <li><span class="idx">06</span>Lin et al. 2023 · <em>AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration</em> · arXiv:2306.00978</li>
+        <li><span class="idx">07</span>Micikevicius et al. 2022 · <em>FP8 Formats for Deep Learning</em> · arXiv:2209.05433</li>
+        <li><span class="idx">08</span>Zheng et al. 2023 · <em>SGLang: Efficient Execution of Structured Language Model Programs</em> · arXiv:2312.07104</li>
+        <li><span class="idx">09</span>Vaswani et al. 2017 · <em>Attention Is All You Need</em> · arXiv:1706.03762 — recap K/V</li>
+      </ul>
+      <div class="callout">
+        <span class="mark">Дальше</span>
+        <p><strong>Лекция 04: Introduction to Agents.</strong> Что такое агент (включая не-LLM разновидность), анатомия (модель, инструменты, память, цикл, условие остановки), ReAct и Plan-and-Execute, когда агент <em>не</em> нужен. Связь с сегодняшним: вы уже знаете, во что обходится один вызов и почему; constrained decoding вернётся в лекции 05, переиспользование префикса — как экономика в лекции 13.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект лекции · LLM Inference &amp; Serving · LLM Agent Development, Lecture 03, HSE University</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>

@@ -15,6 +15,30 @@
 
 const NOTES = [
   {
+    id: "llm-inference-serving",
+    title: "LLM Inference & Serving: KV-кэш, батчинг, квантизация",
+    division: "it",
+    category: "LLM-агенты",
+    date: "2026-09-12",
+    displayDate: "12 сен 2026",
+    description: "Prefill и decode, зачем нужен KV-кэш и его цена, непрерывный батчинг и PagedAttention, constrained decoding, speculative decoding, квантизация (FP16/INT8/INT4, GPTQ/AWQ/GGUF) и выбор между vLLM и SGLang.",
+    tags: ["kv-cache", "quantization"],
+    file: "../notes/llm-inference-serving.html",
+    example: false
+  },
+  {
+    id: "llm-fundamentals",
+    title: "LLM Fundamentals: токенизация, эмбеддинги, трансформер",
+    division: "it",
+    category: "LLM-агенты",
+    date: "2026-09-11",
+    displayDate: "11 сен 2026",
+    description: "BPE-токенизация, эмбеддинги и косинусное сходство, механизм внимания и архитектура трансформера, почему галлюцинации структурны, параметры генерации (temperature, top-k/top-p/min-p) и что на самом деле покупает reasoning effort.",
+    tags: ["transformer", "attention"],
+    file: "../notes/llm-fundamentals.html",
+    example: false
+  },
+  {
     id: "dl-lecture2-dropout-batchnorm",
     title: "Deep Learning. Лекция 2: NLL, Dropout и Batch Norm",
     division: "it",

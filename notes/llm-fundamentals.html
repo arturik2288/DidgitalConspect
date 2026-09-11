@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM Fundamentals: токенизация, эмбеддинги, трансформер — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#0a0a0d;
+      --surface:#131318;
+      --surface-2:#1a1a22;
+      --ink:#f5f5fa;
+      --ink-soft:#c3c3d2;
+      --ink-faint:#83839a;
+      --accent:#00e5ff;
+      --accent-strong:#7df3ff;
+      --accent-soft:#0d2b30;
+      --accent-2:#ff5fd1;
+      --accent-2-soft:#2a0f24;
+      --accent-3:#a6ff4d;
+      --accent-3-soft:#182408;
+      --rule:#26262f;
+      --shadow: 0 1px 2px rgba(0,229,255,.07), 0 10px 28px -12px rgba(0,0,0,.7);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 90%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    blockquote.quote{
+      margin:20px 0; padding:4px 0 4px 20px;
+      border-left:3px solid var(--accent-2);
+      font-family:'Fraunces',serif; font-style:italic; color:var(--ink);
+      font-size:15.5px; max-width:68ch;
+    }
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.result .mark{ color:var(--accent-3); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.fact .mark{ color:var(--accent-2); }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    td.num{font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums;}
+    th.num{text-align:right;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:700px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+    mjx-container[jax="CHTML"]{ color: var(--ink); }
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/it.html">← Раздел «IT»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">LLM Agents · Лекция 2 · LLM Fundamentals</p>
+      <h1 class="title">Токенизация, эмбеддинги и трансформер</h1>
+      <p class="subtitle">Модель не думает — она генерирует. Разбор того, что стоит за этой фразой буквально: от BPE-токенизации и эмбеддингов до механизма внимания, причин структурных галлюцинаций и того, что на самом деле покупает параметр «reasoning effort».</p>
+      <div class="meta-row">
+        <span><strong>Aleksandr Algazinov</strong>, HSE University</span>
+        <span>LLM Agent Development · Lecture 02</span>
+        <span>11.09.2026</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#motivation"><span class="n">01</span>Мотивация</a>
+      <a href="#tokens"><span class="n">02</span>Токенизация</a>
+      <a href="#embeddings"><span class="n">03</span>Эмбеддинги</a>
+      <a href="#why-transformer"><span class="n">04</span>Зачем трансформер</a>
+      <a href="#architecture"><span class="n">05</span>Архитектура</a>
+      <a href="#since2017"><span class="n">06</span>Что изменилось</a>
+      <a href="#objective"><span class="n">07</span>От вероятности к тексту</a>
+      <a href="#sampling"><span class="n">08</span>Параметры генерации</a>
+      <a href="#thinking"><span class="n">09</span>Reasoning-режимы</a>
+      <a href="#summary"><span class="n">10</span>Итоги</a>
+      <a href="#next"><span class="n">11</span>Дальше</a>
+      <a href="#refs"><span class="n">12</span>Литература</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 МОТИВАЦИЯ ============ -->
+    <section class="sec" id="motivation">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Мотивация</p>
+        <h2 class="sec-title">Три вещи, которые модель делает и которые вы пока не можете объяснить</h2>
+      </div>
+      <div class="prose">
+        <ol>
+          <li><strong>Она неверно считает буквы.</strong> Спросите, сколько букв «r» в слове «strawberry» — модель вполне может ошибиться.</li>
+          <li><strong>Один и тот же промпт даёт разные ответы.</strong> Запустите дважды — получите два разных вывода. Иногда это нужно. Часто — нет.</li>
+          <li><strong>Длинный документ стоит дороже короткого.</strong> Не пропорционально словам и не символам. Чему-то ещё.</li>
+        </ol>
+        <p>Каждый из этих трёх фактов объясняется одним блоком этой лекции.</p>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p><strong>Она не думает. Она генерирует.</strong> У языковой модели ровно один ход: имея всё, что было сказано до сих пор, сгенерировать следующий токен. Потом повторить. Всё, что вы слышали под названиями «рассуждение», «планирование» или «мышление» — это <strong>структура поверх этого цикла</strong>, а не выход за его пределы. Это не критика технологии. Это её спецификация.</p>
+      </div>
+    </section>
+
+    <!-- ============ 02 ТОКЕНИЗАЦИЯ ============ -->
+    <section class="sec" id="tokens">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Токены</p>
+        <h2 class="sec-title">Модель никогда не видит символов</h2>
+      </div>
+      <div class="prose">
+        <p>Ваш текст разбивается на <strong>токены</strong> ещё до того, как модель хоть что-то увидит. Строка <code>"strawberry"</code> для токенизатора превращается в три куска: <code>str</code>, <code>aw</code>, <code>berry</code>. Это порождает три следствия, с которыми приходится жить:</p>
+        <ul>
+          <li><strong>Она не может считать буквы</strong> — в её входе нет буквы «r», есть только куски токенов.</li>
+          <li><strong>Лимит контекста измеряется в токенах</strong> — не в словах и не в символах.</li>
+          <li><strong>Счёт выставляется в токенах</strong> — форматирование и пробелы меняют их количество.</li>
+        </ul>
+      </div>
+
+      <h3 class="sub">Byte-Pair Encoding: как выбирается разбиение</h3>
+      <div class="prose"><p>Идея BPE проста: начать с отдельных символов, слить самую частую соседнюю пару, повторить.</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Шаг</th><th>Слияние</th><th>Результат на корпусе</th></tr></thead>
+          <tbody>
+            <tr><td>старт</td><td>по символам</td><td>l·o·w &nbsp; l·o·w·e·r &nbsp; n·e·w·e·s·t &nbsp; w·i·d·e·s·t</td></tr>
+            <tr><td>1</td><td>e + s → es (9×)</td><td>low &nbsp; lower &nbsp; new<b>es</b>t &nbsp; wid<b>es</b>t</td></tr>
+            <tr><td>2</td><td>es + t → est (9×)</td><td>low &nbsp; lower &nbsp; new<b>est</b> &nbsp; wid<b>est</b></td></tr>
+            <tr><td>3</td><td>l + o → lo (7×)</td><td><b>lo</b>w &nbsp; <b>lo</b>wer &nbsp; newest &nbsp; widest</td></tr>
+            <tr><td>4</td><td>lo + w → low (7×)</td><td><b>low</b> &nbsp; <b>low</b>er &nbsp; newest &nbsp; widest</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose">
+        <p>Корпус: <code>low×5, lower×2, newest×6, widest×3</code>. Останавливаемся при достижении бюджета словаря. Итог: частое слово <code>"low"</code> схлопывается в <strong>один</strong> токен, а редкое <code>"strawberry"</code> остаётся в кусках: <code>str | aw | berry</code>.</p>
+      </div>
+
+      <h3 class="sub">Почему не разбивать просто по пробелам?</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Стратегия</th><th>Компромисс</th></tr></thead>
+          <tbody>
+            <tr><td>По словам</td><td>Словарь не ограничен: любая фамилия, опечатка или составное слово — новая запись; всё невиданное превращается в единый <code>&lt;UNK&gt;</code>.</td></tr>
+            <tr><td>По символам</td><td>Крошечный словарь, невиданного не бывает вовсе — но последовательности в разы длиннее, а стоимость attention растёт с <em>квадратом</em> длины.</td></tr>
+            <tr><td>По слитым парам (BPE)</td><td>Ограниченный словарь, без <code>&lt;UNK&gt;</code>, длина последовательности близка к пословной. Платите редкими словами — они остаются в кусках.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Пробелы и регистр меняют разбиение — форматирование вашего промпта имеет цену. Неанглийский текст обычно обходится в больше токенов за тот же смысл, поскольку словарь BPE строился в основном на англоязычных корпусах.</p>
+      </div>
+    </section>
+
+    <!-- ============ 03 ЭМБЕДДИНГИ ============ -->
+    <section class="sec" id="embeddings">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Эмбеддинги</p>
+        <h2 class="sec-title">От слов к векторам</h2>
+      </div>
+      <div class="prose">
+        <p>Самое очевидное кодирование — <strong>one-hot</strong>: одно измерение на слово словаря, единица в позиции этого слова, нули везде. 8 слов → 8 измерений; 50 000 слов → 50 000 измерений — и <strong>любая</strong> пара слов оказывается ровно настолько же далека друг от друга, насколько и любая другая: <code>cat</code> и <code>kitten</code> так же далеки, как <code>cat</code> и <code>houses</code>. Такое представление вообще не кодирует смысл и растёт вместе со словарём.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Слово</th><th class="num">cat</th><th class="num">kitten</th><th class="num">dog</th><th class="num">houses</th><th class="num">man</th><th class="num">woman</th><th class="num">king</th><th class="num">queen</th></tr></thead>
+          <tbody>
+            <tr><td>cat</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+            <tr><td>kitten</td><td class="num">0</td><td class="num">1</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+            <tr><td>queen</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">1</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Разреженное vs плотное представление</h3>
+      <div class="prose">
+        <p><strong>Dense / distributed</strong> эмбеддинги устроены иначе: несколько сотен непрерывных координат, размерность фиксирована независимо от размера словаря. Близкие по смыслу слова оказываются рядом друг с другом, так что расстояние становится сравнимо со смыслом. Сравнение двух векторов делают через косинусное сходство:</p>
+      </div>
+      <div class="eq-box">$$\cos(a,b) = \frac{a\cdot b}{\|a\|\,\|b\|}$$
+        <span class="eq-note">Оператор сравнения делит длины векторов друг на друга и оставляет только угол между ними — направление кодирует смысл, а величина (норма) — нет.</span>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Проекция эмбеддингов в 2D: соседства и направления</p>
+        <svg viewBox="0 0 480 260" role="img" aria-label="Двумерная проекция эмбеддингов: cat и kitten расположены рядом, dog немного дальше, houses в стороне; параллельные стрелки от man к woman и от king к queen показывают одинаковое смысловое направление рода">
+          <circle cx="120" cy="90" r="4" fill="var(--accent)"/>
+          <text x="128" y="86" class="curve-label" fill="var(--accent)">cat</text>
+          <circle cx="140" cy="100" r="4" fill="var(--accent)"/>
+          <text x="148" y="112" class="curve-label" fill="var(--accent)">kitten</text>
+          <circle cx="90" cy="130" r="4" fill="var(--accent-3)"/>
+          <text x="55" y="148" class="curve-label" fill="var(--accent-3)">dog</text>
+          <circle cx="400" cy="40" r="4" fill="var(--ink-faint)"/>
+          <text x="360" y="30" class="curve-label" fill="var(--ink-faint)">houses</text>
+
+          <circle cx="150" cy="210" r="4" fill="var(--accent-2)"/>
+          <text x="118" y="228" class="curve-label" fill="var(--accent-2)">man</text>
+          <circle cx="185" cy="170" r="4" fill="var(--accent-2)"/>
+          <text x="193" y="166" class="curve-label" fill="var(--accent-2)">woman</text>
+          <line x1="150" y1="210" x2="185" y2="170" stroke="var(--accent-2)" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#llmArrow1)"/>
+
+          <circle cx="300" cy="225" r="4" fill="var(--accent-2)"/>
+          <text x="270" y="243" class="curve-label" fill="var(--accent-2)">king</text>
+          <circle cx="335" cy="185" r="4" fill="var(--accent-2)"/>
+          <text x="343" y="181" class="curve-label" fill="var(--accent-2)">queen</text>
+          <line x1="300" y1="225" x2="335" y2="185" stroke="var(--accent-2)" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#llmArrow1)"/>
+          <defs>
+            <marker id="llmArrow1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L7,3 L0,6 Z" fill="var(--accent-2)"/>
+            </marker>
+          </defs>
+        </svg>
+        <figcaption>Ни одна отдельная координата не означает «кошачесть» — смысл распределён по всем нескольким сотням измерений сразу. Но после проекции в 2D соседства оказываются семантическими (<code>cat</code> рядом с <code>kitten</code>, <code>houses</code> — далеко), и направления тоже: шаг от <code>man</code> к <code>woman</code> примерно повторяет шаг от <code>king</code> к <code>queen</code>.</figcaption>
+      </figure>
+
+      <h3 class="sub">Статичные vs контекстные эмбеддинги</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Статичные</th><th>Контекстные</th></tr></thead>
+          <tbody>
+            <tr><td>Один вектор на слово, навсегда. У слова «bank» единственный вектор, покрывающий и берег реки, и деньги.</td><td>Вектор зависит от предложения: «bank» у реки и «bank», где хранят сбережения, получают разные векторы.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Трансформер производит именно контекстные представления — этому посвящена большая часть следующего раздела.</p></div>
+    </section>
+
+    <!-- ============ 04 ЗАЧЕМ ТРАНСФОРМЕР ============ -->
+    <section class="sec" id="why-transformer">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Зачем трансформер</p>
+        <h2 class="sec-title">Что он купил, и чем заплатил</h2>
+      </div>
+      <div class="prose"><p>Трансформер почти полностью вытеснил рекуррентные сети. Каждому токену нужно «дотянуться» до каждого другого токена — есть два способа это устроить.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Две формы связности: рекуррентная сеть vs трансформер</p>
+        <svg viewBox="0 0 480 260" role="img" aria-label="Слева рекуррентная сеть: цепочка h1-h2-h3-h4, путь от x1 до y требует 6 переходов через общий вектор состояния. Справа трансформер: все токены соединены напрямую, путь от x1 до y4 — один переход">
+          <text x="110" y="18" text-anchor="middle" class="axis-label">RNN: последовательно</text>
+          <text x="370" y="18" text-anchor="middle" class="axis-label">Трансформер: сразу все</text>
+
+          <g font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--ink)">
+            <circle cx="40" cy="180" r="12" fill="var(--surface-2)" stroke="var(--accent)"/><text x="40" y="184" text-anchor="middle">h1</text>
+            <circle cx="90" cy="180" r="12" fill="var(--surface-2)" stroke="var(--accent)"/><text x="90" y="184" text-anchor="middle">h2</text>
+            <circle cx="140" cy="180" r="12" fill="var(--surface-2)" stroke="var(--accent)"/><text x="140" y="184" text-anchor="middle">h3</text>
+            <circle cx="190" cy="180" r="12" fill="var(--surface-2)" stroke="var(--accent)"/><text x="190" y="184" text-anchor="middle">h4</text>
+            <circle cx="115" cy="110" r="13" fill="var(--accent-2-soft)" stroke="var(--accent-2)"/><text x="115" y="114" text-anchor="middle" fill="var(--accent-2)">z</text>
+            <circle cx="115" cy="50" r="12" fill="var(--surface-2)" stroke="var(--ink-faint)"/><text x="115" y="54" text-anchor="middle">y</text>
+          </g>
+          <g stroke="var(--ink-faint)" stroke-width="1.4" fill="none">
+            <line x1="52" y1="180" x2="78" y2="180"/><line x1="102" y1="180" x2="128" y2="180"/><line x1="152" y1="180" x2="178" y2="180"/>
+          </g>
+          <g stroke="var(--accent-2)" stroke-width="1" fill="none" opacity="0.6">
+            <line x1="40" y1="168" x2="106" y2="118"/><line x1="90" y1="168" x2="110" y2="120"/><line x1="140" y1="168" x2="118" y2="120"/><line x1="190" y1="168" x2="124" y2="118"/>
+          </g>
+          <line x1="115" y1="97" x2="115" y2="62" stroke="var(--ink-faint)" stroke-width="1.4"/>
+          <text x="40" y="205" class="axis-label" text-anchor="middle">x1</text>
+          <text x="190" y="205" class="axis-label" text-anchor="middle">x4</text>
+          <text x="30" y="240" class="axis-label">x1 → y: 6 переходов, все через z</text>
+
+          <g font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--ink)">
+            <circle cx="320" cy="180" r="11" fill="var(--surface-2)" stroke="var(--rule)"/><text x="320" y="184" text-anchor="middle">x1</text>
+            <circle cx="365" cy="180" r="11" fill="var(--surface-2)" stroke="var(--rule)"/><text x="365" y="184" text-anchor="middle">x2</text>
+            <circle cx="410" cy="180" r="11" fill="var(--surface-2)" stroke="var(--rule)"/><text x="410" y="184" text-anchor="middle">x3</text>
+            <circle cx="455" cy="180" r="11" fill="var(--surface-2)" stroke="var(--rule)"/><text x="455" y="184" text-anchor="middle">x4</text>
+            <circle cx="320" cy="60" r="11" fill="var(--surface-2)" stroke="var(--rule)"/><text x="320" y="64" text-anchor="middle">y1</text>
+            <circle cx="365" cy="60" r="11" fill="var(--surface-2)" stroke="var(--rule)"/><text x="365" y="64" text-anchor="middle">y2</text>
+            <circle cx="410" cy="60" r="11" fill="var(--surface-2)" stroke="var(--rule)"/><text x="410" y="64" text-anchor="middle">y3</text>
+            <circle cx="455" cy="60" r="11" fill="var(--surface-2)" stroke="var(--rule)"/><text x="455" y="64" text-anchor="middle">y4</text>
+          </g>
+          <g stroke="var(--ink-faint)" stroke-width="0.7" opacity="0.35">
+            <line x1="320" y1="169" x2="365" y2="71"/><line x1="320" y1="169" x2="410" y2="71"/>
+            <line x1="365" y1="169" x2="320" y2="71"/><line x1="365" y1="169" x2="410" y2="71"/><line x1="365" y1="169" x2="455" y2="71"/>
+            <line x1="410" y1="169" x2="320" y2="71"/><line x1="410" y1="169" x2="365" y2="71"/><line x1="410" y1="169" x2="455" y2="71"/>
+            <line x1="455" y1="169" x2="365" y2="71"/><line x1="455" y1="169" x2="410" y2="71"/>
+          </g>
+          <line x1="320" y1="169" x2="455" y2="71" stroke="var(--accent-2)" stroke-width="2.2"/>
+          <text x="320" y="240" class="axis-label">x1 → y4: 1 переход</text>
+        </svg>
+        <figcaption>Слева: шаг $t$ ждёт шага $t{-}1$, обучение строго последовательно, а вся история сжимается в один вектор $z$. Справа: каждая позиция читает каждую позицию за один шаг — но это стоит $O(n^2)$ операций внимания на каждый проход.</figcaption>
+      </figure>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Купил</th><th>Купил</th><th>Заплатил</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Параллелизм.</strong> Шагу $t$ больше не нужен шаг $t{-}1$ — вся последовательность обучается разом. Именно это, а не точность, — причина, по которой победили трансформеры: это сделало возможным обучение на масштабе всего интернета.</td><td><strong>Отсутствие узкого места.</strong> Ничто не сжимается в единственный вектор, а любые две позиции — в одном переходе друг от друга. Расстояние больше не портит сигнал.</td><td><strong>Память.</strong> Рекуррентная модель несла $O(1)$ состояния на шаг. Трансформер платит $O(n^2)$ вниманием и кэшем, который растёт с каждым сгенерированным токеном.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Обучение — параллельно, генерация — последовательно: при обучении все позиции известны заранее и обрабатываются разом; при генерации токен $n{+}1$ зависит от токена $n$, и распараллелить это по последовательности нельзя — приходится ждать каждый токен по очереди.</p></div>
+    </section>
+
+    <!-- ============ 05 АРХИТЕКТУРА ============ -->
+    <section class="sec" id="architecture">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Архитектура</p>
+        <h2 class="sec-title">Механизм, а не вывод формул</h2>
+      </div>
+      <div class="prose">
+        <p>В оригинальной статье (Vaswani et al., 2017) всего два типа блока: <strong>Multi-Head Attention</strong> и <strong>Feed Forward</strong>, обёрнутые в Add &amp; Norm. Всё остальное на диаграмме — «сантехника». Стек $N\times$ означает буквально $N$ повторений одного и того же блока: глубина — единственное, что меняется между маленькой моделью и большой. На выходе — softmax поверх словаря: распределение вероятностей, это и есть весь выход модели за один шаг.</p>
+      </div>
+
+      <h3 class="sub">Внимание как мягкий поиск (soft lookup)</h3>
+      <div class="prose"><p>Каждый токен формирует <strong>query</strong> и предлагает свой <strong>key</strong> и <strong>value</strong>.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Query · Key · Value как мягкий поиск</p>
+        <svg viewBox="0 0 480 220" role="img" aria-label="Query сравнивается с тремя парами key-value с оценками совпадения 0.7, 0.2 и 0.1; итоговый output — взвешенная смесь всех трёх values пропорционально этим оценкам">
+          <rect x="20" y="80" width="110" height="50" rx="8" fill="var(--accent-2-soft)" stroke="var(--accent-2)"/>
+          <text x="75" y="102" text-anchor="middle" fill="var(--accent-2)" font-weight="700" font-size="13">QUERY</text>
+          <text x="75" y="118" text-anchor="middle" class="axis-label">что я ищу?</text>
+
+          <rect x="200" y="30" width="130" height="42" rx="8" fill="var(--accent-2)" opacity="0.85"/>
+          <text x="265" y="48" text-anchor="middle" fill="var(--bg)" font-weight="700" font-size="12">KEY · VALUE</text>
+          <text x="265" y="63" text-anchor="middle" fill="var(--bg)" font-size="11">match: 0.7</text>
+
+          <rect x="200" y="82" width="130" height="42" rx="8" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <text x="265" y="100" text-anchor="middle" class="axis-label">KEY · VALUE</text>
+          <text x="265" y="115" text-anchor="middle" class="axis-label">match: 0.2</text>
+
+          <rect x="200" y="134" width="130" height="42" rx="8" fill="var(--surface-2)" stroke="var(--rule)"/>
+          <text x="265" y="152" text-anchor="middle" class="axis-label">KEY · VALUE</text>
+          <text x="265" y="167" text-anchor="middle" class="axis-label">match: 0.1</text>
+
+          <rect x="370" y="80" width="95" height="50" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+          <text x="417" y="102" text-anchor="middle" fill="var(--accent)" font-weight="700" font-size="13">OUTPUT</text>
+          <text x="417" y="118" text-anchor="middle" class="axis-label">смесь</text>
+
+          <path d="M130,95 L190,51" stroke="var(--ink-faint)" stroke-width="1.3" fill="none" marker-end="url(#llmArrow2)"/>
+          <path d="M130,105 L190,103" stroke="var(--ink-faint)" stroke-width="1.3" fill="none" marker-end="url(#llmArrow2)"/>
+          <path d="M130,115 L190,155" stroke="var(--ink-faint)" stroke-width="1.3" fill="none" marker-end="url(#llmArrow2)"/>
+          <path d="M330,51 L365,95" stroke="var(--accent-2)" stroke-width="1.6" fill="none" marker-end="url(#llmArrow2)"/>
+          <path d="M330,103 L365,103" stroke="var(--ink-faint)" stroke-width="1" fill="none" marker-end="url(#llmArrow2)"/>
+          <path d="M330,155 L365,112" stroke="var(--ink-faint)" stroke-width="1" fill="none" marker-end="url(#llmArrow2)"/>
+          <defs><marker id="llmArrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--ink-faint)"/></marker></defs>
+        </svg>
+        <figcaption>Хэш-таблица вернула бы <b>одну</b> запись. Это возвращает <b>смесь всех</b> — ничто не выбирается и не отбрасывается полностью. Ключи и values уже вычисленных токенов не меняются — поэтому их можно кэшировать (подробности в следующей лекции).</figcaption>
+      </figure>
+
+      <h3 class="sub">Веса внимания на реальном предложении</h3>
+      <div class="prose"><p>Строки суммируются в 1, столбцы — нет. Верхний треугольник не существует: токен не может обращаться к тому, что идёт после него (каузальная маска).</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>attends →</th><th class="num">Hello</th><th class="num">I</th><th class="num">love</th><th class="num">you</th><th class="num">Σ</th></tr></thead>
+          <tbody>
+            <tr><td>Hello</td><td class="num">1.00</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num">1.00</td></tr>
+            <tr><td>I</td><td class="num">0.30</td><td class="num">0.70</td><td class="num">—</td><td class="num">—</td><td class="num">1.00</td></tr>
+            <tr><td>love</td><td class="num">0.15</td><td class="num">0.25</td><td class="num">0.60</td><td class="num">—</td><td class="num">1.00</td></tr>
+            <tr><td>you</td><td class="num">0.10</td><td class="num">0.15</td><td class="num">0.35</td><td class="num">0.40</td><td class="num">1.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Операция в символах</h3>
+      <div class="eq-box">$$\mathrm{Attention}(Q,K,V) = \mathrm{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V$$</div>
+      <div class="prose">
+        <ul>
+          <li><strong>$QK^{\top}$</strong> — оценить каждый query против каждого key, все пары сразу.</li>
+          <li><strong>$\div\sqrt{d_k}$</strong> — удержать оценки в диапазоне, где softmax ещё не насытился.</li>
+          <li><strong>$\mathrm{softmax}(\ldots)V$</strong> — превратить оценки в веса, суммирующиеся в 1, затем смешать values по ним.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p><strong>Почему именно $\sqrt{d_k}$?</strong> Если компоненты $Q$ и $K$ имеют примерно единичную дисперсию, то у скалярного произведения $Q\cdot K$ (суммы из $d_k$ слагаемых) дисперсия растёт пропорционально $d_k$. Без деления на $\sqrt{d_k}$ оценки при больших $d_k$ становятся слишком «острыми», softmax уходит в почти one-hot режим, а градиент — почти в ноль. Деление на $\sqrt{d_k}$ возвращает дисперсию к порядку единицы.</p>
+      </div>
+
+      <h3 class="sub">Multi-head, позиция и глубина</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Multi-head</strong></td><td>Несколько поисков параллельно. Каждая голова свободна отслеживать свою связь — синтаксис, кореференцию, тему.</td></tr>
+            <tr><td><strong>Positional encoding</strong></td><td>Внимание слепо к порядку: оно видит <em>множество</em>. Позицию нужно инъецировать явно, иначе «собака кусает человека» читается как «человек кусает собаку».</td></tr>
+            <tr><td><strong>Глубина</strong></td><td>Attention → feed-forward, с residual-связями и нормализацией, стек из $N$ блоков. Поздние слои работают над тем, что собрали ранние.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 06 ЧТО ИЗМЕНИЛОСЬ ============ -->
+    <section class="sec" id="since2017">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>2017 → сегодня</p>
+        <h2 class="sec-title">Почти ничего не выжило без изменений</h2>
+      </div>
+      <div class="prose"><p>Диаграмма из оригинальной статьи — 2017 года. Вот что современная модель, которую вы реально вызываете, с ней сделала:</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>2017</th><th>Сегодня</th><th>Что это даёт</th></tr></thead>
+          <tbody>
+            <tr><td>encoder + decoder</td><td><strong>decoder-only</strong></td><td>Один стек — та половина, которую вы реально вызываете</td></tr>
+            <tr><td>sinusoidal position</td><td><strong>RoPE</strong> (rotary)</td><td>Относительная позиция, расширяется за пределы длины обучения</td></tr>
+            <tr><td>post-LayerNorm</td><td><strong>pre-norm + RMSNorm</strong></td><td>Обучается глубоко без разогревочного расписания</td></tr>
+            <tr><td>ReLU feed-forward</td><td><strong>SwiGLU</strong></td><td>Лучше качество при том же числе параметров</td></tr>
+            <tr><td>multi-head attention</td><td><strong>grouped-query (GQA)</strong></td><td>Головы делят K и V — кэш становится меньше</td></tr>
+            <tr><td>dense feed-forward</td><td><strong>mixture of experts</strong></td><td>Параметры и вычисления перестают быть одним числом</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Связь с лекцией 2</span>
+        <p><strong>RMSNorm</strong> — близкий родственник Batch Normalization: тоже принудительно нормализует активации, но проще — делит только на среднеквадратичное значение, без вычитания среднего и без обучаемого сдвига. Работает <em>внутри</em> одного примера (по признакам), а не по батчу — поэтому не нужны ни батчевая, ни running-статистика из предыдущей лекции.</p>
+      </div>
+      <div class="prose"><p>Последние две строки таблицы — про <em>стоимость</em>, а не про способность модели; это отдельная большая тема (в частности, устройство кэша ключей и значений).</p></div>
+    </section>
+
+    <!-- ============ 07 ОТ ВЕРОЯТНОСТИ К ТЕКСТУ ============ -->
+    <section class="sec" id="objective">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Цель обучения</p>
+        <h2 class="sec-title">Вся цель обучения — в одну строку</h2>
+      </div>
+      <div class="eq-box">$$P(x_1,\ldots,x_T) = \prod_{t=1}^{T}P(x_t\mid x_{\lt t})$$</div>
+      <div class="prose"><p>Вероятность целого документа — эссе, доказательства, рабочей программы — это произведение локальных решений «какой токен следующий». В этой формуле нет ни одного члена для «плана».</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Каждый шаг</strong></td><td>Одна оценка на каждый токен словаря → softmax в распределение → выбрать один, добавить, повторить.</td></tr>
+            <tr><td><strong>Что из этого следует</strong></td><td>Структура дальнего порядка — эмерджентна, а не спланирована заранее. Распределение всегда корректно построено — даже когда модель неправа.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Что реально выходит на каждом шаге</h3>
+      <div class="prose"><p>Не слово и не вероятность — один <strong>неограниченный (unbounded) score</strong> на каждый токен словаря, для контекста <code>"The capital of France is"</code>:</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Токен</th><th class="num">Логит</th><th class="num">После softmax</th></tr></thead>
+          <tbody>
+            <tr><td>Paris</td><td class="num">+8.2</td><td class="num">0.968</td></tr>
+            <tr><td>the</td><td class="num">+4.1</td><td class="num">0.016</td></tr>
+            <tr><td>located</td><td class="num">+3.6</td><td class="num">0.010</td></tr>
+            <tr><td>a</td><td class="num">+2.9</td><td class="num">0.005</td></tr>
+            <tr><td>home</td><td class="num">+1.4</td><td class="num">0.001</td></tr>
+            <tr><td>Lyon</td><td class="num">+0.7</td><td class="num">0.00054</td></tr>
+            <tr><td>banana</td><td class="num">−3.5</td><td class="num">0.0000080</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>...и ещё 49 993 токена, каждый оценён, на каждом шаге. Один — выбран, добавлен, и вся процедура запускается заново.</p></div>
+
+      <h3 class="sub">Почему галлюцинации — структурны, а не баг</h3>
+      <div class="callout fact">
+        <span class="mark">Ничего в цели не спрашивает, правда ли это</span>
+        <p>Цель обучения вознаграждает <strong>правдоподобный</strong> следующий токен, а не правильный. Уверенно выглядящая, но выдуманная ссылка — это ровно то, что выглядит как высоковероятное продолжение фразы «according to». В формуле $P(x_1\ldots x_n)=\prod_t P(x_t\mid x_{\lt t})$ нет члена, который измерял бы истинность.</p>
+      </div>
+      <div class="prose">
+        <p>Поэтому фраза в системном промпте вроде <em>«скажи, если не уверена»</em> не чинит это на уровне механизма: она просит модель сообщить об уверенности, которую та никогда не вычисляла. Она меняет <strong>стиль</strong> вывода, а не то, что модель «знает». Модель, которая всегда выдаёт распределение по следующему токену, всегда выдаст беглый текст — независимо от того, есть ли у неё на это основания. Внутреннего состояния «я не знаю» не существует, если оно не было явно вложено обучением.</p>
+        <p>Это не баг: беглость и фактическая точность — разные свойства, и цель обучения оптимизирует именно первое. Детекция, grounding (привязка к источникам) и абстенция (отказ отвечать) — это уже инженерия поверх модели, а не свойство самой цели предсказания следующего токена.</p>
+      </div>
+    </section>
+
+    <!-- ============ 08 ПАРАМЕТРЫ ГЕНЕРАЦИИ ============ -->
+    <section class="sec" id="sampling">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Генерация</p>
+        <h2 class="sec-title">Параметры генерации: четыре рычага</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Greedy</strong></td><td>Всегда брать токен с наибольшей вероятностью. Воспроизводимо, но склонно к плоскому, зацикленному тексту.</td></tr>
+            <tr><td><strong>Sampling</strong></td><td>Тянуть из распределения. Разнообразнее, неожиданнее — и легче ошибается.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Всё дальше — о том, <strong>какую часть распределения</strong> вы готовы использовать.</p></div>
+
+      <h3 class="sub">Температура</h3>
+      <div class="eq-box">$$p_i = \frac{\exp(z_i/T)}{\sum_j\exp(z_j/T)}$$
+        <span class="eq-note">Тот же softmax, что и на выходном слое, с одним дополнительным делением: $T$ делит логиты до экспоненты — так распределение меняет форму, но ни один токен из него никогда полностью не исчезает.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Низкая · 0.0–0.3</strong></td><td>Заостряет к верхнему токену. Извлечение данных, классификация, аргументы инструментов.</td></tr>
+            <tr><td><strong>Средняя · ~0.7</strong></td><td>Обычный дефолт для диалога.</td></tr>
+            <tr><td><strong>Высокая · &gt;1.0</strong></td><td>Уплощает распределение. Больше разнообразия, больше шансов выбрать неправдоподобное.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Одни и те же логиты, три температуры</p>
+        <svg viewBox="0 0 480 240" role="img" aria-label="Три группы столбцов для одних и тех же логитов при T=0.2 (резко острый пик на Paris), T=0.7 (умеренный) и T=1.5 (плоский); во всех трёх токен banana остаётся с ненулевой вероятностью">
+          <g font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--ink-faint)" text-anchor="middle">
+            <text x="80" y="20">T = 0.2</text><text x="240" y="20">T = 0.7</text><text x="400" y="20">T = 1.5</text>
+          </g>
+          <line x1="20" y1="200" x2="460" y2="200" stroke="var(--rule)" stroke-width="1"/>
+          <!-- T=0.2: Paris .98, rest tiny -->
+          <g fill="var(--accent)">
+            <rect x="30" y="34" width="16" height="166"/>
+            <rect x="55" y="198" width="16" height="2"/>
+            <rect x="80" y="198" width="16" height="2"/>
+            <rect x="105" y="198" width="16" height="2"/>
+            <rect x="130" y="198" width="16" height="2"/>
+          </g>
+          <!-- T=0.7: Paris .63 -->
+          <g fill="var(--accent-2)">
+            <rect x="190" y="90" width="16" height="110"/>
+            <rect x="215" y="160" width="16" height="40"/>
+            <rect x="240" y="172" width="16" height="28"/>
+            <rect x="265" y="190" width="16" height="10"/>
+            <rect x="290" y="196" width="16" height="4"/>
+          </g>
+          <!-- T=1.5: Paris .41 -->
+          <g fill="var(--accent-3)">
+            <rect x="350" y="118" width="16" height="82"/>
+            <rect x="375" y="140" width="16" height="60"/>
+            <rect x="400" y="155" width="16" height="45"/>
+            <rect x="425" y="168" width="16" height="32"/>
+            <rect x="450" y="178" width="16" height="22"/>
+          </g>
+          <g class="axis-label" text-anchor="middle">
+            <text x="38" y="212">Paris</text><text x="63" y="212">the</text><text x="88" y="212">a</text><text x="113" y="212">home</text><text x="138" y="212">Lyon</text>
+            <text x="198" y="212">Paris</text><text x="223" y="212">the</text><text x="248" y="212">a</text><text x="273" y="212">home</text><text x="298" y="212">Lyon</text>
+            <text x="358" y="212">Paris</text><text x="383" y="212">the</text><text x="408" y="212">a</text><text x="433" y="212">home</text><text x="458" y="212">Lyon</text>
+          </g>
+        </svg>
+        <figcaption>Смотрите на короткие столбцы, не на высокий. При $T=0.2$ хвост распределения раздавлен, но всё ещё <b>там</b> — температура переформирует распределение, но никогда его не обрезает.</figcaption>
+      </figure>
+
+      <h3 class="sub">Какой хвост отрезать</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>top-k</strong></td><td>Оставить $k$ самых вероятных токенов. Фиксированное число, независимо от уверенности модели.</td></tr>
+            <tr><td><strong>top-p</strong></td><td>Оставить наименьший набор, чья вероятностная масса набирает $p$. Адаптивно: мало токенов при уверенности, много — при неуверенности.</td></tr>
+            <tr><td><strong>min-p</strong></td><td>Оставить токены выше порога, <strong>отмасштабированного вероятностью топового токена</strong>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>На практике задают <strong>один</strong> рычаг отсечения, а не три сразу: top-p — обычный дефолт; при совместном использовании молча побеждает самое строгое ограничение.</p>
+      </div>
+
+      <h3 class="sub">Штрафы и повторения</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Frequency penalty</strong></td><td>Снижает оценку токена пропорционально тому, сколько раз он уже встречался. Чем чаще повтор — тем сильнее давление вниз.</td></tr>
+            <tr><td><strong>Presence penalty</strong></td><td>Снижает оценку, как только токен встретился хотя бы раз, независимо от количества. Плоский «налог» на повторное использование.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Оба борются с зацикливанием. Оба, если перекрутить, заставляют модель избегать слов, которые ей реально нужны — в том числе тех, что заданы вашей схемой вывода.</p></div>
+
+      <div class="callout fact">
+        <span class="mark">Discussion: temperature = 0 — это детерминизм?</span>
+        <p>Нет, не гарантированно — и это не банальность. При <code>temperature=0</code> сэмплер вырождается в greedy (argmax), но сам <strong>расчёт логитов</strong> на GPU не обязан быть детерминированным: операции суммирования с плавающей точкой не ассоциативны, а порядок вычислений в батч-ядрах зависит от того, какие ещё запросы обрабатываются параллельно в этом батче и как планировщик разбивает работу между потоками. Разные составы батча → разный порядок суммирования → чуть другие логиты → иногда другой argmax на грани двух близких по величине токенов. Это подробно разобрано в статье Thinking Machines Lab «Defeating Nondeterminism in LLM Inference» (2025, см. §12).</p>
+      </div>
+    </section>
+
+    <!-- ============ 09 THINKING MODES ============ -->
+    <section class="sec" id="thinking">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>Reasoning</p>
+        <h2 class="sec-title">Что на самом деле делает рычаг «рассуждения»</h2>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p><strong>«Reasoning» — это паттерн генерации токенов, а не другой алгоритм.</strong> Reasoning-модель не запускает иной вычислительный процесс. Она прогоняет тот же самый цикл «предсказать следующий токен», просто тратит токены на проблему <em>до</em> того, как потратит их на ответ.</p>
+      </div>
+      <div class="prose">
+        <p>Это работает ровно по той причине, которую предсказывает §07: каждый токен обусловлен всем, что уже было сгенерировано, — значит токены, потраченные на то, чтобы разложить задачу, становятся токенами, на которые обусловлен ответ. Следствие 3 из мотивации в начале лекции: модель не может «отменить» уже сгенерированный токен, поэтому всё, что она должна взвесить, должно быть сгенерировано <em>первым</em>. «Мышление» — это именно это наблюдение, превращённое в продукт.</p>
+      </div>
+
+      <h3 class="sub">Счёт, который вы обычно не видите</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Reasoning-токены — это токены вывода</strong></td><td>Они тарифицируются как output, потребляют то же окно контекста, а задержка растёт с ними примерно линейно. Обычно вы их просто не видите.</td></tr>
+            <tr><td><strong>Значит, окно контекста — не то, чем кажется</strong></td><td>Тривиальный обмен репликами может истратить серьёзную долю бюджета ещё до появления первого видимого слова ответа.</td></tr>
+            <tr><td><strong>Рычаг не покупает мышление</strong></td><td>Он покупает токены. Тот же цикл, просто заранее и в большем количестве.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 10 ИТОГИ ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">10</span>Итоги</p>
+        <h2 class="sec-title">Открывающие вопросы, отвеченные</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Почему неверно считает буквы</strong></td><td>Она никогда не получала буквы — «strawberry» пришло как куски подслов.</td></tr>
+            <tr><td><strong>Почему один промпт даёт разные ответы</strong></td><td>Она сэмплирует. Температура и усечение хвоста определяют, насколько велика используемая часть распределения — а на GPU даже сам расчёт логитов не гарантированно детерминирован.</td></tr>
+            <tr><td><strong>Почему длинный документ стоит дороже</strong></td><td>И стоимость, и лимит контекста измеряются в токенах, а не в словах.</td></tr>
+            <tr><td><strong>И это всё ещё не мышление</strong></td><td>Теперь вы знаете, что она делает вместо этого — и, значит, где именно можно вмешаться.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="prose">
+        <p><strong>Разобрано:</strong></p>
+        <ul>
+          <li>BPE и токены как единица и контекста, и стоимости</li>
+          <li>Разреженные vs плотные векторы, косинусное сходство</li>
+          <li>Что заменил трансформер и какова его цена</li>
+          <li>Внимание как мягкий поиск — направленный, замаскированный</li>
+          <li>Логиты, softmax и структурная природа галлюцинаций</li>
+          <li>Температура, усечение, штрафы, детерминизм</li>
+          <li>Reasoning effort как рычаг над числом токенов</li>
+        </ul>
+        <p><strong>Что стоит запомнить:</strong></p>
+        <ul>
+          <li>Она не видит того, что убрала токенизация</li>
+          <li>Направление — это смысл; длина вектора — нет</li>
+          <li>Ключи и values не меняются — их можно кэшировать</li>
+          <li>Беглость — не то же самое, что правильность</li>
+          <li>Один рычаг усечения, выбранный осознанно</li>
+          <li>Арифметика точна; форма распределения — нет</li>
+          <li>Она генерирует. Она не думает.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 11 ДАЛЬШЕ ============ -->
+    <section class="sec" id="next">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">11</span>Дальше</p>
+        <h2 class="sec-title">Лекция 03: LLM Inference &amp; Serving</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Что будет разобрано</strong></td><td>Prefill vs decode и почему они ведут себя по-разному; KV-кэш и его цена в памяти; статический vs непрерывный (continuous) батчинг, PagedAttention; constrained decoding как механизм.</td></tr>
+            <tr><td><strong>Как это связано с сегодняшним</strong></td><td>Вы уже видели замаскированный треугольник внимания — дальше: зачем кэшировать именно $K$ и $V$? Токены как единица измерения становятся токенами как единица стоимости. Последовательная генерация превращается в системную (инженерную) проблему.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 12 ЛИТЕРАТУРА ============ -->
+    <section class="sec" id="refs">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">12</span>Литература</p>
+        <h2 class="sec-title">Источники</h2>
+      </div>
+      <h3 class="sub">Представление и архитектура</h3>
+      <ul class="lit-list">
+        <li><span class="idx">01</span>Vaswani et al. 2017 · <em>Attention Is All You Need</em> · arXiv:1706.03762</li>
+        <li><span class="idx">02</span>Sennrich et al. 2016 · <em>Neural Machine Translation of Rare Words with Subword Units</em> · arXiv:1508.07909</li>
+        <li><span class="idx">03</span>Mikolov et al. 2013 · <em>Efficient Estimation of Word Representations in Vector Space</em> · arXiv:1301.3781</li>
+        <li><span class="idx">04</span>Sutskever et al. 2014 · <em>Sequence to Sequence Learning with Neural Networks</em> · arXiv:1409.3215</li>
+        <li><span class="idx">05</span>Bahdanau et al. 2015 · <em>Neural Machine Translation by Jointly Learning to Align and Translate</em> · arXiv:1409.0473</li>
+        <li><span class="idx">06</span>Su et al. 2021 · <em>RoFormer: Enhanced Transformer with Rotary Position Embedding</em> · arXiv:2104.09864</li>
+        <li><span class="idx">07</span>Zhang &amp; Sennrich 2019 · <em>Root Mean Square Layer Normalization</em> · arXiv:1910.07467</li>
+        <li><span class="idx">08</span>Xiong et al. 2020 · <em>On Layer Normalization in the Transformer Architecture</em> · arXiv:2002.04745</li>
+        <li><span class="idx">09</span>Shazeer 2020 · <em>GLU Variants Improve Transformer</em> · arXiv:2002.05202</li>
+      </ul>
+      <h3 class="sub">Генерация и поведение</h3>
+      <ul class="lit-list">
+        <li><span class="idx">10</span>Shazeer 2019 · <em>Fast Transformer Decoding: One Write-Head is All You Need</em> · arXiv:1911.02150</li>
+        <li><span class="idx">11</span>Ainslie et al. 2023 · <em>GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints</em> · arXiv:2305.13245</li>
+        <li><span class="idx">12</span>Fedus et al. 2021 · <em>Switch Transformers</em> · arXiv:2101.03961</li>
+        <li><span class="idx">13</span>Holtzman et al. 2020 · <em>The Curious Case of Neural Text Degeneration</em> · arXiv:1904.09751</li>
+        <li><span class="idx">14</span>Thinking Machines Lab 2025 · <em>Defeating Nondeterminism in LLM Inference</em></li>
+        <li><span class="idx">15</span>OpenAI · <em>Reasoning models</em> · developers.openai.com/api/docs/guides/reasoning</li>
+        <li><span class="idx">16</span>Anthropic · <em>Effort and adaptive thinking</em> · platform.claude.com/docs/en/build-with-claude/effort</li>
+        <li><span class="idx">17</span>Google · <em>Gemini thinking</em> · ai.google.dev/gemini-api/docs/thinking</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект лекции · LLM Fundamentals · LLM Agent Development, Lecture 02, HSE University</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>
