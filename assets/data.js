@@ -15,6 +15,30 @@
 
 const NOTES = [
   {
+    id: "ml-linear-regression",
+    title: "ML: линейная и логистическая регрессия",
+    division: "it",
+    category: "Машинное обучение",
+    date: "2026-09-14",
+    displayDate: "14 сен 2026",
+    description: "Постановка задачи ML, линейная модель и признаки для неё, функции потерь регрессии (MSE, MAE, Huber, квантильная), переобучение и кросс-валидация, точное решение и градиентный спуск (SGD, SAG, Adam), логистическая регрессия и регуляризация.",
+    tags: ["линейная регрессия", "градиентный спуск"],
+    file: "../notes/ml-linear-regression.html",
+    example: false
+  },
+  {
+    id: "nlp-lecture1-embeddings-rnn",
+    title: "NLP. Лекция 1: от Bag-of-Words до RNN и LSTM",
+    division: "it",
+    category: "NLP",
+    date: "2026-09-13",
+    displayDate: "13 сен 2026",
+    description: "One-hot, BoW, TF-IDF и LSA; классификация текста (наивный Байес, TF-IDF+LogReg, Bag of Embeddings); Word2Vec, negative sampling и hierarchical softmax; FastText, GloVe; N-граммы, RNN, взрыв/затухание градиентов и LSTM.",
+    tags: ["word2vec", "RNN"],
+    file: "../notes/nlp-lecture1-embeddings-rnn.html",
+    example: false
+  },
+  {
     id: "llm-inference-serving",
     title: "LLM Inference & Serving: KV-кэш, батчинг, квантизация",
     division: "it",

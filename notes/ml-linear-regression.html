@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ML: линейная и логистическая регрессия — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#0a0a0d;
+      --surface:#131318;
+      --surface-2:#1a1a22;
+      --ink:#f5f5fa;
+      --ink-soft:#c3c3d2;
+      --ink-faint:#83839a;
+      --accent:#00e5ff;
+      --accent-strong:#7df3ff;
+      --accent-soft:#0d2b30;
+      --accent-2:#ff5fd1;
+      --accent-2-soft:#2a0f24;
+      --accent-3:#a6ff4d;
+      --accent-3-soft:#182408;
+      --rule:#26262f;
+      --shadow: 0 1px 2px rgba(0,229,255,.07), 0 10px 28px -12px rgba(0,0,0,.7);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 90%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.result .mark{ color:var(--accent-3); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.fact .mark{ color:var(--accent-2); }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    td.num{font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums;}
+    th.num{text-align:right;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:700px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+    mjx-container[jax="CHTML"]{ color: var(--ink); }
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/it.html">← Раздел «IT»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">HSE ML · ФКН · Линейные модели</p>
+      <h1 class="title">Линейная и логистическая регрессия</h1>
+      <p class="subtitle">От постановки задачи машинного обучения до градиентного спуска и его модификаций: функции потерь, точное решение, переобучение и регуляризация, а также логистическая регрессия как естественное продолжение линейной.</p>
+      <div class="meta-row">
+        <span>Е. А. Соколов, ФКН ВШЭ · Deep Learning School</span>
+        <span>Курс ML · Лекции 1–3 + линейные модели</span>
+        <span>14.09.2026</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#motivation"><span class="n">01</span>Мотивация</a>
+      <a href="#problem"><span class="n">02</span>Постановка задачи</a>
+      <a href="#linear-model"><span class="n">03</span>Линейная модель</a>
+      <a href="#features"><span class="n">04</span>Признаки для линейных моделей</a>
+      <a href="#losses"><span class="n">05</span>Функции потерь регрессии</a>
+      <a href="#overfitting"><span class="n">06</span>Переобучение и оценка качества</a>
+      <a href="#exact"><span class="n">07</span>Точное решение</a>
+      <a href="#gd"><span class="n">08</span>Градиентный спуск</a>
+      <a href="#gd-estimate"><span class="n">09</span>Оценивание градиента</a>
+      <a href="#gd-modifications"><span class="n">10</span>Модификации спуска</a>
+      <a href="#probabilistic"><span class="n">11</span>От регрессии к классификации</a>
+      <a href="#logreg"><span class="n">12</span>Логистическая регрессия</a>
+      <a href="#regularization"><span class="n">13</span>Регуляризация</a>
+      <a href="#normalization"><span class="n">14</span>Нормализация признаков</a>
+      <a href="#summary"><span class="n">15</span>Итоги</a>
+      <a href="#refs"><span class="n">16</span>Литература</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 МОТИВАЦИЯ ============ -->
+    <section class="sec" id="motivation">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Мотивация</p>
+        <h2 class="sec-title">Зачем нужно машинное обучение</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Машинное обучение</strong> — наука, изучающая способы извлечения закономерностей из ограниченного количества примеров. Оно нужно там, где нельзя построить точную модель из понимания природы процесса (как второй закон Ньютона для силы), но зато есть много данных с примерами правильных решений.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Когда ML уместен</strong></td><td>Нельзя вывести формулу ответа из знаний об устройстве мира; зависимость сложная, подобрать её вручную трудно; есть достаточно примеров с известными ответами.</td></tr>
+            <tr><td><strong>Когда ML избыточен</strong></td><td>Точный алгоритм уже существует — незачем предсказывать силу по массе и ускорению, когда есть $F=ma$, или обучать сеть сортировке массива, когда есть сортировка слиянием.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>ML также применяют, когда зависимость понятна, но сам расчёт ответа трудоёмок (классификация огурцов по фото вместо ручной проверки каждого), либо когда алгоритм решения вообще невозможно формализовать, а опытные люди справляются интуитивно (выплавка стали, игра в го — AlphaGo).</p>
+      </div>
+    </section>
+
+    <!-- ============ 02 ПОСТАНОВКА ЗАДАЧИ ============ -->
+    <section class="sec" id="problem">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Формализация</p>
+        <h2 class="sec-title">Объекты, признаки, обучающая выборка</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Объект</strong> $x$ — то, для чего делается предсказание; множество всех объектов — <strong>пространство объектов</strong> $\mathbb{X}$. <strong>Ответ</strong> (целевая переменная) $y$ лежит в <strong>пространстве ответов</strong> $\mathbb{Y}$. Объекты сами по себе — абстрактные сущности; чтобы с ними работать, их описывают набором <strong>признаков</strong> — вектором чисел, категорий или более сложных структур.</p>
+        <p><strong>Обучающая выборка</strong> $X = \{(x_1,y_1), \dots, (x_\ell, y_\ell)\}$ — примеры с известными правильными ответами. В матричном виде это матрица «объекты-признаки» $X \in \mathbb{R}^{\ell \times d}$: строки — объекты, столбцы — признаки.</p>
+      </div>
+
+      <h3 class="sub">Типы задач обучения с учителем</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Пространство $\mathbb{Y}$</th><th>Задача</th><th>Пример</th></tr></thead>
+          <tbody>
+            <tr><td>$\mathbb{R}$</td><td>Регрессия</td><td>Прибыль ресторана</td></tr>
+            <tr><td>$\{0,1\}$</td><td>Бинарная классификация</td><td>Кликнет ли пользователь по рекламе</td></tr>
+            <tr><td>$\{1,\dots,K\}$</td><td>Многоклассовая (multi-class)</td><td>Предметная область научной статьи</td></tr>
+            <tr><td>$\{0,1\}^K$</td><td>Multi-label</td><td>Теги ресторана (несколько сразу)</td></tr>
+            <tr><td>частично известно</td><td>Semi-supervised</td><td>Медицинский анализ дорог не для всех</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Обучение без учителя</h3>
+      <div class="prose"><p>Ответы неизвестны или не существуют — ищутся закономерности только в признаках.</p></div>
+      <div class="pill-row">
+        <span class="pill">кластеризация</span>
+        <span class="pill">оценивание плотности (детекция аномалий)</span>
+        <span class="pill">визуализация</span>
+        <span class="pill">понижение размерности</span>
+        <span class="pill">обучение с подкреплением</span>
+      </div>
+
+      <h3 class="sub">Функция и функционал</h3>
+      <div class="prose">
+        <p>Задача — построить <strong>алгоритм</strong> (модель) $a: \mathbb{X} \to \mathbb{Y}$, предсказывающий ответ. Чтобы понять, какой алгоритм лучше, вводится <strong>функционал качества</strong> (или ошибки, если его минимизируют). Самый популярный в регрессии — среднеквадратичная ошибка:</p>
+      </div>
+      <div class="eq-box">$$Q(a, X) = \frac{1}{\ell}\sum_{i=1}^{\ell}\big(a(x_i) - y_i\big)^2$$</div>
+      <div class="callout fact">
+        <span class="mark">Функционал определяет всё</span>
+        <p>Именно выбор функционала решает, какой алгоритм окажется «лучшим». Он не обязан быть выпуклым или дифференцируемым, но обязан отражать реальные требования к задаче — плохой выбор здесь обрекает все дальнейшие шаги на провал.</p>
+      </div>
+
+      <h3 class="sub">Семь этапов решения задачи ML</h3>
+      <div class="prose">
+        <ol>
+          <li>Постановка задачи</li>
+          <li>Выделение признаков</li>
+          <li>Формирование выборки</li>
+          <li>Выбор функционала ошибки</li>
+          <li>Предобработка данных (масштабирование, борьба с выбросами и шумовыми признаками)</li>
+          <li>Построение модели</li>
+          <li>Оценивание качества модели</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ 03 ЛИНЕЙНАЯ МОДЕЛЬ ============ -->
+    <section class="sec" id="linear-model">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Простейшее семейство</p>
+        <h2 class="sec-title">Линейная модель</h2>
+      </div>
+      <div class="prose"><p>Самое простое и тщательно изученное семейство алгоритмов — линейные модели: предсказание равно линейной комбинации признаков.</p></div>
+      <div class="eq-box">$$a(x) = w_0 + w_1 x_1 + \dots + w_d x_d = w_0 + \langle w, x \rangle$$</div>
+      <div class="prose"><p>Приём для упрощения записи — добавить к каждому объекту фиктивный признак, равный единице (<strong>bias trick</strong>). Тогда вес при нём сам возьмёт на себя роль свободного коэффициента:</p></div>
+      <div class="formula-box">
+        <div class="eq">$a(x) = \langle w, x \rangle$</div>
+        <div class="formula-legend">
+          <div class="item"><b>x = (1, x₁, …, xₙ)</b>с фиктивной единицей</div>
+          <div class="item"><b>w = (w₀, w₁, …, wₙ)</b>вектор весов</div>
+        </div>
+      </div>
+
+      <h3 class="sub">Почему линейные модели до сих пор используются</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Простота</strong></td><td>Быстро и легко обучаются, подходят для больших объёмов данных.</td></tr>
+            <tr><td><strong>Мало параметров</strong></td><td>Контролируется риск переобучения; хорошо работают на зашумлённых и небольших выборках.</td></tr>
+            <tr><td><strong>Интерпретируемость</strong></td><td>Каждый вес — вклад признака в ответ; критично там, где нужна надёжность и объяснимость решения.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Линейность по параметрам, а не по признакам</h3>
+      <div class="prose"><p>Модель линейна именно по весам $w$ — сами признаки $x_i$ могут быть чем угодно:</p></div>
+      <div class="pill-row">
+        <span class="pill">численный признак напрямую</span>
+        <span class="pill">преобразования: корень, логарифм</span>
+        <span class="pill">степени: $x_2=x_1^2,\ x_3=x_1^3$</span>
+        <span class="pill">значения One-Hot-Encoding</span>
+        <span class="pill">взаимодействия: $x_3=x_1 x_2$</span>
+      </div>
+      <div class="callout result">
+        <span class="mark">Ключевая мысль</span>
+        <p>Это открывает пространство для манёвра: подставляя нелинейные преобразования признаков в линейную по весам формулу, можно моделировать существенно нелинейные зависимости — не меняя сам метод обучения.</p>
+      </div>
+    </section>
+
+    <!-- ============ 04 ПРИЗНАКИ ============ -->
+    <section class="sec" id="features">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Подготовка данных</p>
+        <h2 class="sec-title">Признаки для линейных моделей</h2>
+      </div>
+      <div class="prose"><p>Линейная модель предполагает, что каждый признак влияет на ответ независимо и линейно. По умолчанию это редко выполняется — данные нужно подготовить.</p></div>
+
+      <h3 class="sub">Категориальные признаки: One-Hot Encoding</h3>
+      <div class="prose"><p>Категориальный признак $f_j(x)$ со значениями $C=\{c_1,\dots,c_m\}$ заменяется на $m$ бинарных индикаторов:</p></div>
+      <div class="eq-box">$$b_i(x) = [f_j(x) = c_i]$$</div>
+      <div class="callout fact">
+        <span class="mark">Осторожно: линейная зависимость</span>
+        <p>Признаки $b_1(x),\dots,b_m(x)$ линейно зависимы — их сумма всегда равна 1 ($b_1(x)+\dots+b_m(x)=1$). Чтобы избежать вырожденности, один из бинарных признаков обычно выбрасывают, но тогда новая, невиданная на обучении категория закодируется нулями по всем оставшимся — и это уже не будет соответствовать выброшенной категории однозначно.</p>
+      </div>
+
+      <h3 class="sub">Тексты: мешок слов (Bag of Words)</h3>
+      <div class="prose"><p>Все слова выборки нумеруются: $\{c_1,\dots,c_m\}$. Текст кодируется $m$ признаками, где $b_j(x)$ — число вхождений слова $c_j$:</p></div>
+      <div class="eq-box">$$a(x) = w_1 b_1(x) + \dots + w_m b_m(x) + \dots$$</div>
+      <div class="prose"><p>Каждое вхождение слова $c_j$ сдвигает прогноз на $w_j$ — слово «престижный» в описании квартиры логично тянет цену вверх, а «плохой» — вниз.</p></div>
+
+      <h3 class="sub">Бинаризация числовых признаков</h3>
+      <div class="prose"><p>Если зависимость от числового признака нелинейна (например, цена квартиры растёт с приближением к метро только до определённого расстояния, а затем падает), признак можно разбить сеткой точек $\{t_1,\dots,t_m\}$ (с $t_0=-\infty$, $t_{m+1}=+\infty$) на интервалы-индикаторы:</p></div>
+      <div class="eq-box">$$b_i(x) = [t_{i-1} < x_j \le t_i], \quad i=1,\dots,m+1$$</div>
+      <div class="prose"><p>Линейная модель поверх таких признаков находит собственный прогноз для каждого интервала — нелинейная по исходному признаку зависимость становится доступной линейной модели.</p></div>
+    </section>
+
+    <!-- ============ 05 ФУНКЦИИ ПОТЕРЬ ============ -->
+    <section class="sec" id="losses">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Как измерять ошибку</p>
+        <h2 class="sec-title">Функции потерь для регрессии</h2>
+      </div>
+
+      <h3 class="sub">MSE, RMSE, R²</h3>
+      <div class="eq-box system">
+        $$\text{MSE}(a,X) = \frac{1}{\ell}\sum_{i=1}^\ell(a(x_i)-y_i)^2 \qquad \text{RMSE}(a,X) = \sqrt{\text{MSE}(a,X)}$$
+      </div>
+      <div class="prose"><p>MSE дифференцируем и потому самый популярный функционал, но плохо интерпретируется — не сохраняет единицы измерения (цена в рублях даёт MSE в квадратных рублях). RMSE решает это извлечением корня. Ни тот, ни другой не говорят, <em>насколько хорошо</em> решена задача — MSE=10 ужасен, если $y\in[0,1]$, и прекрасен, если $y\in(10^4,10^5)$.</p></div>
+      <div class="eq-box">
+        $$R^2(a,X) = 1 - \frac{\sum_{i=1}^\ell(a(x_i)-y_i)^2}{\sum_{i=1}^\ell(y_i-\bar y)^2}$$
+        <span class="eq-note">Доля дисперсии ответа, объяснённая моделью. $R^2 \approx 1$ — модель хорошо объясняет данные; $R^2 \approx 0$ — не лучше константного предсказания.</span>
+      </div>
+
+      <h3 class="sub">MAE и устойчивость к выбросам</h3>
+      <div class="eq-box">$$\text{MAE}(a,X) = \frac{1}{\ell}\sum_{i=1}^\ell |a(x_i)-y_i|$$</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">y</th><th class="num">a₁(x)</th><th class="num">(a₁−y)²</th><th class="num">|a₁−y|</th><th class="num">a₂(x)</th><th class="num">(a₂−y)²</th><th class="num">|a₂−y|</th></tr></thead>
+          <tbody>
+            <tr><td class="num">1</td><td class="num">2</td><td class="num">1</td><td class="num">1</td><td class="num">4</td><td class="num">9</td><td class="num">3</td></tr>
+            <tr><td class="num">5</td><td class="num">6</td><td class="num">1</td><td class="num">1</td><td class="num">8</td><td class="num">9</td><td class="num">3</td></tr>
+            <tr><td class="num" style="color:var(--accent-2)">100</td><td class="num">7</td><td class="num">8649</td><td class="num">93</td><td class="num">10</td><td class="num">8100</td><td class="num">90</td></tr>
+            <tr><td class="num">7</td><td class="num">6</td><td class="num">1</td><td class="num">1</td><td class="num">10</td><td class="num">9</td><td class="num">3</td></tr>
+            <tr><td></td><td></td><td colspan="2" style="font-family:'IBM Plex Mono',monospace">MSE=1236, MAE=14.14</td><td></td><td colspan="2" style="font-family:'IBM Plex Mono',monospace">MSE=1164, MAE=15.43</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Модель $a_1$ почти не ошибается на нормальных объектах, но сильно — на выбросе (100); модель $a_2$ подстроилась под выброс ценой остальных прогнозов. $a_1$ лучше по MAE, но хуже по MSE — квадратичный штраф растёт нелинейно с ошибкой, поэтому обучение под MSE в первую очередь борется именно с большими отклонениями.</p></div>
+      <div class="eq-box system">
+        $$\frac{\partial}{\partial a}|a-y| = \text{sign}(a-y) \qquad \frac{\partial}{\partial a}(a-y)^2 = 2(a-y)$$
+        <span class="eq-note">Производная модуля не зависит от близости к ответу — при оптимизации MAE легко «перескочить» экстремум, обучение получается более долгим и сложным.</span>
+      </div>
+      <div class="callout result">
+        <span class="mark">Почему так: минимум по константе</span>
+        <p>Если все объекты имеют одинаковые признаки, но разные $y_i$, минимум MSE достигается на <strong>среднем</strong> $a^*_{\text{MSE}}=\frac{1}{\ell}\sum y_i$, а минимум MAE — на <strong>медиане</strong> $a^*_{\text{MAE}}=\text{median}\{y_i\}$. Среднее чувствительно к выбросам, медиана — нет.</p>
+      </div>
+
+      <h3 class="sub">Гибриды: Huber loss и Log-Cosh</h3>
+      <div class="prose"><p>Хочется совместить гладкость MSE вблизи нуля с устойчивостью MAE вдали от него.</p></div>
+      <div class="eq-box system">
+        $$L_\delta(y,a) = \begin{cases} \frac{1}{2}(y-a)^2, & |y-a| < \delta \\ \delta\left(|y-a| - \frac{1}{2}\delta\right), & |y-a| \ge \delta \end{cases}$$
+      </div>
+      <div class="prose"><p>При $\delta \to 0$ Huber loss вырождается в MAE, при $\delta \to \infty$ — в MSE. Недостаток: вторая производная разрывна при $|y-a|=\delta$. У <strong>Log-Cosh</strong> $L(y,a)=\log\cosh(a-y)$ такого разрыва нет — тоже квадратичное поведение вблизи нуля и линейное вдали, но всюду гладко.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">MSE, MAE и Huber loss рядом</p>
+        <svg viewBox="0 0 480 220" role="img" aria-label="Три кривые функций потерь в зависимости от отклонения: парабола MSE растёт быстрее всех на больших отклонениях, V-образная MAE растёт линейно с самого начала, Huber loss ведёт себя как парабола около нуля и переходит в линейный рост при больших отклонениях">
+          <line x1="40" y1="190" x2="460" y2="190" stroke="var(--rule)"/>
+          <line x1="240" y1="20" x2="240" y2="190" stroke="var(--rule)"/>
+          <path d="M60,190 C120,60 160,10 240,10 C320,10 360,60 420,190" fill="none" stroke="var(--accent-2)" stroke-width="2"/>
+          <path d="M60,20 L240,190 L420,20" fill="none" stroke="var(--accent)" stroke-width="2"/>
+          <path d="M60,140 C140,60 200,20 240,20 C280,20 340,60 420,140" fill="none" stroke="var(--accent-3)" stroke-width="2"/>
+          <text x="330" y="55" class="curve-label" fill="var(--accent-2)">MSE</text>
+          <text x="400" y="45" class="curve-label" fill="var(--accent)">MAE</text>
+          <text x="330" y="100" class="curve-label" fill="var(--accent-3)">Huber</text>
+          <text x="240" y="208" text-anchor="middle" class="axis-label">y − a (отклонение прогноза от ответа)</text>
+        </svg>
+        <figcaption>MSE штрафует большие ошибки сильнее всех; MAE растёт линейно и одинаково штрафует любую величину отклонения; Huber ведёт себя как MSE рядом с нулём и переходит в линейный рост при $|y-a|\ge\delta$.</figcaption>
+      </figure>
+
+      <h3 class="sub">MSLE, MAPE и SMAPE</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>MSLE</strong></td><td>$L(y,a)=(\log(a{+}1)-\log(y{+}1))^2$ — штрафует за отклонение в порядке величины, а не в абсолютном значении; сильнее штрафует заниженные прогнозы.</td></tr>
+            <tr><td><strong>MAPE</strong></td><td>$L(y,a)=\left|\frac{y-a}{y}\right|$ — относительная ошибка, легко интерпретируется («ошибка 50%»), не зависит от масштаба ответа. Несимметрична: занижение ограничено сверху единицей, завышение — нет.</td></tr>
+            <tr><td><strong>SMAPE</strong></td><td>$L(y,a)=\dfrac{|y-a|}{(|y|+|a|)/2}$ — симметричная версия MAPE, исправляет асимметрию.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Квантильная функция потерь</h3>
+      <div class="prose"><p>Иногда цена занижения и завышения прогноза разная (например, дефицит товара в интернет-магазине обходится дороже, чем излишек на складе). Параметр $\tau \in [0,1]$ задаёт это соотношение:</p></div>
+      <div class="eq-box">$$\rho_\tau(z) = (\tau-1)[z<0]\,z + \tau[z\ge0]\,z = \left(\tau-\frac{1}{2}\right)z + \frac{1}{2}|z|$$</div>
+      <div class="callout result">
+        <span class="mark">Вероятностный смысл</span>
+        <p>Если для каждого $x$ задано распределение ответов $p(y\mid x)$, то минимизация $\rho_\tau$ приводит алгоритм к приближению <strong>$\tau$-квантили</strong> этого распределения — обобщение того факта, что MSE даёт среднее ($\tau$-квантиль не определён явно, но это предельный аналог), а MAE даёт медиану (частный случай $\tau=0.5$).</p>
+      </div>
+    </section>
+
+    <!-- ============ 06 ПЕРЕОБУЧЕНИЕ ============ -->
+    <section class="sec" id="overfitting">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Обобщающая способность</p>
+        <h2 class="sec-title">Переобучение и оценка качества</h2>
+      </div>
+      <div class="prose"><p>Модель может показывать отличное качество на обучающей выборке и при этом плохо работать на новых данных — она <strong>переобучилась</strong>, подстроившись под шум конкретных примеров вместо реальной закономерности.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Одна и та же выборка, три степени полинома</p>
+        <svg viewBox="0 0 480 190" role="img" aria-label="Три графика: полином первой степени слишком простой и плохо повторяет форму истинной функции (недообучение), полином четвёртой степени хорошо повторяет плавную форму истинной функции, полином пятнадцатой степени сильно осциллирует между точками данных, пытаясь пройти через каждую точку в точности (переобучение)">
+          <g font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle">
+            <text x="80" y="14" fill="var(--ink-faint)">degree 1</text>
+            <text x="240" y="14" fill="var(--ink-faint)">degree 4</text>
+            <text x="400" y="14" fill="var(--ink-faint)">degree 15</text>
+          </g>
+          <g stroke="var(--rule)"><line x1="20" y1="150" x2="150" y2="150"/><line x1="180" y1="150" x2="310" y2="150"/><line x1="340" y1="150" x2="470" y2="150"/></g>
+          <path d="M25,80 L145,120" stroke="var(--accent-2)" stroke-width="2" fill="none"/>
+          <path d="M185,140 C220,40 270,40 305,130" stroke="var(--accent-3)" stroke-width="2" fill="none"/>
+          <path d="M345,150 C355,40 365,160 375,50 C385,150 395,30 405,140 C415,50 425,145 435,60 C445,140 455,45 465,120" stroke="var(--accent-2)" stroke-width="1.6" fill="none"/>
+          <g fill="var(--ink-faint)">
+            <circle cx="35" cy="85" r="2.2"/><circle cx="55" cy="95" r="2.2"/><circle cx="75" cy="105" r="2.2"/><circle cx="95" cy="110" r="2.2"/><circle cx="115" cy="118" r="2.2"/><circle cx="135" cy="122" r="2.2"/>
+            <circle cx="195" cy="130" r="2.2"/><circle cx="215" cy="60" r="2.2"/><circle cx="235" cy="45" r="2.2"/><circle cx="255" cy="55" r="2.2"/><circle cx="275" cy="80" r="2.2"/><circle cx="295" cy="125" r="2.2"/>
+            <circle cx="355" cy="145" r="2.2"/><circle cx="375" cy="50" r="2.2"/><circle cx="395" cy="140" r="2.2"/><circle cx="415" cy="55" r="2.2"/><circle cx="435" cy="140" r="2.2"/><circle cx="455" cy="60" r="2.2"/>
+          </g>
+          <text x="80" y="175" text-anchor="middle" class="axis-label">недообучение</text>
+          <text x="240" y="175" text-anchor="middle" class="axis-label">хорошо</text>
+          <text x="400" y="175" text-anchor="middle" class="axis-label">переобучение</text>
+        </svg>
+        <figcaption>Слишком простой полином (degree 1) не улавливает форму зависимости; слишком сложный (degree 15) идеально проходит через все точки обучающей выборки ценой диких осцилляций между ними — на новых данных такая модель непригодна.</figcaption>
+      </figure>
+      <div class="callout fact">
+        <span class="mark">Наблюдение</span>
+        <p>У переобученной модели, как правило, получаются очень большие по модулю коэффициенты. Норма вектора весов — типичная величина, которую штрафуют для контроля сложности модели; этот подход называется <strong>регуляризацией</strong> (раздел 13).</p>
+      </div>
+
+      <h3 class="sub">Отложенная выборка (holdout)</h3>
+      <div class="prose"><p>Размеченные данные делятся на обучающую и контрольную части. Модель обучается на первой, качество измеряется на второй — так проверяется способность модели обобщать, а не просто запоминать.</p></div>
+
+      <h3 class="sub">Кросс-валидация</h3>
+      <div class="prose"><p>У holdout есть проблема: результат сильно зависит от конкретного разбиения. Кросс-валидация разбивает выборку на $k$ примерно равных блоков $X_1,\dots,X_k$; $i$-я модель обучается на всех блоках, кроме $i$-го, и проверяется именно на нём:</p></div>
+      <div class="eq-box">$$\text{CV} = \frac{1}{k}\sum_{i=1}^{k} Q\big(a_i(x), X_i\big)$$</div>
+
+      <figure class="chart">
+        <p class="chart-title">5-fold кросс-валидация</p>
+        <svg viewBox="0 0 480 150" role="img" aria-label="Пять строк, в каждой из пяти блоков один выделен как контрольный, а остальные четыре — обучающие; выделенный контрольный блок смещается на одну позицию в каждой следующей строке">
+          <g font-family="IBM Plex Mono, monospace" font-size="9.5" text-anchor="middle">
+          </g>
+          <g>
+            <!-- row 1 -->
+            <rect x="60" y="10" width="70" height="20" fill="var(--accent-2)" opacity="0.85"/>
+            <rect x="130" y="10" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="200" y="10" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="270" y="10" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="340" y="10" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <!-- row 2 -->
+            <rect x="60" y="38" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="130" y="38" width="70" height="20" fill="var(--accent-2)" opacity="0.85"/>
+            <rect x="200" y="38" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="270" y="38" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="340" y="38" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <!-- row 3 -->
+            <rect x="60" y="66" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="130" y="66" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="200" y="66" width="70" height="20" fill="var(--accent-2)" opacity="0.85"/>
+            <rect x="270" y="66" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="340" y="66" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <!-- row 4 -->
+            <rect x="60" y="94" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="130" y="94" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="200" y="94" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="270" y="94" width="70" height="20" fill="var(--accent-2)" opacity="0.85"/>
+            <rect x="340" y="94" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <!-- row 5 -->
+            <rect x="60" y="122" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="130" y="122" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="200" y="122" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="270" y="122" width="70" height="20" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="340" y="122" width="70" height="20" fill="var(--accent-2)" opacity="0.85"/>
+          </g>
+          <text x="30" y="24" text-anchor="middle" class="axis-label">a₁</text>
+          <text x="30" y="52" text-anchor="middle" class="axis-label">a₂</text>
+          <text x="30" y="80" text-anchor="middle" class="axis-label">a₃</text>
+          <text x="30" y="108" text-anchor="middle" class="axis-label">a₄</text>
+          <text x="30" y="136" text-anchor="middle" class="axis-label">a₅</text>
+        </svg>
+        <figcaption>Розовый блок — контрольный для данной модели, серые — обучающие. Каждый объект ровно один раз побывает в контроле; результаты усредняются.</figcaption>
+      </figure>
+
+      <h3 class="sub">Финальная модель</h3>
+      <div class="prose"><p>После того как кросс-валидация подтвердила, что метод обучения даёт хорошо обобщающие модели, финальную модель обычно обучают тем же способом уже на <strong>всех</strong> доступных данных — либо, если это невозможно, строят композицию (например, усреднение прогнозов) моделей $a_1,\dots,a_k$, полученных в процессе кросс-валидации.</p></div>
+    </section>
+
+    <!-- ============ 07 ТОЧНОЕ РЕШЕНИЕ ============ -->
+    <section class="sec" id="exact">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Обучение линейной регрессии</p>
+        <h2 class="sec-title">Точное решение через нормальное уравнение</h2>
+      </div>
+      <div class="prose"><p>С MSE и признаком-константой (свободный коэффициент не нужен отдельно) задача обучения — минимизация нормы невязки в матричном виде:</p></div>
+      <div class="eq-box">$$\frac{1}{\ell}\|Xw - y\|^2 \to \min_w$$</div>
+      <div class="prose"><p>Распишем функцию потерь и продифференцируем по вектору весов:</p></div>
+      <div class="eq-box system">
+        $$L(w) = (Xw-y)^T(Xw-y) \qquad \frac{\partial L}{\partial w} = 2X^T(Xw-y)$$
+      </div>
+      <div class="prose"><p>Приравнивая производную к нулю (если столбцы $X$ линейно независимы), получаем явную формулу:</p></div>
+      <div class="eq-box">$$X^T(Xw-y)=0 \quad\Longrightarrow\quad w = (X^TX)^{-1}X^Ty$$</div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Это же выражение — <strong>псевдообратная матрица</strong> $X^+ = (X^TX)^{-1}X^T$. Когда $X$ квадратная и обратимая ($\ell=n$), решение точное: $w=X^{-1}y$. Когда $\ell \gg n$ (переопределённая система), $X^+$ даёт решение с наименьшей квадратичной ошибкой.</p>
+      </div>
+
+      <h3 class="sub">Когда формула не работает</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Сложность обращения</strong></td><td>Обращение матрицы — операция с кубической сложностью от числа признаков. При тысячах признаков вычисления становятся слишком трудоёмкими; решение — численные методы оптимизации.</td></tr>
+            <tr><td><strong>Вырожденность</strong></td><td>Если столбцы $X$ линейно зависимы (мультиколлинеарность), $X^TX$ вырождена или плохо обусловлена — обращение невозможно либо даёт неустойчивый результат. Лечится регуляризацией (раздел 13).</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Аналитические формулы решения в машинном обучении — редкость: стоит заменить MSE на другой функционал, и найти явную формулу уже не получится. Поэтому нужен общий подход, работающий для широкого класса дифференцируемых функционалов — градиентный спуск.</p></div>
+    </section>
+
+    <!-- ============ 08 ГРАДИЕНТНЫЙ СПУСК ============ -->
+    <section class="sec" id="gd">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Общий метод оптимизации</p>
+        <h2 class="sec-title">Градиентный спуск</h2>
+      </div>
+      <div class="prose"><p><strong>Градиент</strong> функции $f:\mathbb{R}^d\to\mathbb{R}$ — вектор её частных производных $\nabla f = \left(\frac{\partial f}{\partial x_j}\right)_{j=1}^d$. Он указывает направление наискорейшего <em>роста</em> функции, а антиградиент $-\nabla f$ — направление наискорейшего убывания.</p></div>
+
+      <h3 class="sub">Почему градиент — направление роста</h3>
+      <div class="prose"><p>Производная по направлению единичного вектора $v$ раскладывается через градиент:</p></div>
+      <div class="eq-box">$$\frac{\partial f}{\partial v} = \sum_{j=1}^d \frac{\partial f}{\partial x_j} v_j = \langle \nabla f, v \rangle = \|\nabla f\|\|v\|\cos\varphi = \|\nabla f\|\cos\varphi$$</div>
+      <div class="prose"><p>где $\varphi$ — угол между градиентом и направлением $v$. Производная по направлению максимальна при $\varphi=0$ (вдоль градиента) и минимальна при $\varphi=180°$ (вдоль антиградиента) — отсюда и обоснование метода.</p></div>
+      <div class="callout fact">
+        <span class="mark">Ещё одно свойство: ортогональность линиям уровня</span>
+        <p>Разложив $f$ в ряд Тейлора вдоль линии уровня $S(x_0)=\{x\mid f(x)=f(x_0)\}$, получаем $\langle \nabla f, \varepsilon\rangle = o(\|\varepsilon\|)$ для смещения $\varepsilon$ вдоль этой линии. При $\|\varepsilon\|\to 0$ вектор $\varepsilon/\|\varepsilon\|$ стремится к касательной линии уровня — значит, градиент ей ортогонален. Это свойство пригодится, чтобы понимать вид траектории спуска на линиях уровня.</p>
+      </div>
+
+      <h3 class="sub">Алгоритм</h3>
+      <div class="eq-box">$$w^{(k)} = w^{(k-1)} - \eta_k \nabla Q(w^{(k-1)})$$</div>
+      <div class="prose"><p>Стартуем из точки $w^{(0)}$ (случайной или нулевой) и повторяем шаг до сходимости — критерием остановки может быть малость градиента $\|\nabla Q(w^{(k-1)})\|<\varepsilon$, малое изменение весов, либо рост ошибки на отложенной выборке.</p></div>
+
+      <h3 class="sub">Длина шага (learning rate)</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Константа</strong> $\eta_k=c$</td><td>Слишком большой шаг — риск перепрыгивать минимум; слишком маленький — долгая сходимость.</td></tr>
+            <tr><td><strong>Убывающий</strong> $\eta_k=1/k$</td><td>Простая монотонно убывающая схема.</td></tr>
+            <tr><td><strong>Vowpal Wabbit</strong></td><td>$\eta_k = \lambda\left(\frac{s_0}{s_0+k}\right)^p$ — на практике достаточно настроить $\lambda$, остальным присвоить $s_0=1,\ p=0.5$.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Спуск по параболе $f(x)=x^2$, $\eta=0.1$</p>
+        <svg viewBox="0 0 480 190" role="img" aria-label="Парабола с точками, стартующими в x=3 и последовательно приближающимися к минимуму в нуле, каждый следующий шаг заметно короче предыдущего">
+          <path d="M40,170 Q240,-40 440,170" fill="none" stroke="var(--rule)" stroke-width="1.5"/>
+          <g fill="var(--accent-2)">
+            <circle cx="410" cy="150" r="4"/><circle cx="370" cy="118" r="4"/><circle cx="335" cy="90" r="4"/>
+            <circle cx="305" cy="66" r="4"/><circle cx="282" cy="48" r="4"/><circle cx="265" cy="35" r="4"/>
+            <circle cx="252" cy="26" r="4"/><circle cx="243" cy="20" r="3.5"/>
+          </g>
+          <text x="410" y="175" text-anchor="middle" class="axis-label">x=3</text>
+          <text x="243" y="12" text-anchor="middle" class="axis-label" fill="var(--accent-3)">минимум</text>
+        </svg>
+        <figcaption>$x \leftarrow x - 0.1\cdot 2x$: каждый шаг короче предыдущего, потому что градиент $2x$ сам уменьшается по мере приближения к минимуму.</figcaption>
+      </figure>
+
+      <h3 class="sub">Скорость сходимости</h3>
+      <div class="eq-box">$$Q(w^{(k)}) - Q(w^*) = O(1/k)$$</div>
+      <div class="prose"><p>Для выпуклых дифференцируемых функционалов с липшицевым градиентом и правильно подобранным шагом гарантируется сходимость к глобальному минимуму с этой скоростью; для невыпуклых функционалов — лишь сходимость к локальному минимуму или седловой точке.</p></div>
+    </section>
+
+    <!-- ============ 09 ОЦЕНИВАНИЕ ГРАДИЕНТА ============ -->
+    <section class="sec" id="gd-estimate">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>Масштабируем на большие данные</p>
+        <h2 class="sec-title">Оценивание градиента</h2>
+      </div>
+      <div class="prose"><p>Функционал в ML почти всегда — сумма ошибок по объектам: $Q(w)=\frac{1}{\ell}\sum_i q_i(w)$. Вычисление полного градиента $\nabla_w Q(w) = \frac{1}{\ell}\sum_i \nabla_w q_i(w)$ на каждом шаге трудоёмко при больших $\ell$ — но точность здесь не так важна, поскольку шаги в сторону антиградиента и так небольшие.</p></div>
+
+      <h3 class="sub">Стохастический градиентный спуск (SGD)</h3>
+      <div class="eq-box">$$\nabla_w Q(w) \approx \nabla_w q_{i_k}(w) \qquad w^{(k)} = w^{(k-1)} - \eta_k \nabla q_{i_k}(w^{(k-1)})$$</div>
+      <div class="prose"><p>Градиент оценивается по одному случайно взятому слагаемому. Это резко удешевляет шаг (на диске достаточно держать один объект за раз), но сходимость становится шумнее: параметры, оптимальные для одного объекта, не обязаны быть оптимальными в среднем. Для гарантий сходимости шаг должен убывать по условиям Роббинса–Монро:</p></div>
+      <div class="eq-box system">
+        $$\sum_{k=1}^\infty \eta_k = \infty \qquad \sum_{k=1}^\infty \eta_k^2 < \infty \qquad \mathbb{E}\big[Q(w^{(k)})-Q(w^*)\big] = O(1/\sqrt{k})$$
+      </div>
+      <div class="prose"><p>Точность оценки можно повысить, используя несколько случайных слагаемых сразу — <strong>mini-batch gradient descent</strong>, самый распространённый на практике вариант:</p></div>
+      <div class="eq-box">$$\nabla_w Q(w) \approx \frac{1}{n}\sum_{j=1}^n \nabla_w q_{i_{k_j}}(w)$$</div>
+
+      <h3 class="sub">Метод SAG (Stochastic Average Gradient)</h3>
+      <div class="prose"><p>Сочетает низкую стоимость шага SGD с высокой скоростью сходимости полного градиента. Идея: хранить вспомогательные переменные $z_i$ — последний посчитанный градиент каждого слагаемого; на шаге пересчитывается только один $z_{i_k}$, а используется среднее по <em>всем</em> $z_i$ (почти все из них — со старых шагов):</p></div>
+      <div class="eq-box system">
+        $$z_i^{(k)} = \begin{cases}\nabla q_i(w^{(k-1)}), & i=i_k \\ z_i^{(k-1)}, & \text{иначе}\end{cases} \qquad w^{(k)} = w^{(k-1)} - \eta_k \frac{1}{\ell}\sum_{i=1}^\ell z_i^{(k)}$$
+      </div>
+      <div class="prose"><p>SAG достигает той же скорости сходимости $O(1/k)$, что и полный градиентный спуск, при цене одного шага, сравнимой с SGD — но требует хранить последний градиент для каждого объекта выборки.</p></div>
+
+      <div class="callout fact">
+        <span class="mark">Оценивание без явных градиентов</span>
+        <p>Существуют методы, вообще не вычисляющие производные: случайный вектор $u$ на единичной сфере домножается на значение функции в этом направлении, $\nabla_w Q(w) \approx Q(w+\delta u)\,u$ — несмещённая оценка градиента сглаженной версии функционала. В глубоком обучении градиент иногда даже <em>обучают предсказывать</em> отдельной моделью на основе текущих параметров.</p>
+      </div>
+    </section>
+
+    <!-- ============ 10 МОДИФИКАЦИИ ============ -->
+    <section class="sec" id="gd-modifications">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">10</span>Инженерные улучшения</p>
+        <h2 class="sec-title">Модификации градиентного спуска</h2>
+      </div>
+
+      <h3 class="sub">Momentum (инерция)</h3>
+      <div class="prose"><p>Если линии уровня функционала сильно вытянуты, антиградиент меняет направление почти на противоположное на каждом шаге — осцилляции замедляют сходимость. Усреднение антиградиентов с предыдущих шагов гасит шум:</p></div>
+      <div class="eq-box system">
+        $$h_0 = 0 \qquad h_k = \alpha h_{k-1} + \eta_k \nabla_w Q(w^{(k-1)}) \qquad w^{(k)} = w^{(k-1)} - h_k$$
+      </div>
+      <div class="prose"><p>Если знак градиента по координате постоянно меняется, вектор инерции по ней близок к нулю (осцилляции гасятся); если знак стабилен — вектор инерции растёт, и шаги в этом направлении становятся крупнее.</p></div>
+
+      <h3 class="sub">AdaGrad и RMSprop</h3>
+      <div class="prose"><p>Градиентный спуск чувствителен к выбору длины шага. AdaGrad подбирает свою длину шага для <strong>каждой</strong> координаты — тем меньшую, чем длиннее были предыдущие шаги по ней:</p></div>
+      <div class="eq-box system">
+        $$G_{kj} = G_{k-1,j} + \big(\nabla_w Q(w^{(k-1)})\big)_j^2 \qquad w_j^{(k)} = w_j^{(k-1)} - \frac{\eta_t}{\sqrt{G_{kj}+\varepsilon}}\big(\nabla_w Q(w^{(k-1)})\big)_j$$
+      </div>
+      <div class="prose"><p>Хорошо подходит для разреженных задач — по редко ненулевым признакам шаги остаются крупными. Недостаток: $G_{kj}$ монотонно растёт, шаги могут остановиться раньше, чем найден минимум. RMSprop решает это экспоненциальным затуханием накопленных градиентов вместо их полной суммы:</p></div>
+      <div class="eq-box">$$G_{kj} = \alpha G_{k-1,j} + (1-\alpha)\big(\nabla_w Q(w^{(k-1)})\big)_j^2$$</div>
+
+      <h3 class="sub">Adam</h3>
+      <div class="prose"><p>Объединяет обе идеи: накапливает (со сглаживанием) сами градиенты, как momentum — для устранения осцилляций, и накапливает квадраты градиентов, как RMSprop — для адаптивной длины шага по каждому параметру. На практике — де-факто стандартный оптимизатор для глубоких моделей.</p></div>
+    </section>
+
+    <!-- ============ 11 ОТ РЕГРЕССИИ К КЛАССИФИКАЦИИ ============ -->
+    <section class="sec" id="probabilistic">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">11</span>Смена постановки</p>
+        <h2 class="sec-title">Вероятностный взгляд на классификатор</h2>
+      </div>
+      <div class="prose"><p>Для бинарной классификации ($y\in\{0,1\}$) удобно считать $X$ и $Y$ случайными величинами и построить модель, предсказывающую вероятность:</p></div>
+      <div class="eq-box">$$P(Y=1\mid \mathbf{x}) = \hat f(\mathbf{x})$$</div>
+      <div class="callout fact">
+        <span class="mark">Пример</span>
+        <p>$X=$ (число кликов раньше, время активности, доход) для задачи предсказания клика по рекламе; $\hat f(\mathbf{x})$ — вероятность того, что человек с такими характеристиками кликнет.</p>
+      </div>
+      <div class="prose"><p><strong>Правдоподобие</strong> — вероятность получить именно такую обучающую выборку, если верить предсказаниям модели:</p></div>
+      <div class="eq-box">$$\prod_{i=1}^\ell P(Y=y_i\mid \mathbf{x}_i) \to \max_{\mathbf{w}}$$</div>
+      <div class="prose"><p>Теорема из статистики (метод максимального правдоподобия) гарантирует: параметры, максимизирующие правдоподобие, дают хорошую модель. Логарифмирование не меняет точку максимума, но превращает произведение в сумму:</p></div>
+      <div class="eq-box">$$\ln\left(\prod_{i=1}^\ell P(Y=y_i\mid\mathbf{x}_i)\right) \to \max_{\mathbf{w}}$$</div>
+      <div class="prose"><p>Меняя знак, получаем задачу минимизации — тот же функционал, что и во всех предыдущих разделах:</p></div>
+      <div class="eq-box">$$L(\mathbf{w}) = -\sum_{i=1}^\ell \ln\big(P(Y=y_i\mid\mathbf{x}_i)\big) \to \min_{\mathbf{w}}$$</div>
+      <div class="callout result">
+        <span class="mark">Что мы сделали</span>
+        <p>Максимизация правдоподобия даёт статистически хорошие веса. Изменив знак и прологарифмировав, мы получили <strong>функцию потерь</strong>, минимизация которой эквивалентна максимизации правдоподобия — теперь можно применять уже знакомый градиентный спуск, только к другой модели.</p>
+      </div>
+    </section>
+
+    <!-- ============ 12 ЛОГИСТИЧЕСКАЯ РЕГРЕССИЯ ============ -->
+    <section class="sec" id="logreg">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">12</span>Классификация через сигмоиду</p>
+        <h2 class="sec-title">Логистическая регрессия</h2>
+      </div>
+      <div class="prose"><p>Модель ищется в виде линейной комбинации признаков, пропущенной через <strong>сигмоиду</strong> — она сжимает любое вещественное число в интервал $(0,1)$, где и живут вероятности:</p></div>
+      <div class="formula-box">
+        <div class="eq">$\hat f(\mathbf{x}) = \sigma\!\left(\sum_{i=0}^n w_i x_i\right)$</div>
+        <div class="formula-legend">
+          <div class="item"><b>σ(x) = 1/(1+e⁻ˣ)</b>сигмоида</div>
+        </div>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Модель называется <em>регрессией</em>, а не классификацией, потому что она в первую очередь предсказывает <strong>вероятность</strong> — вещественное число; порог 0.5 (или другой) для получения бинарной метки применяется уже поверх этого предсказания.</p>
+      </div>
+
+      <h3 class="sub">Функция потерь: LogLoss</h3>
+      <div class="prose"><p>Для двух классов $y_i\in\{0,1\}$ вероятность правильного класса можно записать одной формулой, не различая случаи:</p></div>
+      <div class="eq-box">$$\ln P(Y=y_i\mid\mathbf{x}_i) = y_i\ln\big(\hat f(\mathbf{x}_i)\big) + (1-y_i)\ln\big(1-\hat f(\mathbf{x}_i)\big)$$</div>
+      <div class="prose"><p>Подставляя в общую формулу функции потерь из предыдущего раздела, получаем <strong>LogLoss</strong>:</p></div>
+      <div class="eq-box">$$L(\mathbf{w}) = -\sum_{i=1}^\ell \Big[y_i\ln(\hat f(\mathbf{x}_i)) + (1-y_i)\ln(1-\hat f(\mathbf{x}_i))\Big] \to \min_{\mathbf{w}}$$</div>
+
+      <h3 class="sub">Градиент логистической регрессии</h3>
+      <div class="prose"><p>Производная сигмоиды имеет удобный вид $\sigma'(x)=\sigma(x)(1-\sigma(x))$, откуда:</p></div>
+      <div class="eq-box">$$\frac{\partial \hat f(\mathbf{x}_i)}{\partial w_1} = \hat f(\mathbf{x}_i)\big(1-\hat f(\mathbf{x}_i)\big)\, x_{i1}$$</div>
+      <div class="prose"><p>Подставив это в производную LogLoss по цепному правилу и упростив дроби, получаем чистое выражение без логарифмов:</p></div>
+      <div class="eq-box">$$\frac{\partial L}{\partial w_1} = -\sum_{i=1}^\ell x_{i1}\Big[y_i\big(1-\hat f(\mathbf{x}_i)\big) - (1-y_i)\hat f(\mathbf{x}_i)\Big]$$</div>
+      <div class="prose"><p>Множитель в скобках — это, по сути, «ошибка» предсказания вероятности (для $y_i=1$ остаётся $1-\hat f(\mathbf{x}_i)$, для $y_i=0$ — $-\hat f(\mathbf{x}_i)$); чем увереннее модель ошибается, тем больше вклад объекта в градиент.</p></div>
+
+      <h3 class="sub">Обобщение на много классов: Softmax</h3>
+      <div class="prose"><p>При $m$ классах для каждого класса заводится свой вектор весов $\mathbf{w}^k$, и все линейные комбинации (<strong>логиты</strong>) переводятся в распределение вероятностей через softmax:</p></div>
+      <div class="eq-box system">
+        $$logits(\mathbf{x}) = \begin{pmatrix}\mathbf{w}^1\cdot\mathbf{x}\\ \vdots \\ \mathbf{w}^m\cdot\mathbf{x}\end{pmatrix} \qquad \text{Softmax}(\alpha) = \left(\frac{e^{\alpha_1}}{\sum_{i=1}^m e^{\alpha_i}}, \dots, \frac{e^{\alpha_m}}{\sum_{i=1}^m e^{\alpha_i}}\right)$$
+      </div>
+      <div class="eq-box">$$P(Y=k\mid\mathbf{x}) = \hat f_k(\mathbf{x}) = \frac{e^{\sum_{i=0}^n w_i^k x_i}}{\sum_{k=1}^m e^{\sum_{i=0}^n w_i^k x_i}}$$</div>
+      <div class="prose"><p>Softmax гарантирует, что все выходы неотрицательны и в сумме дают единицу — законное распределение вероятностей по классам, которое затем так же подставляется в общую функцию потерь $L(\mathbf{w})=-\sum\ln P(Y=y_i\mid\mathbf{x}_i)$.</p></div>
+    </section>
+
+    <!-- ============ 13 РЕГУЛЯРИЗАЦИЯ ============ -->
+    <section class="sec" id="regularization">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">13</span>Контроль сложности модели</p>
+        <h2 class="sec-title">Регуляризация</h2>
+      </div>
+      <div class="prose"><p>Если столбцы матрицы $X$ линейно зависимы (мультиколлинеарность), существует такой ненулевой вектор $\beta$, что $X\beta=0$. Тогда бесконечно много векторов весов дают одинаковые предсказания:</p></div>
+      <div class="eq-box">$$\forall c\in\mathbb{R}: \quad \mathbf{x}\cdot(\mathbf{w}+c\beta) = \mathbf{x}\cdot\mathbf{w} + c\,\mathbf{x}\cdot\beta = \mathbf{x}\cdot\mathbf{w}$$</div>
+      <div class="callout fact">
+        <span class="mark">Почему это плохо</span>
+        <p>Решение перестаёт быть единственным: веса могут разъезжаться сколь угодно далеко (в направлении $\beta$), не меняя качество на обучающей выборке. Именно это стоит за наблюдением из раздела 6 — переобученные модели получают неадекватно большие коэффициенты.</p>
+      </div>
+
+      <h3 class="sub">Weight Decay: L1 и L2 регуляризация</h3>
+      <div class="prose"><p>Предположим, что веса не должны быть большими по модулю, и добавим это как штраф прямо в функцию потерь ($\beta$ — сила регуляризации):</p></div>
+      <div class="eq-box system">
+        $$L_2\text{-регуляризация:}\quad L(\mathbf{w}) = \sum_{i=1}^\ell(\mathbf{x}_i^T\mathbf{w}-y_i)^2 + \beta\sum_{j=1}^n w_j^2$$
+        $$L_1\text{-регуляризация:}\quad L(\mathbf{w}) = \sum_{i=1}^\ell(\mathbf{x}_i^T\mathbf{w}-y_i)^2 + \beta\sum_{j=1}^n |w_j|$$
+      </div>
+      <div class="prose"><p>Штраф превращает вырожденную задачу в невырожденную: движение весов вдоль направления $\beta$ теперь увеличивает норму штрафа, поэтому у минимума появляется единственное решение.</p></div>
+
+      <h3 class="sub">Как меняется градиент</h3>
+      <div class="eq-box system">
+        $$\frac{\partial L}{\partial w_1}\Big|_{L_2} = \sum_{i=1}^\ell 2(\mathbf{x}_i^T\mathbf{w}-y_i)x_{i1} + 2\beta w_1$$
+        $$\frac{\partial L}{\partial w_1}\Big|_{L_1} = \sum_{i=1}^\ell 2(\mathbf{x}_i^T\mathbf{w}-y_i)x_{i1} + \beta\,\text{sign}(w_1)$$
+      </div>
+      <div class="prose"><p>$L_2$-штраф на каждом шаге «стягивает» вес пропорционально его текущему значению — отсюда и название Weight Decay. $L_1$-штраф толкает вес к нулю с постоянной силой независимо от его величины, из-за чего $L_1$-регуляризация склонна обнулять несущественные веса полностью, выполняя неявный отбор признаков.</p></div>
+    </section>
+
+    <!-- ============ 14 НОРМАЛИЗАЦИЯ ============ -->
+    <section class="sec" id="normalization">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">14</span>Последний штрих перед обучением</p>
+        <h2 class="sec-title">Нормализация признаков</h2>
+      </div>
+      <div class="prose"><p>Признаки приводятся к одному масштабу вычитанием среднего и делением на стандартное отклонение (z-score):</p></div>
+      <div class="eq-box">
+        $$x_{ij}^{\text{new}} = \frac{x_{ij}-\mu_j}{\sigma_j}$$
+        <span class="eq-note">$\mu_j$ — среднее $j$-го признака на обучающей выборке, $\sigma_j$ — его стандартное отклонение.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Градиентный спуск</strong></td><td>Плохо сходится на признаках с сильно разным масштабом — линии уровня функционала становятся сильно вытянутыми эллипсами, и антиградиент указывает почти перпендикулярно направлению к минимуму.</td></tr>
+            <tr><td><strong>Регуляризация</strong></td><td>Штраф $\sum w_j^2$ или $\sum|w_j|$ одинаково давит на все веса — если признаки в разных масштабах, регуляризация начинает несправедливо сильнее давить на веса при «мелких» по масштабу признаках.</td></tr>
+            <tr><td><strong>Интерпретируемость</strong></td><td>После нормализации величина веса $w_j$ становится сопоставимой мерой важности признака $j$ — до нормализации сравнивать веса между собой некорректно.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 15 ИТОГИ ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">15</span>Итоги</p>
+        <h2 class="sec-title">Самое важное</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Разобрано:</strong></p>
+        <ul>
+          <li>Постановка задачи ML: объекты, признаки, функционал качества, типы задач обучения с учителем и без</li>
+          <li>Линейная модель: bias trick, линейность по параметрам, а не по признакам, one-hot/bag-of-words/бинаризация</li>
+          <li>Функции потерь регрессии: MSE/RMSE/R², MAE, Huber/Log-Cosh, MSLE, MAPE/SMAPE, квантильная</li>
+          <li>Переобучение, holdout, кросс-валидация</li>
+          <li>Точное решение через нормальное уравнение и его ограничения</li>
+          <li>Градиентный спуск: свойства градиента, схемы шага, SGD/mini-batch/SAG, momentum/AdaGrad/RMSprop/Adam</li>
+          <li>От линейной регрессии к логистической: правдоподобие, MLE, LogLoss, softmax для многих классов</li>
+          <li>Регуляризация (L1/L2) и нормализация признаков</li>
+        </ul>
+        <p><strong>Что стоит запомнить:</strong></p>
+        <ul>
+          <li>Линейная модель линейна по <em>весам</em>, а не по исходным признакам — нелинейность моделируется через признаковую инженерию</li>
+          <li>Выбор функции потерь определяет, что именно приближает обученная модель: MSE → среднее, MAE → медиана, квантильная функция → произвольная квантиль</li>
+          <li>Аналитическое решение существует только для MSE без ограничений; во всех остальных случаях — градиентный спуск</li>
+          <li>Логистическая регрессия — та же линейная модель, но с сигмоидой и вероятностной интерпретацией выхода</li>
+          <li>Регуляризация решает задачу единственности решения при мультиколлинеарности и одновременно борется с переобучением</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 16 ЛИТЕРАТУРА ============ -->
+    <section class="sec" id="refs">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">16</span>Литература</p>
+        <h2 class="sec-title">Источники</h2>
+      </div>
+      <ul class="lit-list">
+        <li><span class="idx">01</span>Соколов Е. А. · <em>Лекция 1. Введение в машинное обучение</em> · ФКН ВШЭ, 2021</li>
+        <li><span class="idx">02</span>Соколов Е. А. · <em>Лекция 2. Линейная регрессия</em> · ФКН ВШЭ, 2021</li>
+        <li><span class="idx">03</span>Соколов Е. А. · <em>Лекция 3. Линейная регрессия (обучение и оптимизация)</em> · ФКН ВШЭ, 2021</li>
+        <li><span class="idx">04</span>Nesterov, Y. 2004 · <em>Introductory Lectures on Convex Optimization</em> · Springer</li>
+        <li><span class="idx">05</span>Robbins, H., Monro, S. 1951 · <em>A Stochastic Approximation Method</em> · Annals of Mathematical Statistics</li>
+        <li><span class="idx">06</span>Schmidt, M., Le Roux, N., Bach, F. 2013 · <em>Minimizing Finite Sums with the Stochastic Average Gradient</em></li>
+        <li><span class="idx">07</span>Kingma, D. P., Ba, J. 2014 · <em>Adam: A Method for Stochastic Optimization</em> · arXiv:1412.6980</li>
+        <li><span class="idx">08</span>Barron, J. T. 2019 · <em>A General and Adaptive Robust Loss Function</em> · arXiv:1701.03077</li>
+      </ul>
+      <div class="callout">
+        <span class="mark">Дальше</span>
+        <p>Следующий логичный шаг курса — методы, работающие с более сложными семействами моделей: решающие деревья и композиции над ними (бэггинг, случайный лес, градиентный бустинг) — там, где линейность перестаёт быть достаточным приближением.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект лекции · Линейная и логистическая регрессия · ФКН ВШЭ / Deep Learning School</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>
