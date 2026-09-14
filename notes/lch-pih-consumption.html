@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Жизненный цикл и перманентный доход — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#f6f2e9;
+      --surface:#ffffff;
+      --surface-2:#efe7d4;
+      --ink:#232019;
+      --ink-soft:#6b6353;
+      --ink-faint:#9a927e;
+      --accent:#2f5590;
+      --accent-strong:#1f3d66;
+      --accent-soft:#dde9e8;
+      --accent-2:#a8703a;
+      --accent-2-soft:#f3e3cd;
+      --accent-3:#3f7d5c;
+      --accent-3-soft:#e1efe4;
+      --rule:#ddd2b8;
+      --shadow: 0 1px 2px rgba(35,32,25,0.06), 0 6px 20px -8px rgba(35,32,25,0.15);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent-2);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    blockquote.quote{
+      margin:20px 0; padding:4px 0 4px 20px;
+      border-left:3px solid var(--accent-2);
+      font-family:'Fraunces',serif; font-style:italic; color:var(--ink);
+      font-size:15.5px; max-width:68ch;
+    }
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.result .mark{ color:var(--accent-2); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.fact .mark{ color:var(--accent-3); }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    td.num{font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums;}
+    th.num{text-align:right;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:700px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/economics.html">← Раздел «Экономика»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Macroeconomics of Financial Markets · Лекции 6–7 · конспект</p>
+      <h1 class="title">Жизненный цикл и перманентный доход</h1>
+      <p class="subtitle">Зачем люди сберегают: гипотеза жизненного цикла Модильяни (от индивида к агрегированной экономике), гипотеза перманентного дохода Фридмана, случайное блуждание потребления, осторожность и предупредительные сбережения, ограничения ликвидности — и как всё это объясняет реальные загадки в данных.</p>
+      <div class="meta-row">
+        <span>Module 1 · Macroeconomics of Financial Markets</span>
+        <span>Modigliani 1954/1986, Friedman 1957, Hall 1978</span>
+        <span>17.09.2026</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#motivation"><span class="n">01</span>Мотивация</a>
+      <a href="#lch-setup"><span class="n">02</span>LCH: постановка</a>
+      <a href="#lch-stylized"><span class="n">03</span>Временные профили</a>
+      <a href="#aggregation"><span class="n">04</span>Агрегирование</a>
+      <a href="#propensities"><span class="n">05</span>Склонности к сбережению</a>
+      <a href="#empirics-growth"><span class="n">06</span>Рост и сбережения</a>
+      <a href="#empirics-profiles"><span class="n">07</span>Проверка на данных</a>
+      <a href="#pih-setup"><span class="n">08</span>Перманентный доход</a>
+      <a href="#test-yourself"><span class="n">09</span>Тест на себе</a>
+      <a href="#transitory"><span class="n">10</span>Переходный доход</a>
+      <a href="#random-walk"><span class="n">11</span>Случайное блуждание</a>
+      <a href="#prudent"><span class="n">12</span>Осторожный потребитель</a>
+      <a href="#liquidity"><span class="n">13</span>Ограничения ликвидности</a>
+      <a href="#puzzles"><span class="n">14</span>Разгадка головоломок</a>
+      <a href="#summary"><span class="n">15</span>Итоги</a>
+      <a href="#refs"><span class="n">16</span>Литература</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 МОТИВАЦИЯ ============ -->
+    <section class="sec" id="motivation">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Мотивация</p>
+        <h2 class="sec-title">От общего равновесия — назад к домохозяйству</h2>
+      </div>
+      <div class="prose">
+        <p>Модели Рамсея и OLG дают широкую картину потребления, сбережений, инвестиций и накопления капитала — но чтобы построить даже простую модель общего равновесия, пришлось опустить много деталей: в частности, сбережения в этих моделях напрямую превращались в инвестиции, минуя финансовые рынки. Пора вернуться к частному равновесию и разобрать подробно, как именно домохозяйства принимают решение о потреблении и сбережении.</p>
+        <p>У нас уже есть несколько объяснений, зачем сберегать: сбережения нужны для накопления производительного капитала (Рамсей); сбережения и заимствование — это способ перераспределить неравномерный поток дохода во времени; добровольные или обязательные пенсионные сбережения — черта человеческого жизненного цикла. Но список неполон: мы ещё не разобрали сбережения как перераспределение богатства во времени подробно на уровне домохозяйства, и совсем не учли неопределённость, с которой люди реально сталкиваются.</p>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Разбираем две теории — <strong>гипотезу жизненного цикла</strong> (Life-Cycle Hypothesis, Модильяни) и <strong>гипотезу перманентного дохода</strong> (Permanent Income Hypothesis, Фридман). Обе опираются на одну и ту же межвременную оптимизацию потребителя, но дают разный ракурс: LCH строится на подходе перекрывающихся поколений и позволяет перейти от индивидуального к агрегированному уровню; PIH использует репрезентативного агента с бесконечным горизонтом и проще показывает связь потребления с ожиданиями о будущих доходах.</p>
+      </div>
+    </section>
+
+    <!-- ============ 02 LCH ПОСТАНОВКА ============ -->
+    <section class="sec" id="lch-setup">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Модильяни, 1954</p>
+        <h2 class="sec-title">Гипотеза жизненного цикла: постановка</h2>
+      </div>
+      <div class="prose"><p>Репрезентативное домохозяйство живёт $T$ периодов, начиная с момента $t$. Задача межвременной оптимизации — та же, что мы уже решали для двухпериодного и общего случая:</p></div>
+      <div class="eq-box">$$\sum_{\tau=0}^{T-1}\frac{u(c^t_{t+\tau})}{(1+\rho)^\tau} \to \max_{c^t_{t+\tau}} \qquad \text{при} \qquad \sum_{\tau=0}^{T-1}\frac{c^t_{t+\tau}}{(1+r)^\tau} = A_t + \sum_{\tau=0}^{T-1}\frac{Y^d_{t+\tau}}{(1+r)^\tau}$$</div>
+      <div class="prose"><p>Условие первого порядка — знакомое правило Рамсея-Кейнса:</p></div>
+      <div class="eq-box">$$\frac{u'(c^t_{t+\tau})}{u'(c^t_{t+\tau+1})} = \frac{1+r}{1+\rho}$$</div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td>$r > \rho$</td><td>потребление растёт на протяжении жизни</td></tr>
+            <tr><td>$r < \rho$</td><td>потребление снижается на протяжении жизни</td></tr>
+            <tr><td>$r = \rho$</td><td>оптимальное потребление постоянно на протяжении всей жизни</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Существенно</span>
+        <p>Эти выводы никак не связаны с траекторией трудового дохода — постоянство или рост потребления определяются исключительно соотношением $r$ и $\rho$, а не тем, как именно устроен профиль дохода домохозяйства на протяжении жизни. Именно эта развязка потребления и текущего дохода — центральная идея обеих теорий конспекта.</p>
+      </div>
+    </section>
+
+    <!-- ============ 03 СТИЛИЗОВАННАЯ МОДЕЛЬ ============ -->
+    <section class="sec" id="lch-stylized">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Упрощённая версия</p>
+        <h2 class="sec-title">Временные профили потребления, сбережений и богатства</h2>
+      </div>
+      <div class="prose">
+        <p>Чтобы получить содержательные явные формулы, упростим модель: жизнь длится $T=L+R$ периодов, из которых $L$ — трудовые годы с постоянным доходом $y^t$, а $R$ — годы пенсии с нулевым доходом. Ставка процента и норма дисконтирования равны нулю: $r=\rho=0$.</p>
+      </div>
+      <div class="eq-box system">
+        $$y^t_{t+\tau} = y^t,\quad 0\le\tau\le L-1 \qquad\qquad y^t_{t+\tau} = 0,\quad L\le\tau\le T-1$$
+      </div>
+      <div class="prose"><p>При $r=\rho=0$ уравнение Эйлера даёт постоянное потребление на всём горизонте жизни: $c^t_{t+\tau}=c^t\ \forall\tau$. Подставляя это в бюджетное ограничение $\sum c^t_{t+\tau} = \sum y^t_{t+\tau} = Ly^t$ (доход зарабатывается только $L$ периодов), получаем <strong>индивидуальную норму потребления</strong>:</p></div>
+      <div class="formula-box">
+        <div class="eq">c<sup>t</sup> = L/(L+R) · y<sup>t</sup></div>
+        <div class="formula-legend">
+          <div class="item"><b>L=40, R=10</b>даёт MPC = 0.8, норму сбережений 0.2</div>
+        </div>
+      </div>
+
+      <h3 class="sub">Сбережения и накопление богатства в трудовой период</h3>
+      <div class="eq-box system">
+        $$s^t_{t+\tau} = \frac{R}{L+R}y^t,\quad 0\le\tau\le L-1 \qquad\qquad a^t_{t+\tau} = \tau s^t_{t+\tau} = \frac{\tau R}{L+R}y^t,\quad 0\le\tau\le L$$
+      </div>
+      <div class="prose"><p>Богатство растёт линейно, начиная с нуля (наследства и первоначального богатства нет), и достигает максимума непосредственно перед выходом на пенсию:</p></div>
+      <div class="eq-box">
+        $$a^t_{t+L} = \frac{LR}{L+R}y^t$$
+        <span class="eq-note">Для $L=40,\ R=10$ это в 8 раз превышает трудовой доход — среднее отношение богатства к доходу за трудовую жизнь равно 4.</span>
+      </div>
+
+      <h3 class="sub">Расходование богатства на пенсии</h3>
+      <div class="prose"><p>После выхода на пенсию домохозяйство продолжает потреблять $c^t=L/(L+R)\,y^t$, но уже не из дохода (его нет), а из накопленного богатства — «проедая» его равными порциями на протяжении $R$ периодов:</p></div>
+      <div class="eq-box system">
+        $$s^t_{t+\tau} = -\frac{a^t_{t+L}}{R} = -\frac{L}{L+R}y^t \qquad a^t_{t+\tau} = a^t_{t+L} + (\tau-L)s^t_{t+\tau} = \frac{L(R+L-\tau)}{L+R}y^t,\quad L\le\tau\le T-1$$
+      </div>
+      <div class="prose"><p>Богатство линейно снижается и обнуляется ровно к моменту смерти $a^t_{t+T}=0$ — условие отсутствия «игр Понци» не нарушается: домохозяйство ни умирает с неистраченным богатством, ни залезает в неоплатный долг.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Временные профили дохода, потребления, сбережений и богатства (L=40, R=10, y≡1)</p>
+        <svg viewBox="0 0 560 260" role="img" aria-label="Четыре линии на графике по оси возраста от 0 до 50: доход — синяя ступенька на уровне 1 до возраста 40, затем 0; потребление — красная горизонтальная линия на уровне 0.8 на всём протяжении жизни; сбережения — зелёная штрихпунктирная линия на уровне 0.2 до возраста 40, затем резко падает до минус 0.8; богатство — жёлтая пунктирная линия, линейно растущая от нуля до пика 8 в возрасте 40, затем линейно падающая обратно к нулю в возрасте 50">
+          <line x1="50" y1="220" x2="490" y2="220" stroke="var(--rule)" stroke-width="1.2"/>
+          <line x1="50" y1="220" x2="50" y2="20" stroke="var(--rule)" stroke-width="1.2"/>
+          <g class="axis-label">
+            <text x="50" y="12" text-anchor="start">8</text>
+            <text x="30" y="182" text-anchor="end">1</text>
+            <text x="30" y="192" text-anchor="end">0.8</text>
+            <text x="30" y="205" text-anchor="end">0.2</text>
+            <text x="30" y="225" text-anchor="end">0</text>
+            <text x="30" y="252" text-anchor="end">−0.8</text>
+          </g>
+          <!-- wealth (yellow dashed): 0 -> 8 at x=L(=330) -> 0 at x=T(=450) -->
+          <path d="M50,220 L330,32 L450,220" fill="none" stroke="var(--accent-2)" stroke-width="2" stroke-dasharray="6 3"/>
+          <!-- income (blue): step at 1 (y=182) from 50 to 330, then 0 (y=220) -->
+          <path d="M50,182 L330,182 L330,220 L450,220" fill="none" stroke="var(--accent)" stroke-width="2"/>
+          <!-- consumption (red): flat at 0.8 (y=192) whole range -->
+          <line x1="50" y1="192" x2="450" y2="192" stroke="#a5432c" stroke-width="2"/>
+          <!-- saving (green dashdot): 0.2 (y=205) to x=330, then -0.8 (y=252) -->
+          <path d="M50,205 L330,205 L330,252 L450,252" fill="none" stroke="var(--accent-3)" stroke-width="2" stroke-dasharray="8 3 2 3"/>
+          <line x1="330" y1="220" x2="330" y2="228" stroke="var(--ink-faint)" stroke-dasharray="2 2"/>
+          <text x="330" y="238" text-anchor="middle" class="axis-label">L=40</text>
+          <text x="450" y="238" text-anchor="middle" class="axis-label">T=50</text>
+          <text x="490" y="216" text-anchor="start" class="axis-label">Возраст</text>
+          <g font-family="IBM Plex Mono, monospace" font-size="11">
+            <text x="60" y="35" fill="var(--accent-2)">богатство a</text>
+            <text x="60" y="50" fill="var(--accent)">доход y</text>
+            <text x="60" y="65" fill="#a5432c">потребление c</text>
+            <text x="60" y="80" fill="var(--accent-3)">сбережения s</text>
+          </g>
+        </svg>
+        <figcaption>Потребление сглажено на всём горизонте жизни; доход и сбережения — ступенчатые; богатство растёт треугольником, достигая пика ровно к выходу на пенсию, и обнуляется к смерти.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 04 АГРЕГИРОВАНИЕ ============ -->
+    <section class="sec" id="aggregation">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>От домохозяйства к экономике</p>
+        <h2 class="sec-title">Агрегирование: микрообоснование кейнсианской функции потребления</h2>
+      </div>
+      <div class="prose">
+        <p>Предположим, что население растёт непрерывно с темпом $n$, а производительность труда — с темпом $g_A$: $n(t)=n_0e^{nt}$ домохозяйств входят в экономику в момент $t$, и их трудовой доход равен $y(t)=y_0e^{g_At}$ на протяжении трудового периода жизни. Важно: рост производительности здесь происходит <strong>от поколения к поколению</strong>, а не в течение трудовой жизни каждого отдельного домохозяйства.</p>
+        <p>Агрегированный доход в момент $t$ — сумма трудовых доходов всех, кто сейчас работает, то есть поколений, вошедших в экономику от $t-L$ до $t$:</p>
+      </div>
+      <div class="eq-box">$$Y(t) = \int_{t-L}^{t} y(\tau)n(\tau)\,d\tau = \int_{t-L}^{t} y_0e^{g_A\tau}n_0e^{n\tau}\,d\tau$$</div>
+      <div class="prose"><p>Агрегированное потребление, в отличие от дохода, определяется для всех <em>живых</em> поколений — работающих и пенсионеров, то есть вошедших в экономику от $t-L-R$ до $t$. Каждое домохозяйство потребляет постоянную долю своего трудового дохода $L/(L+R)$:</p></div>
+      <div class="eq-box">
+        $$C(t) = \int_{t-L-R}^{t}\frac{L}{L+R}\,y(\tau)n(\tau)\,d\tau = \underbrace{\frac{L}{L+R}Y(t)}_{\text{потребление работающих}} + \underbrace{\int_{t-L-R}^{t-L}\frac{L}{L+R}y(\tau)n(\tau)\,d\tau}_{\text{потребление пенсионеров}}$$
+      </div>
+      <div class="prose"><p>Первое слагаемое — совокупный трудовой доход, помноженный на индивидуальную норму потребления; второе — потребление неработающих поколений, которое обеспечивается накопленным ранее богатством, а значит пропорционально совокупному богатству экономики. В итоге мы получили функцию агрегированного потребления с линейной зависимостью от совокупного дохода <em>и</em> богатства:</p></div>
+      <div class="formula-box">
+        <div class="eq">C(t) = α·Y(t) + β·A(t)</div>
+        <div class="formula-legend">
+          <div class="item"><b>α</b>предельная склонность к потреблению из трудового дохода</div>
+          <div class="item"><b>β·A(t)</b>автономное потребление — потребление из накопленного богатства</div>
+        </div>
+      </div>
+      <div class="callout result">
+        <span class="mark">Ключевой результат</span>
+        <p>Это микроэкономическое обоснование стандартной <strong>кейнсианской функции потребления</strong>: линейная зависимость от текущего дохода со свободным членом. LCH объясняет, откуда берётся автономное потребление (из накопленного богатства) — то, что в чисто кейнсианской модели постулировалось, а не выводилось.</p>
+      </div>
+      <div class="prose"><p>Аналогично раскладывается и агрегированное сбережение $S(t)=Y(t)-C(t)$: положительные сбережения работающих поколений минус отрицательные сбережения (потребление сверх нулевого дохода) пенсионеров.</p></div>
+    </section>
+
+    <!-- ============ 05 СКЛОННОСТИ ============ -->
+    <section class="sec" id="propensities">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Агрегированные величины</p>
+        <h2 class="sec-title">Агрегированная норма потребления и сбережения</h2>
+      </div>
+      <div class="prose"><p>Вычисляя интегралы явно, получаем агрегированную среднюю норму потребления:</p></div>
+      <div class="eq-box">
+        $$c = \frac{C(t)}{Y(t)} = \frac{L}{L+R}\cdot\frac{1-e^{-(g_A+n)(L+R)}}{1-e^{-(g_A+n)L}} \qquad s = 1-c$$
+        <span class="eq-note">Зависит от темпа роста экономики $g_Y = g_A + n$ — сумме темпов роста производительности и населения.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>$g_Y$</th><th class="num">0%</th><th class="num">1%</th><th class="num">3%</th><th class="num">5%</th></tr></thead>
+          <tbody>
+            <tr><td>Агрегированная норма сбережений $s$</td><td class="num">0%</td><td class="num">4.5%</td><td class="num">11.1%</td><td class="num">15.1%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Агрегированная норма сбережений — возрастающая и вогнутая функция темпа роста экономики, при <strong>неизменной</strong> индивидуальной норме сбережений (0.2 в нашей параметризации). Не важно, чем именно обеспечен рост — более быстрым ростом населения или ростом производительности, — значение имеет только их сумма $g_Y$.</p>
+      </div>
+      <div class="prose">
+        <p>Почему так происходит:</p>
+        <ul>
+          <li>Если экономика не растёт ($g_Y=0$), агрегированная норма сбережений равна нулю: положительные сбережения работающего поколения в точности компенсируются отрицательными сбережениями пенсионеров.</li>
+          <li>Агрегированные сбережения положительны, только если поток положительных сбережений работающих превышает по модулю отрицательные сбережения пенсионеров — это происходит из-за роста численности поколений (<strong>эффект Нэйссера</strong>) и/или из-за роста индивидуального дохода вследствие роста производительности (<strong>эффект Бентзела</strong>).</li>
+        </ul>
+      </div>
+      <div class="callout result">
+        <span class="mark">Причинность, а не просто корреляция</span>
+        <p>LCH утверждает, что причинность идёт <strong>от экономического роста к норме сбережений</strong>, а не наоборот: сбережения — следствие роста, а не его источник (в отличие от моделей Рамсея/OLG, где именно сбережения питают инвестиции и рост капитала). Мы не процесс совокупных сбережений определяет темп роста, а рост определяет норму сбережений.</p>
+      </div>
+    </section>
+
+    <!-- ============ 06 ЭМПИРИКА РОСТ ============ -->
+    <section class="sec" id="empirics-growth">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Проверка на данных, часть 1</p>
+        <h2 class="sec-title">Экономический рост и сбережения: эмпирика</h2>
+      </div>
+      <div class="eq-box">
+        $$s = \underset{(4.2)}{0.06} + \underset{(6.1)}{1.81}\,g_Y \qquad \bar R^2 = 0.37,\quad S.E. = 0.041$$
+        <span class="eq-note">Регрессия Модильяни (1986, 1990) по кросс-страновым данным: норма личных сбережений на темп роста подушевого дохода. В скобках — t-статистики.</span>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Норма сбережений растёт вместе с темпом роста экономики</p>
+        <svg viewBox="0 0 480 220" role="img" aria-label="Точечная диаграмма темпа роста подушевого дохода по горизонтали и нормы личных сбережений по вертикали для набора развитых стран, с восходящей линией регрессии; Япония с самым высоким ростом и самой высокой нормой сбережений в правом верхнем углу, Британия с низким ростом и низкой нормой сбережений внизу слева">
+          <line x1="40" y1="190" x2="450" y2="190" stroke="var(--rule)"/>
+          <line x1="40" y1="190" x2="40" y2="20" stroke="var(--rule)"/>
+          <line x1="55" y1="175" x2="435" y2="35" stroke="var(--accent)" stroke-width="2"/>
+          <g fill="var(--accent-2)" opacity="0.85">
+            <circle cx="70" cy="168" r="4"/><circle cx="120" cy="155" r="4"/><circle cx="150" cy="140" r="4"/>
+            <circle cx="180" cy="120" r="4"/><circle cx="210" cy="108" r="4"/><circle cx="230" cy="100" r="4"/>
+            <circle cx="260" cy="95" r="4"/><circle cx="290" cy="85" r="4"/><circle cx="320" cy="115" r="4"/>
+            <circle cx="350" cy="130" r="4"/><circle cx="420" cy="42" r="5.5"/>
+          </g>
+          <text x="70" y="182" class="axis-label" text-anchor="middle">Britain</text>
+          <text x="230" y="88" class="axis-label" text-anchor="middle">France</text>
+          <text x="420" y="30" class="axis-label" text-anchor="middle">Japan</text>
+          <text x="240" y="208" text-anchor="middle" class="axis-label">темп роста подушевого дохода, %</text>
+          <text x="-110" y="16" text-anchor="middle" transform="rotate(-90)" class="axis-label">норма сбережений, %</text>
+        </svg>
+        <figcaption>Стилизованное воспроизведение графика Модильяни (1986): страны с более высоким темпом роста устойчиво демонстрируют более высокую норму личных сбережений.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>Пэксон (Paxson, 1996), используя декадные средние по широкой панели стран, находит ту же положительную связь между темпом роста подушевого ВВП и нормой инвестиций/сбережений — хотя разброс по отдельным странам велик (Тайвань и Таиланд с высоким ростом и высокими сбережениями, Великобритания и США — с более низкими значениями обоих показателей).</p>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Направление причинности подтверждается отдельно</span>
+        <p>Кэрролл и Уэйл (Carroll, Weil, 1994) провели межстрановой тест Грейнджера на причинно-следственную связь между сбережениями и ростом. Результат: можно говорить о высоких нормах совокупных сбережений как <strong>следствии</strong> высоких темпов роста, но не наоборот — именно то, что предсказывает LCH.</p>
+      </div>
+      <div class="prose"><p>Альтернативное (не противоречащее LCH) объяснение того же наблюдения строится на основе привычек потребления (habit formation): домохозяйства медленно подстраивают уровень потребления к возросшему доходу, из-за чего быстрый рост дохода временно сопровождается более высокими сбережениями.</p></div>
+    </section>
+
+    <!-- ============ 07 ПРОВЕРКА ПРОФИЛЕЙ ============ -->
+    <section class="sec" id="empirics-profiles">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Проверка на данных, часть 2</p>
+        <h2 class="sec-title">Насколько реалистична стилизованная модель?</h2>
+      </div>
+      <div class="prose">
+        <p>Модель раздела 03 предельно схематична: нулевая ставка процента, постоянный трудовой доход, экзогенно заданная и детерминированная продолжительность жизни, отсутствие изменения размера семьи, отсутствие пенсионной системы. Устойчива ли модель к смягчению этих предпосылок? Ответ эмпирических исследований — в целом да: несмотря на упрощения, ключевые предсказания LCH неплохо соотносятся с реальностью.</p>
+      </div>
+
+      <h3 class="sub">Жаппелли-Модильяни (1998): панель итальянских домохозяйств</h3>
+      <div class="fig-grid">
+        <figure class="chart">
+          <p class="chart-title">Заработанный доход и потребление</p>
+          <svg viewBox="0 0 260 190" role="img" aria-label="Два горба на графике по возрасту от 20 до 80: заработанный доход резко растёт, достигает пика около 45-50 лет на уровне около 55, затем резко падает к нулю к 65-70 годам; потребление плавно растёт, достигает более низкого и более позднего пика около 50-55 лет на уровне около 30, затем плавно снижается">
+            <line x1="30" y1="160" x2="240" y2="160" stroke="var(--rule)"/>
+            <line x1="30" y1="160" x2="30" y2="20" stroke="var(--rule)"/>
+            <path d="M40,145 C70,90 100,45 130,42 C155,40 175,60 200,120 C215,145 225,155 230,158" fill="none" stroke="var(--accent)" stroke-width="2"/>
+            <path d="M40,128 C80,105 120,95 145,92 C175,95 200,108 230,128" fill="none" stroke="#a5432c" stroke-width="2"/>
+            <text x="130" y="35" class="axis-label" fill="var(--accent)">доход</text>
+            <text x="175" y="85" class="axis-label" fill="#a5432c">потребление</text>
+            <text x="130" y="176" text-anchor="middle" class="axis-label">возраст, 20–80 лет</text>
+          </svg>
+          <figcaption>Горб дохода выше и уже горба потребления — типичная картина жизненного цикла заработков.</figcaption>
+        </figure>
+        <figure class="chart">
+          <p class="chart-title">Совокупное богатство</p>
+          <svg viewBox="0 0 260 190" role="img" aria-label="Плавный горб на графике по возрасту от 20 до 80: богатство растёт от низкого уровня в молодости, достигает пика около 55-60 лет, затем плавно снижается к концу жизни, но не доходит до нуля">
+            <line x1="30" y1="160" x2="240" y2="160" stroke="var(--rule)"/>
+            <line x1="30" y1="160" x2="30" y2="20" stroke="var(--rule)"/>
+            <path d="M40,150 C90,100 140,40 165,35 C190,40 215,80 230,110" fill="none" stroke="var(--accent-2)" stroke-width="2"/>
+            <text x="165" y="28" text-anchor="middle" class="axis-label" fill="var(--accent-2)">богатство</text>
+            <text x="130" y="176" text-anchor="middle" class="axis-label">возраст, 20–80 лет</text>
+          </svg>
+          <figcaption>Пик богатства смещён позже пика потребления/дохода — примерно на 55–60 лет — и снижается медленнее, чем росло.</figcaption>
+        </figure>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Заработанный доход выше и раньше пикует, чем потребление</strong></td><td>Именно эта разница и есть сбережения: положительные в среднем возрасте, отрицательные ближе к пенсии — ровно то, что предсказывает стилизованная модель.</td></tr>
+            <tr><td><strong>Размер семьи тоже горбообразен</strong></td><td>Растёт с рождением детей, снижается по мере их отделения — подтверждает, что упрощение «размер семьи не меняется» некритично для качественных выводов.</td></tr>
+            <tr><td><strong>Пенсионное и частное богатство ведут себя по-разному</strong></td><td>Принудительные (пенсионные) сбережения становятся отрицательными позже, чем частные — люди тратят частные сбережения раньше, чем начинают получать пенсионные выплаты.</td></tr>
+            <tr><td><strong>Общее богатство остаётся положительным до конца жизни</strong></td><td>В отличие от простейшей модели (где богатство обнуляется точно к смерти), эмпирически оно снижается медленнее — из-за неопределённости продолжительности жизни, мотива предупредительных сбережений (раздел 12) и, возможно, мотива оставить наследство.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Итог проверки</span>
+        <p>Несмотря на стилизованность, модель жизненного цикла неплохо описывает реальные профили дохода, потребления, сбережений и богатства на протяжении жизни — качественные предсказания (горб дохода выше горба потребления, накопление богатства к пенсии с последующим снижением) подтверждаются панельными данными.</p>
+      </div>
+    </section>
+
+    <!-- ============ 08 PIH ПОСТАНОВКА ============ -->
+    <section class="sec" id="pih-setup">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Фридман, 1957</p>
+        <h2 class="sec-title">Гипотеза перманентного дохода</h2>
+      </div>
+      <div class="prose"><p>Рассмотрим репрезентативного агента с бесконечным горизонтом жизни (упрощение, не влияющее на суть результатов). Берём уравнение Эйлера и межвременное бюджетное ограничение, полагая для простоты $r=\rho$:</p></div>
+      <div class="eq-box">
+        $$\frac{u'(C_t)}{u'(C_{t+1})} = \frac{1+r}{1+\rho} \qquad \sum_{\tau=0}^{\infty}\frac{C_{t+\tau}}{(1+r)^\tau} = A_t + \sum_{\tau=0}^{\infty}\frac{Y^d_{t+\tau}}{(1+r)^\tau}$$
+      </div>
+      <div class="prose"><p>При $r=\rho$ оптимальный выбор — постоянное потребление, $C_{t+1}=C_t=C$, вне зависимости от динамики располагаемого дохода. Вынося постоянное $C$ из-под знака суммы и используя формулу суммы бесконечной геометрической прогрессии $\sum_{\tau=0}^{\infty}1/(1+r)^\tau=1+1/r=(1+r)/r$, получаем:</p></div>
+      <div class="eq-box">
+        $$C = \frac{r}{1+r}\left[A_t + \sum_{\tau=0}^{\infty}\frac{Y^d_{t+\tau}}{(1+r)^\tau}\right] \overset{\text{def}}{\equiv} Y^P \qquad \forall t$$
+      </div>
+      <div class="callout result">
+        <span class="mark">Определение перманентного дохода</span>
+        <p><strong>Перманентный доход</strong> — это аннуитетная стоимость совокупного богатства, то есть суммы финансового богатства $A_t$ и человеческого богатства (приведённой стоимости будущего потока располагаемого дохода). Общая идея: домохозяйство как бы обменивает весь поток своих будущих трудовых доходов на эквивалентную сумму денег сегодня (наподобие получения кредита под будущие доходы как залог) — и живёт на процентный доход с этой суммы.</p>
+      </div>
+
+      <h3 class="sub">Напоминание про аннуитеты</h3>
+      <div class="prose"><p>Если купить актив с ценой $X$, приносящий постоянный купон $x$ каждый период, то цена и купон связаны через сумму бесконечной геометрической прогрессии:</p></div>
+      <div class="eq-box">$$x + \frac{x}{1+r} + \frac{x}{(1+r)^2} + \dots = \frac{1+r}{r}x = X \quad\Longleftrightarrow\quad x = \frac{r}{1+r}X$$</div>
+      <div class="prose"><p>Определение перманентного дохода — это в точности такая формула аннуитетного платежа, применённая к совокупному богатству $\Omega_t=A_t+\sum Y^d_{t+\tau}/(1+r)^\tau$.</p></div>
+
+      <h3 class="sub">Связь с конечным горизонтом (LCH)</h3>
+      <div class="prose"><p>Если проделать тот же вывод для потребителя с конечным горизонтом $T$ лет и начальным богатством $A_0$ (при $r=\rho=0$), получим аналогичную формулу с коэффициентом аннуитета $1/T$ вместо $r/(1+r)$:</p></div>
+      <div class="eq-box system">
+        $$C = \frac{1}{T}\left[A_0+\sum_{\tau=0}^{T-1}Y^d_\tau\right] = \frac{1}{T-t}\left[A_t+\sum_{\tau=0}^{T-1}Y^d_{t+\tau}\right]\quad\forall t$$
+      </div>
+      <div class="callout">
+        <span class="mark">Одно и то же утверждение</span>
+        <p>Для конечного горизонта $T$ при нулевой ставке коэффициент аннуитета — $1/T$ (обратное число оставшихся периодов); для бесконечного горизонта — $r/(1+r)$. LCH и PIH дают <strong>одинаковый</strong> ответ на вопрос «зачем сберегать» — оптимальное потребление определяется не текущим, а совокупным (приведённым) доходом. Но осторожно: не стоит путать перманентный доход со <em>средним</em> доходом — совпадение верно лишь в этом частном случае постоянного дохода на конечном горизонте.</p>
+      </div>
+    </section>
+
+    <!-- ============ 09 ТЕСТ НА СЕБЕ ============ -->
+    <section class="sec" id="test-yourself">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>Проверка интуиции</p>
+        <h2 class="sec-title">Тест на себе: миллион в лотерею</h2>
+      </div>
+      <div class="prose">
+        <p>Представьте, что вы выиграли в лотерею 1 000 000 рублей. Оцените оставшийся горизонт жизни как 50 лет; пусть ставка процента равна нулю и будущая полезность не дисконтируется (то есть вы выбираете постоянное потребление). Следуя PIH, нужно увеличить <strong>ежегодные</strong> расходы на $1\,000\,000/50 = 20\,000$ рублей.</p>
+      </div>
+      <div class="callout warn" style="border-color:color-mix(in srgb, #a5432c 40%, transparent); background:#f6e2da;">
+        <span class="mark" style="color:#a5432c;">Реакция большинства</span>
+        <p>«Нет уж, я хочу потратить миллион <em>сейчас</em>!» — типичная реакция, которая как будто расходится с предсказанием теории. Означает ли это, что PIH плохо описывает поведение (возможно, нерациональных) людей?</p>
+      </div>
+      <div class="prose">
+        <p>На самом деле — нет. Если представить, на что реально был бы потрачен выигрыш — автомобиль, дорогая бытовая техника и тому подобное, — то это расходы на <strong>товары длительного пользования</strong>, а не на текущее потребление. Переменная $C$ в модели измеряет именно текущее потребление (еду, услуги, одежду) — то, что тождественно объёму благ, входящему в функцию полезности <em>в момент покупки</em>. Для товаров длительного пользования это предположение неуместно: расходы совершаются в одном периоде, а полезность извлекается на протяжении многих последующих.</p>
+        <p>Общий принцип: сглаживанию по PIH подлежит не поток <em>расходов</em>, а поток <em>полезности</em> от потребления. Направив большую часть выигрыша на запас товаров длительного пользования, домохозяйство обеспечивает себе более высокий, но стабильный поток полезности в будущем — это не противоречит гипотезе перманентного дохода, а прекрасно в неё укладывается.</p>
+      </div>
+
+      <h3 class="sub">Паттерны, которые PIH объясняет хуже</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Keeping up with the Joneses</strong></td><td>Некоторые домохозяйства с низким доходом создают видимость благополучия, потребляя «не хуже других». Это плохо укладывается в рациональную PIH: у «бедных» низок не только текущий, но и перманентный доход, так что желание пустить пыль в глаза сегодня неизбежно требует ещё более низкого потребления завтра.</td></tr>
+            <tr><td><strong>«Почему богатые сберегают так много?»</strong></td><td>Кэрролл (Carroll, 1998) отмечает, что более высокую норму сбережений у богатых домохозяйств сложно объяснить в рамках стандартного межвременного перераспределения ресурсов. Альтернативные объяснения: накопление богатства как самоцель, мотив передачи наследства, стремление к более высокому социальному или политическому статусу.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 10 ПЕРЕХОДНЫЙ ДОХОД ============ -->
+    <section class="sec" id="transitory">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">10</span>Механизм сглаживания</p>
+        <h2 class="sec-title">Переходный доход и сглаживание потребления</h2>
+      </div>
+      <div class="prose"><p>Определим разницу между текущим и перманентным доходом как <strong>переходный (транзитивный) доход</strong>:</p></div>
+      <div class="eq-box">$$Y^T_t \overset{\text{def}}{\equiv} Y^d_t - Y^P = Y^d_t - \frac{r}{1+r}\left[A_t+\sum_{\tau=0}^{\infty}\frac{Y^d_{t+\tau}}{(1+r)^{\tau}}\right]$$</div>
+      <div class="prose"><p>Поскольку $Y^P=C$, переходный доход — это, по сути, то же самое, что сбережения: $S_t=Y^d_t-C=Y^T_t$. Именно переходный доход позволяет домохозяйству перераспределять ресурсы во времени: сберегать, когда текущий доход превышает перманентный, и занимать (или тратить из накопленного богатства), когда текущий доход ниже перманентного.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Текущий доход колеблется — перманентный доход и потребление сглажены</p>
+        <svg viewBox="0 0 480 190" role="img" aria-label="Зубчатая ломаная линия текущего дохода, сильно колеблющаяся вокруг гладкой почти горизонтальной линии перманентного дохода и потребления; в моменты, когда текущий доход выше сглаженной линии, область между ними закрашена как положительные сбережения, а когда ниже — как отрицательные сбережения">
+          <line x1="30" y1="160" x2="450" y2="160" stroke="var(--rule)"/>
+          <path d="M30,100 L70,60 L110,120 L150,75 L190,110 L230,50 L270,95 L310,130 L350,80 L390,105 L430,70 L450,95" fill="none" stroke="var(--accent)" stroke-width="1.8"/>
+          <path d="M30,95 C120,92 200,90 320,92 C380,93 420,90 450,90" fill="none" stroke="#a5432c" stroke-width="2.4" stroke-dasharray="1 0"/>
+          <text x="60" y="45" class="axis-label" fill="var(--accent)">текущий доход Yᵈ</text>
+          <text x="330" y="105" class="axis-label" fill="#a5432c">перманентный доход = потребление</text>
+          <text x="240" y="178" text-anchor="middle" class="axis-label">время</text>
+        </svg>
+        <figcaption>Разница между зубчатой и гладкой линией в каждый момент — переходный доход, равный сбережениям: положительный, когда текущий доход выше перманентного, отрицательный — когда ниже.</figcaption>
+      </figure>
+      <div class="callout">
+        <span class="mark">Два важных уточнения</span>
+        <p>Во-первых, сама концепция перманентного дохода <strong>не требует</strong> постоянства потребления во времени — это следствие нашего упрощающего предположения $r=\rho$. Суть в другом: при выборе <em>текущего</em> уровня потребления рациональный агент должен ориентироваться не столько на текущий доход, сколько на доходы на протяжении всей оставшейся жизни. Во-вторых, LCH и PIH дают одинаковый ответ на вопрос «зачем сберегать»: сбережения — инструмент, который позволяет домохозяйствам добиваться сглаженности потребления (consumption smoothing), несмотря на неравномерное распределение трудового дохода во времени.</p>
+      </div>
+    </section>
+
+    <!-- ============ 11 СЛУЧАЙНОЕ БЛУЖДАНИЕ ============ -->
+    <section class="sec" id="random-walk">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">11</span>Холл, 1978</p>
+        <h2 class="sec-title">PIH при неопределённости и гипотеза случайного блуждания</h2>
+      </div>
+      <div class="prose"><p>В реальности домохозяйства не знают своих будущих доходов наверняка. Задача переписывается в терминах ожидаемой полезности и ожидаемой приведённой стоимости:</p></div>
+      <div class="eq-box system">
+        $$E_0\sum_{t=0}^{\infty}\frac{u(C_t)}{(1+\rho)^t} \to \max_{C_t} \qquad E_t\sum_{\tau=0}^{\infty}\frac{C_{t+\tau}}{(1+r)^\tau} = A_t + E_t\sum_{\tau=0}^{\infty}\frac{Y^d_{t+\tau}}{(1+r)^\tau}$$
+      </div>
+      <div class="prose"><p>Уравнение Эйлера теперь содержит математическое ожидание предельной полезности будущего потребления:</p></div>
+      <div class="eq-box">$$\frac{u'(C_t)}{E_t[u'(C_{t+1})]} = \frac{1+r}{1+\rho} \quad\overset{r=\rho}{\Longrightarrow}\quad u'(C_t) = E_t[u'(C_{t+1})]$$</div>
+
+      <h3 class="sub">Определённая эквивалентность (certainty equivalence)</h3>
+      <div class="prose"><p>Дополнительное упрощающее предположение $E_t[u'(C_{t+1})]=u'(E_tC_{t+1})$ (справедливо для квадратичной функции полезности — там предельная полезность линейна) означает, что агент выбирает потребление так, как если бы точно знал будущие значения дохода. Это сильно упрощает уравнение Эйлера:</p></div>
+      <div class="eq-box">$$u'(C_t)=u'(E_tC_{t+1}) \;\Rightarrow\; E_tC_{t+1}=C_t \quad\text{или}\quad C_{t+1}=C_t+\varepsilon_{t+1},\ \varepsilon_{t+1}\sim i.i.d.(0,\sigma^2)$$</div>
+      <div class="callout result">
+        <span class="mark">Random Walk Hypothesis</span>
+        <p>Изменение потребления в каждом периоде — случайная величина с нулевым средним. Отсюда следует, что лучший прогноз для любого будущего потребления — это <strong>текущее</strong> потребление: $E_tC_{t+\tau}=C_t\ \forall\tau$. Никакая другая доступная сегодня информация (включая прошлые доходы) не должна помогать предсказать будущее изменение потребления лучше, чем просто «change = 0 в среднем».</p>
+      </div>
+
+      <h3 class="sub">Что определяет изменение потребления</h3>
+      <div class="prose"><p>Вычитая уравнение перманентного дохода для $t$ из аналогичного уравнения для $t+1$ (используя динамическое бюджетное ограничение), получаем:</p></div>
+      <div class="eq-box">$$\Delta C_t = C_{t+1}-C_t = \frac{r}{1+r}\sum_{\tau=0}^{\infty}\frac{E_{t+1}Y^d_{t+1+\tau} - E_tY^d_{t+1+\tau}}{(1+r)^\tau}$$</div>
+      <div class="prose"><p>Изменение потребления между $t$ и $t+1$ определяется <strong>изменением ожиданий</strong> о будущих доходах — то есть новой информацией («новостями»). Если домохозяйство не получает новостей, потребление остаётся тем же.</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Следствие 1</strong></td><td>Только <em>неожиданные</em> изменения налоговой политики могут повлиять на потребление — потребление меняется в момент объявления новой политики, а не в момент её фактического вступления в силу.</td></tr>
+            <tr><td><strong>Следствие 2</strong></td><td>Временное изменение налоговой политики должно оказывать меньшее влияние на потребление, чем постоянное изменение — потому что временное изменение слабее меняет приведённую сумму будущих доходов.</td></tr>
+            <tr><td><strong>Избыточная чувствительность (excess sensitivity)</strong></td><td>Если прошлые доходы позволяют прогнозировать будущие, изменение потребления перестаёт быть чисто случайным — это нарушение чистой гипотезы случайного блуждания, которое эмпирически действительно наблюдается и требует более тонких моделей (см. следующие разделы).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 12 ОСТОРОЖНЫЙ ПОТРЕБИТЕЛЬ ============ -->
+    <section class="sec" id="prudent">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">12</span>За пределами определённой эквивалентности</p>
+        <h2 class="sec-title">Осторожный потребитель и предупредительные сбережения</h2>
+      </div>
+      <div class="prose"><p>Определённая эквивалентность — удобный, но нереалистичный способ выбора в условиях неопределённости: он полностью игнорирует влияние <em>изменения самого риска</em> на решения. Рассмотрим две ситуации выбора потребления при неопределённости дохода в следующем периоде:</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td>Ситуация #1</td><td>С вероятностью 0.5 доход будет $1200, иначе — $800 (ожидание $1000)</td></tr>
+            <tr><td>Ситуация #2</td><td>С вероятностью 0.5 доход будет $1500, иначе — $500 (ожидание $1000, но выше дисперсия)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>При определённой эквивалентности эти ситуации <strong>идентичны</strong>, поскольку совпадает математическое ожидание дохода. Но выбрали бы вы одинаковый уровень сегодняшнего потребления в обоих случаях — или проявили бы осторожность?</p></div>
+
+      <h3 class="sub">Формализация: выпуклая предельная полезность</h3>
+      <div class="prose"><p>Чтобы ввести мотив осторожности, нужно предположить $u'''(\cdot)>0$. Тогда неравенства Йенсена дают:</p></div>
+      <div class="eq-box system">
+        $$E_t[u'(C_{t+1})] > u'(E_tC_{t+1})$$
+        $$E_t\big[u'(C_{t+1})\,\big|\,\sigma_2^2\big] > E_t\big[u'(C_{t+1})\,\big|\,\sigma_1^2\big], \quad \sigma_2^2 > \sigma_1^2$$
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Выпуклая предельная полезность и неравенство Йенсена</p>
+        <svg viewBox="0 0 460 220" role="img" aria-label="Выпуклая убывающая кривая предельной полезности от потребления; хорда, соединяющая две точки на кривой при разных уровнях риска, лежит выше самой кривой; чем выше риск (шире хорда), тем выше ожидаемая предельная полезность над значением предельной полезности в точке ожидаемого потребления">
+          <line x1="40" y1="190" x2="440" y2="190" stroke="var(--rule)"/>
+          <line x1="40" y1="190" x2="40" y2="20" stroke="var(--rule)"/>
+          <path d="M55,30 C90,60 130,110 190,140 C260,165 340,178 420,182" fill="none" stroke="var(--ink)" stroke-width="2"/>
+          <line x1="90" y1="52" x2="330" y2="176" stroke="var(--accent-2)" stroke-width="1.4" stroke-dasharray="3 2"/>
+          <line x1="150" y1="95" x2="270" y2="160" stroke="var(--accent)" stroke-width="1.4" stroke-dasharray="3 2"/>
+          <g stroke="var(--ink-faint)" stroke-dasharray="2 2">
+            <line x1="210" y1="190" x2="210" y2="120"/>
+            <line x1="40" y1="120" x2="210" y2="120"/>
+            <line x1="40" y1="145" x2="210" y2="145"/>
+            <line x1="40" y1="105" x2="210" y2="105"/>
+          </g>
+          <g class="axis-label">
+            <text x="30" y="108" text-anchor="end">u'(EC)</text>
+            <text x="30" y="123" text-anchor="end">E[u'|σ₁²]</text>
+            <text x="30" y="148" text-anchor="end">E[u'|σ₂²]</text>
+            <text x="210" y="206" text-anchor="middle">E C_{t+1}</text>
+            <text x="420" y="206" text-anchor="end">C_{t+1}</text>
+            <text x="60" y="14" text-anchor="middle">u'(C)</text>
+          </g>
+        </svg>
+        <figcaption>Из-за выпуклости $u'$ ожидаемая предельная полезность превышает предельную полезность ожидаемого потребления — и тем сильнее, чем выше риск.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>Ожидаемая предельная полезность выше предельной полезности ожидаемого потребления — и чем выше риск, тем выше эта разница. Поскольку предельная полезность убывает, из уравнения Эйлера $u'(C_t)=E_t[u'(C_{t+1})]$ следует: более высокий риск в следующем периоде соответствует более <strong>низкому</strong> оптимальному $C_{t+1}$ — то есть, сталкиваясь с более высоким риском на будущее, потребитель сберегает больше уже сегодня.</p>
+      </div>
+      <div class="callout result">
+        <span class="mark">Предупредительные сбережения (precautionary saving)</span>
+        <p>Мотив осторожности вводит ещё одну, отдельную причину для сбережений — помимо накопления капитала, перераспределения ресурсов во времени и подготовки к пенсии. Это не отменяет полезность гипотезы случайного блуждания (основанной на определённой эквивалентности), а дополняет её.</p>
+      </div>
+      <div class="prose">
+        <p>Мотив осторожности порождает относительно небольшой дополнительный запас активов — так называемые <strong>буферные сбережения</strong> (buffer-stock saving). Этот мотив ослабевает по мере накопления богатства (больший запас активов сам по себе снижает уязвимость к шокам), а значит подразумевает некоторый восходящий тренд в потреблении: молодое домохозяйство без достаточного богатства потребляет меньше, чем предсказывала бы простая PIH, но по мере накопления богатства начинает потреблять больше. Это работает в направлении, <strong>противоположном</strong> эффекту нетерпеливости (высокой $\rho$), которая, наоборот, снижает потребление в будущем относительно настоящего.</p>
+      </div>
+    </section>
+
+    <!-- ============ 13 ОГРАНИЧЕНИЯ ЛИКВИДНОСТИ ============ -->
+    <section class="sec" id="liquidity">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">13</span>Ещё один реалистичный штрих</p>
+        <h2 class="sec-title">Ограничения ликвидности</h2>
+      </div>
+      <div class="prose"><p>На протяжении всего анализа мы предполагали, что домохозяйства могут сберегать и занимать по одной и той же ставке процента — единственным ограничением было условие отсутствия «игр Понци» (NPG). В реальности люди часто сталкиваются с <strong>ограничениями ликвидности</strong>: ставка по кредиту выше ставки по вкладу, а некоторые вообще не имеют доступа к кредиту, что означает жёсткое ограничение $A_t\ge0$.</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Дополнительный мотив к буферным сбережениям</strong></td><td>Столкновение (или ожидание столкновения) с ограничениями ликвидности в будущем — ещё одна причина накапливать дополнительное богатство: если в будущем будет сложно занять в период низкого дохода, разумнее уже сейчас накопить запас, чтобы сгладить потребление самостоятельно.</td></tr>
+            <tr><td><strong>Связь с макроэкономической политикой</strong></td><td>Буферные сбережения — один из источников избыточного роста сбережений во время кризисов (люди боятся будущих ограничений ликвидности и наращивают буфер). Это создаёт основание для кейнсианской антициклической политики (вспомним аргументы Кругмана про парадокс бережливости).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 14 ГОЛОВОЛОМКИ ============ -->
+    <section class="sec" id="puzzles">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">14</span>Возвращаясь к оценке функции потребления</p>
+        <h2 class="sec-title">PIH разгадывает эмпирические головоломки</h2>
+      </div>
+      <div class="prose"><p>Эконометрическая оценка стандартной кейнсианской функции потребления $C=C^A+\text{mpc}\cdot Y^d$ на разных наборах данных даёт на первый взгляд противоречивые результаты. PIH снимает это противоречие.</p></div>
+      <div class="eq-box">
+        $$\hat b = \frac{\text{Cov}(Y,C)}{\text{Var}(Y)} = \frac{\text{Cov}(Y^P+Y^T,\,Y^P)}{\text{Var}(Y^P+Y^T)} = \frac{\text{Var}(Y^P)}{\text{Var}(Y^P)+\text{Var}(Y^T)}$$
+        $$\hat a = \bar C-\hat b\bar Y = \bar Y^P-\hat b(\bar Y^P+\bar Y^T) = (1-\hat b)\bar Y^P$$
+        <span class="eq-note">Используем, что $C=Y^P$ по гипотезе Фридмана, $Y=Y^P+Y^T$, и что перманентный и переходный доход по построению некоррелированы.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Панельные данные (домохозяйства)</strong></td><td>Основная часть разброса дохода между людьми объясняется личными обстоятельствами — безработицей, возрастом, карьерой, то есть $\text{Var}(Y^T)\gg\text{Var}(Y^P)$. Значит $\hat b<1$, $\hat a>0$: рост текущего дохода отражается на потреблении лишь частично.</td></tr>
+            <tr><td><strong>Временные ряды (агрегированные данные)</strong></td><td>На агрегированном уровне почти все изменения дохода отражают долгосрочный экономический рост, то есть $\text{Var}(Y^T)\ll\text{Var}(Y^P)$. Значит $\hat b\approx1$, $\hat a\approx0$ — потребление меняется практически один к одному с текущим доходом.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout result">
+        <span class="mark">Загадка Кузнеца снята</span>
+        <p>Разные оценки коэффициента наклона на микро- и макроданных — не противоречие, а прямое следствие разного соотношения дисперсий перманентного и переходного дохода на разных уровнях агрегации.</p>
+      </div>
+
+      <h3 class="sub">Загадка «Blacks vs Whites»</h3>
+      <div class="prose"><p>Ещё одна загадка: оценка (25) для групп населения с разным уровнем дохода (например, для разных этнических групп в США) даёт линии потребления с похожим наклоном (схожая mpc), но для более богатой группы линия лежит <strong>выше</strong>. Для одного и того же уровня <em>текущего</em> дохода более богатая группа потребляет больше. Почему?</p></div>
+      <div class="eq-box">$$\hat a = (1-\hat b)\bar Y^P$$</div>
+      <div class="prose"><p>Если волатильность перманентного и переходного доходов у разных групп схожа, наклоны (mpc) у них тоже похожи — согласно формуле выше. Но положение линии на графике (автономное потребление $\hat a$) тем выше, чем выше <em>перманентный</em> доход группы. Иными словами: у групп со схожими $\hat b$, но разным средним перманентным доходом $\bar Y^P$, линии потребления идут параллельно, но более состоятельная группа — выше. Тот же уровень текущего дохода для богатой группы нетипично низок (относительно её обычного, перманентного уровня), а для бедной — нетипично высок, отсюда и разница в потреблении при равном текущем доходе.</p></div>
+    </section>
+
+    <!-- ============ 15 ИТОГИ ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">15</span>Итоги</p>
+        <h2 class="sec-title">Самое важное</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Разобрано:</strong></p>
+        <ul>
+          <li>Гипотеза жизненного цикла: стилизованная модель домохозяйства (L рабочих + R пенсионных лет), временные профили потребления/сбережений/богатства</li>
+          <li>Агрегирование: от индивида к экономике, микрообоснование кейнсианской функции потребления $C=\alpha Y+\beta A$</li>
+          <li>Агрегированная норма сбережений как функция темпа роста экономики; эффекты Нэйссера и Бентзела</li>
+          <li>Эмпирика: регрессия Модильяни, кросс-страновые данные Пэксон, тест Грейнджера Кэрролла-Уэйла, жизненные профили Жаппелли-Модильяни</li>
+          <li>Гипотеза перманентного дохода: определение через аннуитет, связь с LCH, переходный доход и сглаживание</li>
+          <li>PIH при неопределённости: определённая эквивалентность, гипотеза случайного блуждания, избыточная чувствительность</li>
+          <li>Осторожный потребитель: неравенства Йенсена, предупредительные сбережения, буферные сбережения</li>
+          <li>Ограничения ликвидности как ещё один источник буферных сбережений</li>
+          <li>Разгадка эмпирических головоломок: разброс МРС на микро- и макроданных, различие линий потребления между группами населения</li>
+        </ul>
+        <p><strong>Что стоит запомнить:</strong></p>
+        <ul>
+          <li>Обе теории дают один и тот же фундаментальный ответ на вопрос «зачем сберегать»: сбережения сглаживают потребление относительно неравномерного дохода</li>
+          <li>LCH: причинность идёт от экономического роста к норме сбережений, а не наоборот</li>
+          <li>PIH: оптимальное потребление определяется перманентным, а не текущим доходом — отсюда гипотеза случайного блуждания потребления</li>
+          <li>Осторожность (не только нетерпеливость) — самостоятельный, количественно значимый мотив к сбережениям при наличии риска</li>
+          <li>Кажущиеся противоречия в эмпирических оценках функции потребления (микро vs макро, богатые vs бедные) снимаются одним и тем же механизмом: разным соотношением дисперсий перманентного и переходного дохода</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 16 ЛИТЕРАТУРА ============ -->
+    <section class="sec" id="refs">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">16</span>Литература</p>
+        <h2 class="sec-title">Источники</h2>
+      </div>
+      <ul class="lit-list">
+        <li><span class="idx">01</span>Modigliani F., Brumberg R. (1954) "Utility Analysis and the Consumption Function: an Interpretation of Cross-Section Data" in Post Keynesian Economics, ed. K. K. Kurihara</li>
+        <li><span class="idx">02</span>Modigliani F. (1986) "Life Cycle, Individual Thrift, and the Wealth of Nations". American Economic Review, 76, pp. 297–313</li>
+        <li><span class="idx">03</span>Jappelli T., Modigliani F. (1998) "The Age-Saving Profile and the Life-Cycle Hypothesis". CSEF Working Paper No. 9</li>
+        <li><span class="idx">04</span>Friedman M. (1957) A Theory of the Consumption Function. Princeton University Press</li>
+        <li><span class="idx">05</span>Hall R. E. (1978) "Stochastic Implications of the Life Cycle — Permanent Income Hypothesis: Theory and Evidence". Journal of Political Economy, 86(6), pp. 971–987</li>
+        <li><span class="idx">06</span>Paxson C. (1996) "Savings and Growth: Evidence from Micro Data". European Economic Review, 40(2), pp. 255–288</li>
+        <li><span class="idx">07</span>Carroll C. D., Weil D. N. (1994) "Saving and Growth: A Reinterpretation". Carnegie-Rochester Series on Public Policy, 40(June), pp. 133–192</li>
+        <li><span class="idx">08</span>Carroll C. D. (1998/2002) "Why Do the Rich Save So Much?" in Slemrod J. (ed.) Does Atlas Shrug?</li>
+        <li><span class="idx">09</span>Deaton A. (1992) Understanding Consumption. Clarendon Press: Oxford</li>
+        <li><span class="idx">10</span>Attanasio O. P., Banks J., Meghir C., Weber G. (1999) "Humps and Bumps in Lifetime Consumption". Journal of Business and Economic Statistics, 17(1), pp. 22–35</li>
+      </ul>
+      <div class="callout">
+        <span class="mark">Дальше</span>
+        <p>Следующий логичный шаг курса — как фирмы (а не домохозяйства) принимают решения об инвестициях, и как всё это в итоге связывается с работой финансовых рынков и финансовым посредничеством.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект лекции · Жизненный цикл и перманентный доход · Macroeconomics of Financial Markets, Лекции 6–7</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>

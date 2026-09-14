@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Search — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#0a0a0d;
+      --surface:#131318;
+      --surface-2:#1a1a22;
+      --ink:#f5f5fa;
+      --ink-soft:#c3c3d2;
+      --ink-faint:#83839a;
+      --accent:#00e5ff;
+      --accent-strong:#7df3ff;
+      --accent-soft:#0d2b30;
+      --accent-2:#ff5fd1;
+      --accent-2-soft:#2a0f24;
+      --accent-3:#a6ff4d;
+      --accent-3-soft:#182408;
+      --rule:#26262f;
+      --shadow: 0 1px 2px rgba(0,229,255,.07), 0 10px 28px -12px rgba(0,0,0,.7);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 90%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.result .mark{ color:var(--accent-3); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.fact .mark{ color:var(--accent-2); }
+    .callout.warn{ border-color:color-mix(in srgb, #ff8a3d 40%, transparent); background:#2e1c0d; }
+    .callout.warn .mark{ color:#ff8a3d; }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    pre{
+      background:var(--surface-2); border:1px solid var(--rule); border-radius:8px;
+      padding:14px 16px; overflow-x:auto; font-family:'IBM Plex Mono',monospace;
+      font-size:13px; line-height:1.55; margin:14px 0; color:var(--ink-soft);
+    }
+    pre .cm{color:var(--ink-faint);}
+    pre .kw{color:var(--accent-2);}
+    pre .bad{color:#ff8a3d;}
+    pre .good{color:var(--accent-3);}
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:9px 13px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.num{font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+    th.num{text-align:right;}
+    td.diff{white-space:nowrap; font-family:'IBM Plex Mono',monospace; font-size:12.5px;}
+    td.diff.easy{color:var(--accent-3);}
+    td.diff.medium{color:#e8c15a;}
+    td.diff.hard{color:#ff5f6d;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+    mjx-container[jax="CHTML"]{ color: var(--ink); }
+
+    ol.order-list{counter-reset:ord; list-style:none; margin:16px 0; padding:0; max-width:70ch;}
+    ol.order-list li{
+      counter-increment:ord; position:relative; padding:10px 14px 10px 48px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; margin-bottom:8px;
+      font-size:14.5px;
+    }
+    ol.order-list li::before{
+      content:counter(ord); position:absolute; left:12px; top:50%; transform:translateY(-50%);
+      width:22px; height:22px; border-radius:6px; background:var(--accent-soft); color:var(--accent);
+      font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+    }
+    ol.order-list li code{color:var(--accent-strong);}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/it.html">← Раздел «IT»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Алгоритмы · Паттерны · LeetCode</p>
+      <h1 class="title">Binary Search</h1>
+      <p class="subtitle">От базового шаблона поиска точного значения — к самой важной идее medium/hard-задач: binary search on answer, когда ищешь не индекс в массиве, а оптимальное значение параметра. Плюс повёрнутые массивы, 2D-поиск, частые ошибки и список задач с порядком отработки.</p>
+      <div class="meta-row">
+        <span>Паттерны подготовки к собеседованиям</span>
+        <span>Binary Search · Binary Search on Answer</span>
+        <span>19.09.2026</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#motivation"><span class="n">01</span>Базовая идея</a>
+      <a href="#basic-template"><span class="n">02</span>Базовый шаблон</a>
+      <a href="#bound-template"><span class="n">03</span>Поиск границы</a>
+      <a href="#search-on-answer"><span class="n">04</span>Search on Answer</a>
+      <a href="#rotated"><span class="n">05</span>Повёрнутый массив</a>
+      <a href="#search-2d"><span class="n">06</span>Binary Search в 2D</a>
+      <a href="#mistakes"><span class="n">07</span>Частые ошибки</a>
+      <a href="#tasks"><span class="n">08</span>Список задач</a>
+      <a href="#order"><span class="n">09</span>Порядок решения</a>
+      <a href="#summary"><span class="n">10</span>Итоги</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 МОТИВАЦИЯ ============ -->
+    <section class="sec" id="motivation">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Мотивация</p>
+        <h2 class="sec-title">Базовая идея: монотонность вместо перебора</h2>
+      </div>
+      <div class="prose">
+        <p>Binary search применяется к пространству, где есть <strong>монотонное свойство</strong> — то есть можно провести границу, до которой условие ложно, а после которой истинно (или наоборот). Классический случай — отсортированный массив, где значение монотонно растёт слева направо. Но это лишь частный случай: монотонным может быть не сам массив, а <strong>предикат</strong> над произвольным пространством ответов — эта идея разворачивается в разделе 04 и оказывается важнее самого «поиска в массиве».</p>
+        <p>На каждом шаге проверяется средний элемент диапазона, и в зависимости от результата отбрасывается ровно половина пространства поиска. Каждая проверка вдвое сокращает то, что осталось проверить — отсюда $O(\log n)$ вместо $O(n)$ линейного перебора.</p>
+      </div>
+      <div class="callout warn">
+        <span class="mark">!</span>
+        <p><strong>Требование:</strong> пространство поиска должно быть монотонным относительно условия, которое ты проверяешь. Если это не так — binary search молча даст неверный результат, даже если он «запустится» и что-то вернёт. Монотонность нужно доказать себе <em>до</em> того, как садиться писать код, а не понадеяться, что «вроде работает».</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Каждый шаг отбрасывает ровно половину пространства поиска</p>
+        <svg viewBox="0 0 480 130" role="img" aria-label="Три последовательные полосы, изображающие сужение диапазона поиска: первая полоса представляет весь массив целиком, вторая — уже вдвое короче после первой проверки среднего элемента, третья — ещё вдвое короче после второй проверки">
+          <g font-family="IBM Plex Mono, monospace" font-size="11">
+            <rect x="20" y="15" width="440" height="24" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="240" y="15" width="4" height="24" fill="var(--accent-2)"/>
+            <text x="470" y="31" text-anchor="start" class="axis-label">n</text>
+
+            <rect x="20" y="55" width="220" height="24" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="130" y="55" width="4" height="24" fill="var(--accent-2)"/>
+            <text x="250" y="71" text-anchor="start" class="axis-label">n/2</text>
+
+            <rect x="20" y="95" width="110" height="24" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="75" y="95" width="4" height="24" fill="var(--accent-2)"/>
+            <text x="140" y="111" text-anchor="start" class="axis-label">n/4</text>
+          </g>
+        </svg>
+        <figcaption>Розовая полоса — проверенный <code>mid</code>. После каждой проверки половина диапазона (закрашенная область целиком) отбрасывается — за $\log_2 n$ шагов остаётся один элемент.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 02 БАЗОВЫЙ ШАБЛОН ============ -->
+    <section class="sec" id="basic-template">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Шаблон №1</p>
+        <h2 class="sec-title">Базовый шаблон: поиск точного значения</h2>
+      </div>
+      <pre>def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+    while left &lt;= right:
+        mid = left + (right - left) // 2   <span class="cm"># так, а не (left+right)//2 — привычка от переполнения в других языках,</span>
+                                            <span class="cm"># в Python не критично, но так принято</span>
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] &lt; target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return -1  <span class="cm"># не найдено</span></pre>
+
+      <figure class="chart">
+        <p class="chart-title">Сходящиеся left/mid/right на отсортированном массиве</p>
+        <svg viewBox="0 0 480 150" role="img" aria-label="Отсортированный массив из семи чисел с указателями left в начале и right в конце; средний элемент mid проверяется на равенство target, и в зависимости от результата сравнения один из указателей сдвигается, сужая диапазон поиска">
+          <g font-family="IBM Plex Mono, monospace" font-size="12" text-anchor="middle">
+            <rect x="20" y="30" width="60" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="50" y="51" fill="var(--ink-soft)">2</text>
+            <rect x="80" y="30" width="60" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="110" y="51" fill="var(--ink-soft)">5</text>
+            <rect x="140" y="30" width="60" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="170" y="51" fill="var(--ink-soft)">8</text>
+            <rect x="200" y="30" width="60" height="34" rx="5" fill="var(--accent-2)" opacity="0.85"/><text x="230" y="51" fill="var(--bg)">12</text>
+            <rect x="260" y="30" width="60" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="290" y="51" fill="var(--ink-soft)">16</text>
+            <rect x="320" y="30" width="60" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="350" y="51" fill="var(--ink-soft)">23</text>
+            <rect x="380" y="30" width="60" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="410" y="51" fill="var(--ink-soft)">30</text>
+          </g>
+          <text x="50" y="90" text-anchor="middle" class="axis-label" fill="var(--accent-strong)">left</text>
+          <text x="230" y="90" text-anchor="middle" class="axis-label" fill="var(--accent-2)">mid</text>
+          <text x="410" y="90" text-anchor="middle" class="axis-label" fill="var(--accent-strong)">right</text>
+          <text x="240" y="120" text-anchor="middle" class="axis-label">target = 23: arr[mid]=12 &lt; 23 → left = mid + 1, диапазон [16,23,30]</text>
+        </svg>
+        <figcaption>После каждого сравнения ровно одна из половин массива навсегда исключается из рассмотрения.</figcaption>
+      </figure>
+
+      <h3 class="sub">Ключевые моменты</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><code>while left &lt;= right</code></td><td>Именно <code>&lt;=</code>, а не <code>&lt;</code> — иначе пропустишь случай, когда для проверки остался последний элемент диапазона (<code>left == right</code>).</td></tr>
+            <tr><td><code>left = mid + 1</code> / <code>right = mid - 1</code></td><td>Границу обязательно нужно сдвигать <em>мимо</em> <code>mid</code>. <code>mid</code> уже проверен и точно не подходит — если оставить его в новом диапазоне (например, написать <code>left = mid</code>), при определённых значениях диапазон перестанет сужаться и получится бесконечный цикл.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 03 ПОИСК ГРАНИЦЫ ============ -->
+    <section class="sec" id="bound-template">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Шаблон №2</p>
+        <h2 class="sec-title">Шаблон «найти границу» (lower_bound / upper_bound)</h2>
+      </div>
+      <div class="prose"><p>Этот шаблон на практике встречается чаще, чем поиск точного значения — особенно когда в массиве есть дубликаты или нужно найти «первый элемент, удовлетворяющий условию».</p></div>
+      <pre>def lower_bound(arr, target):
+    <span class="cm"># первый индекс, где arr[i] >= target</span>
+    left, right = 0, len(arr)
+    while left &lt; right:
+        mid = left + (right - left) // 2
+        if arr[mid] &lt; target:
+            left = mid + 1
+        else:
+            right = mid
+    return left</pre>
+
+      <h3 class="sub">Отличия от базового шаблона</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><code>right = len(arr)</code></td><td>вместо <code>len(arr) - 1</code> — правая граница невключительная.</td></tr>
+            <tr><td><code>while left &lt; right</code></td><td>вместо <code>left &lt;= right</code>.</td></tr>
+            <tr><td>Нет отдельной ветки <code>==</code></td><td>просто сужаем диапазон до одной точки — сравниваем только <code>&lt;</code> vs «не <code>&lt;</code>».</td></tr>
+            <tr><td>В конце <code>left == right</code></td><td>это и есть искомая граница; она может быть равна <code>len(arr)</code>, если подходящего элемента нет вообще — это обязательно нужно проверять в вызывающем коде.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Для <strong>upper_bound</strong> (первый индекс, где <code>arr[i] &gt; target</code>) меняется только условие внутри цикла: <code>if arr[mid] &lt;= target: left = mid + 1</code>.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">lower_bound и upper_bound на массиве с дубликатами</p>
+        <svg viewBox="0 0 480 140" role="img" aria-label="Массив с повторяющимися значениями: 1, 3, 3, 3, 5, 7; стрелка lower_bound указывает на первую тройку, стрелка upper_bound указывает на элемент 5, сразу после последней тройки">
+          <g font-family="IBM Plex Mono, monospace" font-size="12" text-anchor="middle">
+            <rect x="20" y="35" width="60" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="50" y="56" fill="var(--ink-soft)">1</text>
+            <rect x="80" y="35" width="60" height="34" rx="5" fill="var(--accent-3)" opacity="0.85"/><text x="110" y="56" fill="var(--bg)">3</text>
+            <rect x="140" y="35" width="60" height="34" rx="5" fill="var(--accent-3)" opacity="0.85"/><text x="170" y="56" fill="var(--bg)">3</text>
+            <rect x="200" y="35" width="60" height="34" rx="5" fill="var(--accent-3)" opacity="0.85"/><text x="230" y="56" fill="var(--bg)">3</text>
+            <rect x="260" y="35" width="60" height="34" rx="5" fill="var(--accent-2)" opacity="0.85"/><text x="290" y="56" fill="var(--bg)">5</text>
+            <rect x="320" y="35" width="60" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="350" y="56" fill="var(--ink-soft)">7</text>
+          </g>
+          <text x="110" y="20" text-anchor="middle" class="axis-label" fill="var(--accent-3)">lower_bound(3) = индекс 1</text>
+          <text x="290" y="98" text-anchor="middle" class="axis-label" fill="var(--accent-2)">upper_bound(3) = индекс 4</text>
+        </svg>
+        <figcaption>lower_bound находит первое вхождение искомого значения, upper_bound — первый элемент строго за пределами последнего вхождения. Вместе они дают весь диапазон дубликатов.</figcaption>
+      </figure>
+
+      <div class="callout result">
+        <span class="mark">Самый универсальный шаблон</span>
+        <p>Этот шаблон не ломается на дубликатах и легко адаптируется под любое монотонное условие — не только сравнение с числом, но и произвольный предикат. Стоит выучить именно его как основной, а вариант с отдельной веткой <code>==</code> использовать только для совсем простых задач на точное совпадение.</p>
+      </div>
+    </section>
+
+    <!-- ============ 04 SEARCH ON ANSWER ============ -->
+    <section class="sec" id="search-on-answer">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Ключевая идея темы</p>
+        <h2 class="sec-title">Binary search on answer (параметрический поиск)</h2>
+      </div>
+      <div class="prose">
+        <p>Самая важная концепция для medium/hard-задач на эту тему. Суть: ты ищешь не индекс в массиве, а <strong>оптимальное значение параметра</strong> $X$, при котором выполняется некоторое условие <code>feasible(X)</code> — и это условие <strong>монотонно по $X$</strong>: если оно выполняется для $X$, то выполняется и для всех $X'$ по одну сторону от $X$.</p>
+      </div>
+      <pre>def find_min_feasible(lo, hi, feasible):
+    while lo &lt; hi:
+        mid = lo + (hi - lo) // 2
+        if feasible(mid):
+            hi = mid       <span class="cm"># mid подходит, но, может, есть меньше — не отбрасываем mid</span>
+        else:
+            lo = mid + 1   <span class="cm"># mid точно не подходит</span>
+    return lo</pre>
+
+      <h3 class="sub">Как распознать, что нужен этот подход</h3>
+      <div class="pill-row">
+        <span class="pill">«минимальное/максимальное X, такое что...»</span>
+        <span class="pill">«найти наименьшее k, чтобы...»</span>
+        <span class="pill">прямой перебор X дал бы верный, но слишком медленный ответ</span>
+        <span class="pill">если X подходит — любое X' по ту же сторону тоже подходит</span>
+      </div>
+
+      <h3 class="sub">Пример мышления: Koko Eating Bananas</h3>
+      <div class="prose"><p>Задача: «с какой минимальной скоростью нужно есть бананы, чтобы успеть съесть все кучи за $h$ часов». Прямой перебор скорости от 1 до $\max(\text{piles})$ с проверкой «успеет ли за это время» даёт $O(n \cdot \max(\text{piles}))$ — слишком медленно. Но здесь есть монотонность: если скорость $k$ достаточна, то и любая скорость больше $k$ тоже достаточна. Значит можно применить binary search — не по массиву куч, а по <strong>пространству возможных скоростей</strong>.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">feasible(X) — монотонная ступенька по X, а не по индексу массива</p>
+        <svg viewBox="0 0 480 150" role="img" aria-label="Горизонтальная ось значений параметра X от малых к большим; левая часть оси закрашена красным как область, где feasible(X) ложно, правая часть закрашена зелёным как область, где feasible(X) истинно; binary search ищет именно границу перехода между этими двумя областями">
+          <rect x="30" y="40" width="200" height="36" fill="#ff8a3d" opacity="0.3"/>
+          <rect x="230" y="40" width="220" height="36" fill="var(--accent-3)" opacity="0.3"/>
+          <line x1="230" y1="30" x2="230" y2="86" stroke="var(--accent-strong)" stroke-width="2"/>
+          <text x="130" y="63" text-anchor="middle" class="axis-label" fill="#ff8a3d">feasible(X) = False</text>
+          <text x="340" y="63" text-anchor="middle" class="axis-label" fill="var(--accent-3)">feasible(X) = True</text>
+          <text x="230" y="22" text-anchor="middle" class="axis-label" fill="var(--accent-strong)">искомая граница = ответ</text>
+          <text x="30" y="110" text-anchor="start" class="axis-label">X = 1 (слишком медленно)</text>
+          <text x="450" y="110" text-anchor="end" class="axis-label">X = max(piles) (заведомо хватит)</text>
+        </svg>
+        <figcaption>Диапазон поиска — не индексы массива, а сами значения скорости $X$. Binary search находит ровно точку перехода <code>feasible(X)</code> с False на True — это и есть минимальное подходящее значение.</figcaption>
+      </figure>
+
+      <div class="callout warn">
+        <span class="mark">!</span>
+        <p>Это концептуально сложнее обычного binary search, потому что здесь нет отсортированного массива — функцию <code>feasible(X)</code> нужно придумать самому. Вся сложность задачи сводится к двум вещам: (1) понять, что здесь вообще применим binary search, и (2) правильно и достаточно быстро реализовать <code>feasible(X)</code>.</p>
+      </div>
+    </section>
+
+    <!-- ============ 05 ПОВЁРНУТЫЙ МАССИВ ============ -->
+    <section class="sec" id="rotated">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Нарушенная монотонность</p>
+        <h2 class="sec-title">Binary search в повёрнутом (rotated) массиве</h2>
+      </div>
+      <div class="prose"><p>Массив был отсортирован, а затем «повёрнут» — циклически сдвинут. Целиком он уже не монотонен, но здесь есть более тонкое свойство, которое и нужно использовать: <strong>в любой момент одна из двух половин относительно <code>mid</code> точно отсортирована</strong>.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Одна из половин всегда отсортирована</p>
+        <svg viewBox="0 0 480 140" role="img" aria-label="Повёрнутый отсортированный массив: 15, 18, 2, 4, 7, 9, 12; относительно среднего элемента 4 левая половина 15, 18, 2, 4 не монотонна, а правая половина 4, 7, 9, 12 строго возрастает и потому точно отсортирована">
+          <g font-family="IBM Plex Mono, monospace" font-size="12" text-anchor="middle">
+            <rect x="20" y="35" width="60" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="50" y="56" fill="var(--ink-soft)">15</text>
+            <rect x="80" y="35" width="60" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="110" y="56" fill="var(--ink-soft)">18</text>
+            <rect x="140" y="35" width="60" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="170" y="56" fill="var(--ink-soft)">2</text>
+            <rect x="200" y="35" width="60" height="34" rx="5" fill="var(--accent-2)" opacity="0.85"/><text x="230" y="56" fill="var(--bg)">4</text>
+            <rect x="260" y="35" width="60" height="34" rx="5" fill="var(--accent-3)" opacity="0.85"/><text x="290" y="56" fill="var(--bg)">7</text>
+            <rect x="320" y="35" width="60" height="34" rx="5" fill="var(--accent-3)" opacity="0.85"/><text x="380" y="56" fill="var(--bg)">9</text>
+            <rect x="380" y="35" width="60" height="34" rx="5" fill="var(--accent-3)" opacity="0.85"/><text x="410" y="56" fill="var(--bg)">12</text>
+          </g>
+          <text x="110" y="20" text-anchor="middle" class="axis-label" fill="#ff8a3d">левая половина не монотонна: 15→18→2</text>
+          <text x="320" y="98" text-anchor="middle" class="axis-label" fill="var(--accent-3)">правая половина строго возрастает — отсортирована</text>
+        </svg>
+        <figcaption>Сравнив <code>arr[left]</code> и <code>arr[mid]</code>, легко определить, какая половина отсортирована — и дальше решить, попадает ли <code>target</code> в её диапазон.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p>Алгоритм: определи, какая половина отсортирована (сравнив <code>arr[left]</code> и <code>arr[mid]</code>):</p>
+        <ul>
+          <li>если <code>arr[left] &lt;= arr[mid]</code> — отсортирована <strong>левая</strong> половина;</li>
+          <li>иначе — отсортирована <strong>правая</strong> половина.</li>
+        </ul>
+        <p>Дальше, зная, какая половина точно отсортирована, легко проверить, попадает ли <code>target</code> в её диапазон значений (обычным сравнением с границами). Если попадает — искать в этой половине как в обычном отсортированном массиве; если нет — искать в другой половине (которая, в свою очередь, при следующем шаге снова разделится на «точно отсортированную» и «остальную»).</p>
+      </div>
+    </section>
+
+    <!-- ============ 06 2D ============ -->
+    <section class="sec" id="search-2d">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Два измерения</p>
+        <h2 class="sec-title">Binary search в 2D</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr>
+              <td><strong>Матрица отсортирована по строкам глобально</strong><br><span style="color:var(--ink-faint); font-size:13px;">первый элемент каждой строки больше последнего элемента предыдущей</span></td>
+              <td>Её можно рассматривать как один «виртуальный» отсортированный массив длины $m \times n$ и применять обычный binary search, пересчитывая индекс: <code>row = mid // cols</code>, <code>col = mid % cols</code>.</td>
+            </tr>
+            <tr>
+              <td><strong>Матрица отсортирована по строкам и столбцам независимо</strong><br><span style="color:var(--ink-faint); font-size:13px;">но не глобально</span></td>
+              <td>Другой приём — старт из угла (например, верхний правый) и движение по строке/столбцу в зависимости от сравнения с <code>target</code>. Формально это не совсем binary search, а <strong>staircase search</strong>, но эти задачи часто идут в одной теме.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Staircase search: движение из угла «лестницей»</p>
+        <svg viewBox="0 0 300 220" role="img" aria-label="Матрица 4 на 4, отсортированная по строкам и столбцам; поиск начинается из верхнего правого угла; если текущий элемент больше искомого, курсор двигается на одну клетку влево, если меньше — на одну клетку вниз, пока элемент не найден или курсор не вышел за пределы матрицы">
+          <g font-family="IBM Plex Mono, monospace" font-size="12" text-anchor="middle">
+            <rect x="20" y="20" width="60" height="40" fill="var(--surface-2)" stroke="var(--rule)"/><text x="50" y="44" fill="var(--ink-soft)">1</text>
+            <rect x="80" y="20" width="60" height="40" fill="var(--surface-2)" stroke="var(--rule)"/><text x="110" y="44" fill="var(--ink-soft)">4</text>
+            <rect x="140" y="20" width="60" height="40" fill="var(--surface-2)" stroke="var(--rule)"/><text x="170" y="44" fill="var(--ink-soft)">7</text>
+            <rect x="200" y="20" width="60" height="40" fill="var(--accent-2)" opacity="0.85"/><text x="230" y="44" fill="var(--bg)">11</text>
+
+            <rect x="20" y="60" width="60" height="40" fill="var(--surface-2)" stroke="var(--rule)"/><text x="50" y="84" fill="var(--ink-soft)">2</text>
+            <rect x="80" y="60" width="60" height="40" fill="var(--surface-2)" stroke="var(--rule)"/><text x="110" y="84" fill="var(--ink-soft)">5</text>
+            <rect x="140" y="60" width="60" height="40" fill="var(--surface-2)" stroke="var(--rule)"/><text x="170" y="84" fill="var(--ink-soft)">8</text>
+            <rect x="200" y="60" width="60" height="40" fill="var(--accent-2)" opacity="0.85"/><text x="230" y="84" fill="var(--bg)">12</text>
+
+            <rect x="20" y="100" width="60" height="40" fill="var(--surface-2)" stroke="var(--rule)"/><text x="50" y="124" fill="var(--ink-soft)">3</text>
+            <rect x="80" y="100" width="60" height="40" fill="var(--surface-2)" stroke="var(--rule)"/><text x="110" y="124" fill="var(--ink-soft)">6</text>
+            <rect x="140" y="100" width="60" height="40" fill="var(--accent-3)" opacity="0.9"/><text x="170" y="124" fill="var(--bg)">9</text>
+            <rect x="200" y="100" width="60" height="40" fill="var(--surface-2)" stroke="var(--rule)"/><text x="230" y="124" fill="var(--ink-soft)">16</text>
+          </g>
+          <text x="150" y="170" text-anchor="middle" class="axis-label">target = 9: 11&gt;9→влево, 12&gt;9→влево (следующая строка сначала), 6&lt;9→вниз, 9=9 найдено</text>
+        </svg>
+        <figcaption>Каждый шаг сравнения с текущим элементом однозначно исключает целую строку или целый столбец — отсюда $O(m+n)$ вместо $O(mn)$ полного перебора.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 07 ЧАСТЫЕ ОШИБКИ ============ -->
+    <section class="sec" id="mistakes">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Что чаще всего идёт не так</p>
+        <h2 class="sec-title">Частые ошибки</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Бесконечный цикл</strong></td><td>Неправильный сдвиг границ — написать <code>left = mid</code> вместо <code>left = mid + 1</code>, когда <code>mid</code> уже проверен и точно не подходит. Диапазон перестаёт сужаться.</td></tr>
+            <tr><td><strong>Смешение шаблонов</strong></td><td>Перепутать шаблон «точный поиск» (<code>right = len-1</code>, <code>left &lt;= right</code>) с шаблоном «поиск границы» (<code>right = len</code>, <code>left &lt; right</code>) — брать половину условий из одного, половину из другого.</td></tr>
+            <tr><td><strong>Применение там, где нет монотонности</strong></td><td>Сначала нужно доказать себе, что свойство/предикат монотонны, и только потом писать код — иначе binary search молча вернёт неверный ответ.</td></tr>
+            <tr><td><strong>Забытая сложность feasible()</strong></td><td>Для binary search on answer: если сама функция <code>feasible(X)</code> стоит $O(n)$, а внешний binary search делает $O(\log(\text{range}))$ итераций, итоговая сложность — $O(n \log(\text{range}))$. Это нужно явно понимать и проговаривать на собеседовании, а не молчаливо считать весь алгоритм «логарифмическим».</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 08 СПИСОК ЗАДАЧ ============ -->
+    <section class="sec" id="tasks">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Практика</p>
+        <h2 class="sec-title">Список задач на LeetCode</h2>
+      </div>
+
+      <h3 class="sub">Классический binary search</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">#</th><th>Задача</th><th>Сложность</th><th>Заметка</th></tr></thead>
+          <tbody>
+            <tr><td class="num">704</td><td>Binary Search</td><td class="diff easy">Easy</td><td>база, шаблон 1</td></tr>
+            <tr><td class="num">35</td><td>Search Insert Position</td><td class="diff easy">Easy</td><td>lower_bound</td></tr>
+            <tr><td class="num">278</td><td>First Bad Version</td><td class="diff easy">Easy</td><td>binary search on answer, простейший случай</td></tr>
+            <tr><td class="num">69</td><td>Sqrt(x)</td><td class="diff easy">Easy</td><td>binary search on answer</td></tr>
+            <tr><td class="num">367</td><td>Valid Perfect Square</td><td class="diff easy">Easy</td><td>binary search on answer</td></tr>
+            <tr><td class="num">34</td><td>Find First and Last Position of Element in Sorted Array</td><td class="diff medium">Medium</td><td>lower_bound + upper_bound вместе</td></tr>
+            <tr><td class="num">162</td><td>Find Peak Element</td><td class="diff medium">Medium</td><td>binary search без сортировки, по локальному свойству</td></tr>
+            <tr><td class="num">74</td><td>Search a 2D Matrix</td><td class="diff medium">Medium</td><td>матрица как один массив</td></tr>
+            <tr><td class="num">240</td><td>Search a 2D Matrix II</td><td class="diff medium">Medium</td><td>staircase search</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Rotated sorted array</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">#</th><th>Задача</th><th>Сложность</th><th>Заметка</th></tr></thead>
+          <tbody>
+            <tr><td class="num">153</td><td>Find Minimum in Rotated Sorted Array</td><td class="diff medium">Medium</td><td>без дубликатов</td></tr>
+            <tr><td class="num">33</td><td>Search in Rotated Sorted Array</td><td class="diff medium">Medium</td><td>база темы</td></tr>
+            <tr><td class="num">81</td><td>Search in Rotated Sorted Array II</td><td class="diff medium">Medium</td><td>с дубликатами — сложнее</td></tr>
+            <tr><td class="num">154</td><td>Find Minimum in Rotated Sorted Array II</td><td class="diff hard">Hard</td><td>с дубликатами</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Binary search on answer (параметрический поиск)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">#</th><th>Задача</th><th>Сложность</th><th>Заметка</th></tr></thead>
+          <tbody>
+            <tr><td class="num">875</td><td>Koko Eating Bananas</td><td class="diff medium">Medium</td><td>эталонная задача темы, начни с неё</td></tr>
+            <tr><td class="num">1283</td><td>Find the Smallest Divisor Given a Threshold</td><td class="diff medium">Medium</td><td>почти изоморфна 875</td></tr>
+            <tr><td class="num">1011</td><td>Capacity To Ship Packages Within D Days</td><td class="diff medium">Medium</td><td>тот же паттерн, чуть сложнее feasible()</td></tr>
+            <tr><td class="num">1482</td><td>Minimum Number of Days to Make m Bouquets</td><td class="diff medium">Medium</td><td></td></tr>
+            <tr><td class="num">1552</td><td>Magnetic Force Between Two Balls</td><td class="diff medium">Medium</td><td>поиск максимума вместо минимума — обрати внимание на направление</td></tr>
+            <tr><td class="num">287</td><td>Find the Duplicate Number</td><td class="diff medium">Medium</td><td>нестандартное применение, через подсчёт</td></tr>
+            <tr><td class="num">378</td><td>Kth Smallest Element in a Sorted Matrix</td><td class="diff medium">Medium</td><td>binary search по значению, не по индексу</td></tr>
+            <tr><td class="num">410</td><td>Split Array Largest Sum</td><td class="diff hard">Hard</td><td>классика темы на hard-уровне</td></tr>
+            <tr><td class="num">668</td><td>Kth Smallest Number in Multiplication Table</td><td class="diff hard">Hard</td><td></td></tr>
+            <tr><td class="num">1231</td><td>Divide Chocolate</td><td class="diff hard">Hard</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Hard / комбинированные</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">#</th><th>Задача</th><th>Сложность</th><th>Заметка</th></tr></thead>
+          <tbody>
+            <tr><td class="num">4</td><td>Median of Two Sorted Arrays</td><td class="diff hard">Hard</td><td>классика на собесах топовых компаний, но нетипичная реализация binary search</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 09 ПОРЯДОК РЕШЕНИЯ ============ -->
+    <section class="sec" id="order">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>План отработки</p>
+        <h2 class="sec-title">Рекомендуемый порядок решения</h2>
+      </div>
+      <ol class="order-list">
+        <li><code>704</code>, <code>35</code> — закрепить базовый шаблон и lower_bound на самом простом уровне.</li>
+        <li><code>278</code>, <code>69</code>, <code>367</code> — первое знакомство с идеей «binary search на предикате», ещё без сложной <code>feasible()</code>.</li>
+        <li><code>34</code> — совместить lower_bound и upper_bound в одной задаче, это часто спрашивают на medium.</li>
+        <li><code>33</code>, <code>153</code> — rotated array, понять идею «одна половина всегда отсортирована».</li>
+        <li><code>875</code> — первая полноценная binary search on answer задача. Не переходить дальше, пока не разобрана досконально — это самая частая идея на medium-собеседованиях.</li>
+        <li><code>1283</code>, <code>1011</code>, <code>1482</code> — закрепление параметрического поиска на вариациях.</li>
+        <li><code>162</code>, <code>74</code>, <code>240</code> — если осталось время, добить оставшиеся классические варианты (peak element, 2D).</li>
+        <li><code>1552</code>, <code>287</code>, <code>378</code> — более нестандартные применения темы.</li>
+        <li><code>410</code>, <code>4</code> (при наличии времени перед собеседованием) — hard-уровень: посмотреть, но не заморачиваться, если не идёт с первого раза.</li>
+      </ol>
+    </section>
+
+    <!-- ============ 10 ИТОГИ ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">10</span>Итоги</p>
+        <h2 class="sec-title">Самое важное</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Разобрано:</strong></p>
+        <ul>
+          <li>Базовая идея: монотонность условия, а не обязательно сортировка массива — $O(\log n)$ за счёт отбрасывания половины пространства поиска на каждом шаге</li>
+          <li>Базовый шаблон точного поиска и его две ключевые ловушки (<code>&lt;=</code> в условии цикла, сдвиг мимо <code>mid</code>)</li>
+          <li>Шаблон lower_bound/upper_bound — более универсальный, не ломается на дубликатах</li>
+          <li>Binary search on answer: поиск оптимального параметра через монотонный предикат <code>feasible(X)</code>, а не индекса в массиве</li>
+          <li>Повёрнутый массив: в любой момент одна из половин относительно <code>mid</code> точно отсортирована</li>
+          <li>2D: матрица как виртуальный массив (глобальная сортировка) или staircase search (независимая сортировка по строкам/столбцам)</li>
+          <li>Частые ошибки: бесконечный цикл, смешение шаблонов, применение без доказанной монотонности, забытая сложность <code>feasible()</code></li>
+        </ul>
+        <p><strong>Что стоит запомнить:</strong></p>
+        <ul>
+          <li>Монотонность — это свойство условия/предиката, а не обязательно отсортированности самого массива</li>
+          <li>Шаблон lower_bound стоит выучить как основной — он покрывает почти все практические случаи, включая точный поиск</li>
+          <li>Binary search on answer — самая частая продвинутая идея на medium-собеседованиях: если прямой перебор параметра монотонен по результату, его можно ускорить бинарным поиском</li>
+          <li>Итоговая сложность binary search on answer — это $O(\log(\text{range}))$, умноженное на сложность самой функции <code>feasible()</code>, а не просто «логарифм»</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект · Binary Search · Паттерны подготовки к алгоритмическим собеседованиям</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>

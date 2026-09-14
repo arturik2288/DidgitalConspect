@@ -15,6 +15,66 @@
 
 const NOTES = [
   {
+    id: "binary-search",
+    title: "Binary Search",
+    division: "it",
+    category: "Алгоритмы",
+    date: "2026-09-19",
+    displayDate: "19 сен 2026",
+    description: "Базовый шаблон и шаблон поиска границы (lower/upper bound), binary search on answer (параметрический поиск, Koko Eating Bananas), повёрнутый массив, 2D-поиск, частые ошибки, список задач LeetCode и порядок их отработки.",
+    tags: ["binary search", "search on answer"],
+    file: "../notes/binary-search.html",
+    example: false
+  },
+  {
+    id: "two-pointers-sliding-window",
+    title: "Two Pointers & Sliding Window",
+    division: "it",
+    category: "Алгоритмы",
+    date: "2026-09-18",
+    displayDate: "18 сен 2026",
+    description: "Встречные и однонаправленные указатели (Two Sum II, Container With Most Water, Floyd's cycle detection), окно фиксированного и переменного размера, частая ошибка при асимметричном условии в окне, список задач LeetCode и порядок их отработки.",
+    tags: ["two pointers", "sliding window"],
+    file: "../notes/two-pointers-sliding-window.html",
+    example: false
+  },
+  {
+    id: "lch-pih-consumption",
+    title: "Жизненный цикл и перманентный доход",
+    division: "economics",
+    category: "Макроэкономика",
+    date: "2026-09-17",
+    displayDate: "17 сен 2026",
+    description: "Гипотеза жизненного цикла Модильяни (временные профили, агрегирование, склонности к сбережению, эмпирика роста и сбережений), гипотеза перманентного дохода Фридмана, случайное блуждание потребления, осторожный потребитель и разгадка эмпирических головоломок.",
+    tags: ["LCH", "PIH"],
+    file: "../notes/lch-pih-consumption.html",
+    example: false
+  },
+  {
+    id: "econometrics-ols",
+    title: "Эконометрика: метод наименьших квадратов",
+    division: "economics",
+    category: "Эконометрика",
+    date: "2026-09-16",
+    displayDate: "16 сен 2026",
+    description: "Подгонка кривой (МНК, LAD, компромисс Хубера), линейная регрессионная модель и условия Гаусса-Маркова, полный вывод МНК-оценки, теорема Гаусса-Маркова, дисперсия оценок и R², проверка гипотез — на сквозном числовом примере.",
+    tags: ["МНК", "Гаусс-Марков"],
+    file: "../notes/econometrics-ols.html",
+    example: false
+  },
+  {
+    id: "ml-clusterization",
+    title: "ML: кластеризация — K-means, DBSCAN, спектральная кластеризация",
+    division: "it",
+    category: "Машинное обучение",
+    date: "2026-09-15",
+    displayDate: "15 сен 2026",
+    description: "Постановка задачи кластеризации, простые графовые методы, K-means (K-means++, квантизация признаков), иерархическая кластеризация, DBSCAN, лапласиан графа и спектральная кластеризация, метрики качества (силуэт, гомогенность, полнота, V-мера, BCubed).",
+    tags: ["K-means", "DBSCAN"],
+    file: "../notes/ml-clusterization.html",
+    example: false
+  },
+  {
     id: "ml-linear-regression",
     title: "ML: линейная и логистическая регрессия",
     division: "it",

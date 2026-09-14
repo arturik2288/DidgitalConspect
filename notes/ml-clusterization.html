@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ML: кластеризация — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#0a0a0d;
+      --surface:#131318;
+      --surface-2:#1a1a22;
+      --ink:#f5f5fa;
+      --ink-soft:#c3c3d2;
+      --ink-faint:#83839a;
+      --accent:#00e5ff;
+      --accent-strong:#7df3ff;
+      --accent-soft:#0d2b30;
+      --accent-2:#ff5fd1;
+      --accent-2-soft:#2a0f24;
+      --accent-3:#a6ff4d;
+      --accent-3-soft:#182408;
+      --rule:#26262f;
+      --shadow: 0 1px 2px rgba(0,229,255,.07), 0 10px 28px -12px rgba(0,0,0,.7);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 90%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.result .mark{ color:var(--accent-3); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.fact .mark{ color:var(--accent-2); }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:17px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    td.num{font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums;}
+    th.num{text-align:right;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:700px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+    mjx-container[jax="CHTML"]{ color: var(--ink); }
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/it.html">← Раздел «IT»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">HSE ML · ФКН · Обучение без учителя</p>
+      <h1 class="title">Кластеризация: от K-means до спектральных методов</h1>
+      <p class="subtitle">Как разбивать объекты на группы, не имея разметки: графовые методы, K-means, иерархическая кластеризация, DBSCAN, лапласиан графа и спектральная кластеризация, а также как вообще измерить качество результата.</p>
+      <div class="meta-row">
+        <span>Е. А. Соколов, А. Гусев, И. Садртдинов, ФКН ВШЭ</span>
+        <span>Курс ML · Лекция 17</span>
+        <span>15.09.2026</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#problem"><span class="n">01</span>Постановка задачи</a>
+      <a href="#graph-simple"><span class="n">02</span>Простые графовые методы</a>
+      <a href="#kmeans"><span class="n">03</span>K-means</a>
+      <a href="#hierarchical"><span class="n">04</span>Иерархическая кластеризация</a>
+      <a href="#dbscan"><span class="n">05</span>DBSCAN</a>
+      <a href="#choosing"><span class="n">06</span>Какой метод выбрать</a>
+      <a href="#laplacian"><span class="n">07</span>Граф и лапласиан</a>
+      <a href="#spectral"><span class="n">08</span>Спектральная кластеризация</a>
+      <a href="#quality-internal"><span class="n">09</span>Качество без разметки</a>
+      <a href="#quality-external"><span class="n">10</span>Качество с разметкой</a>
+      <a href="#summary"><span class="n">11</span>Итоги</a>
+      <a href="#refs"><span class="n">12</span>Литература</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 ПОСТАНОВКА ЗАДАЧИ ============ -->
+    <section class="sec" id="problem">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Обучение без учителя</p>
+        <h2 class="sec-title">Постановка задачи кластеризации</h2>
+      </div>
+      <div class="prose">
+        <p>В классификации мы восстанавливали отображение в конечный набор <strong>заранее известных</strong> меток по размеченной обучающей выборке. В кластеризации мы тоже разбиваем объекты на конечное число классов, но:</p>
+        <ul>
+          <li>обучающей выборки с ответами нет;</li>
+          <li>заранее не известна природа классов, а иногда — и их количество.</li>
+        </ul>
+        <p>Формально: есть выборка $X=\{x_i\}_{i=1}^{\ell}$, $x_i \in \mathbb{X}$, нужно построить алгоритм $a: \mathbb{X} \to \{1,\dots,K\}$, ставящий в соответствие объекту номер кластера. То, что модель сочла объекты «похожими», отнеся их к одному кластеру, — это новая информация, «открытие» самой модели.</p>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Кластеризацию часто применяют, когда фактически нужна классификация, но собрать обучающую выборку дорого или долго — а валидационную выборку для оценки результата собрать заметно проще. Важно: точность supervised-методов всегда выше, поэтому если обучающую выборку всё-таки можно получить — лучше решать задачу как классификацию.</p>
+      </div>
+
+      <h3 class="sub">Примеры прикладных задач</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Пикап-пойнты в такси</strong></td><td>GPS-координаты заказов известны с погрешностью и образуют «рой» точек; кластеризация координат находит удобные точки посадки, центры кластеров — кандидаты в пикап-пойнты.</td></tr>
+            <tr><td><strong>Фото на смартфоне</strong></td><td>Группировка снимков по месту съёмки — число кластеров меняется вместе с масштабом карты.</td></tr>
+            <tr><td><strong>Цветовая схема интерфейса</strong></td><td>Цвета изображения кластеризуются в RGB-пространстве; центры кластеров становятся цветами оформления.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 02 ПРОСТЫЕ ГРАФОВЫЕ МЕТОДЫ ============ -->
+    <section class="sec" id="graph-simple">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Первое приближение</p>
+        <h2 class="sec-title">Простейшие методы кластеризации через графы</h2>
+      </div>
+      <div class="prose"><p>Разберём на примере: есть рой геокоординат, нужны пикап-пойнты для такси.</p></div>
+
+      <h3 class="sub">Выделение компонент связности</h3>
+      <div class="prose"><p>Строим граф на точках: соединяем ребром точки на расстоянии до 2–3 метров. Компоненты связности графа — это и есть кластеры.</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Проблема «цепочки»</strong></td><td>Сколь угодно длинная цепочка соседних точек с расстояниями в пару метров вся попадёт в одну компоненту — кластеры получаются крупнее, чем хотелось бы; порог слабо связан с итоговым диаметром кластера.</td></tr>
+            <tr><td><strong>Выбор порога</strong></td><td>Для геометок ещё можно предложить логику выбора расстояния, но для многомерных данных (текстов, эмбеддингов) подобрать отсечку значительно сложнее.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Минимальное остовное дерево</h3>
+      <div class="prose"><p>Альтернатива — не добавлять рёбра, а удалять. Строим минимальное остовное дерево (веса рёбер — расстояния между точками); удалив $N$ самых тяжёлых рёбер, получаем $N+1$ компоненту связности — кластеры.</p></div>
+      <div class="callout result">
+        <span class="mark">Смена параметра</span>
+        <p>Вместо порогового расстояния гиперпараметром становится <strong>количество кластеров</strong> — интерпретируемая и удобная для ручной настройки величина. Эта идея — «число кластеров как параметр» — использована во многих последующих методах.</p>
+      </div>
+    </section>
+
+    <!-- ============ 03 K-MEANS ============ -->
+    <section class="sec" id="kmeans">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Метрический алгоритм</p>
+        <h2 class="sec-title">Метод K-средних (K-means)</h2>
+      </div>
+      <div class="prose"><p>Итеративное повторение двух шагов: (1) распределение объектов по кластерам, (2) пересчёт центров кластеров. Сначала выбираются $K$ случайных центров; каждый объект относят к ближайшему центру; центры пересчитываются как среднее векторов признаков объектов кластера; повторяем, пока центры не перестанут меняться.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Один шаг K-means: переприсвоение и пересчёт центра</p>
+        <svg viewBox="0 0 480 190" role="img" aria-label="Слева облако точек с центром кластера не в центре масс, справа — после переприсвоения точек ближайшему центру и пересчёта центра как среднего арифметического новый центр сместился в геометрический центр своих точек">
+          <text x="120" y="18" text-anchor="middle" class="axis-label">до пересчёта</text>
+          <text x="360" y="18" text-anchor="middle" class="axis-label">после пересчёта</text>
+          <g fill="var(--accent)" opacity="0.85">
+            <circle cx="70" cy="60" r="4"/><circle cx="95" cy="80" r="4"/><circle cx="60" cy="100" r="4"/><circle cx="100" cy="110" r="4"/><circle cx="80" cy="130" r="4"/>
+          </g>
+          <g fill="var(--accent-2)" opacity="0.85">
+            <circle cx="150" cy="90" r="4"/><circle cx="175" cy="60" r="4"/><circle cx="190" cy="100" r="4"/><circle cx="165" cy="130" r="4"/>
+          </g>
+          <circle cx="120" cy="40" r="7" fill="none" stroke="var(--accent-3)" stroke-width="2.5"/>
+          <text x="120" y="30" text-anchor="middle" class="axis-label" fill="var(--accent-3)">старый центр</text>
+
+          <g fill="var(--accent)" opacity="0.85">
+            <circle cx="310" cy="60" r="4"/><circle cx="335" cy="80" r="4"/><circle cx="300" cy="100" r="4"/><circle cx="340" cy="110" r="4"/><circle cx="320" cy="130" r="4"/>
+          </g>
+          <g fill="var(--accent-2)" opacity="0.85">
+            <circle cx="390" cy="90" r="4"/><circle cx="415" cy="60" r="4"/><circle cx="430" cy="100" r="4"/><circle cx="405" cy="130" r="4"/>
+          </g>
+          <circle cx="317" cy="96" r="7" fill="none" stroke="var(--accent-3)" stroke-width="2.5"/>
+          <circle cx="411" cy="95" r="7" fill="none" stroke="var(--accent-3)" stroke-width="2.5"/>
+          <path d="M150,60 L280,80" stroke="var(--ink-faint)" stroke-dasharray="3 3" marker-end="url(#kmArrow)"/>
+          <defs><marker id="kmArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--ink-faint)"/></marker></defs>
+          <text x="240" y="175" text-anchor="middle" class="axis-label">новый центр = среднее арифметическое точек своего кластера</text>
+        </svg>
+        <figcaption>Каждая итерация: объекты переприсваиваются ближайшему центру, затем центр смещается в центр масс своих новых точек.</figcaption>
+      </figure>
+
+      <h3 class="sub">Выбор начального приближения: K-means++</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Проблема 1</strong></td><td>Случайные центры «из воздуха» могут попасть в область без точек выборки. Решение — брать в качестве начальных центров сами объекты выборки.</td></tr>
+            <tr><td><strong>Проблема 2</strong></td><td>Кучное расположение начальных центров ведёт к далёкому от оптимального результату.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose">
+        <p><strong>Эвристика K-means++:</strong></p>
+        <ol>
+          <li>первый центр — случайный объект выборки, равномерно;</li>
+          <li>каждый следующий — случайно, с вероятностью, пропорциональной <strong>квадрату расстояния</strong> до ближайшего уже выбранного центра.</li>
+        </ol>
+        <p>Это заставляет начальные центры быть максимально удалёнными друг от друга.</p>
+      </div>
+
+      <h3 class="sub">Выбор метрики</h3>
+      <div class="prose"><p>Шаг присвоения объекта ближайшему центру не зависит от вида метрики. А вот шаг пересчёта центра как среднего арифметического оптимален именно для <strong>евклидовой</strong> метрики (доказательство — ниже, в разделе про целевую функцию). На практике K-means используют и с другими мерами без строгого обоснования — тогда нет теоретических гарантий сходимости. Популярная альтернатива для текстов — косинусная мера близости:</p></div>
+      <div class="eq-box">
+        $$\text{CosineSimilarity}(\mu_k, x_i) = \frac{\langle \mu_k, x_i\rangle}{\|\mu_k\|_2 \cdot \|x_i\|_2}$$
+        <span class="eq-note">Это мера близости, а не расстояние — чем больше значение, тем ближе векторы.</span>
+      </div>
+
+      <h3 class="sub">Mini-batch K-means и снижение размерности</h3>
+      <div class="prose"><p>При фиксированных $K$ и размерности оба шага работают за $O(n)$ по выборке. На каждой итерации можно использовать случайный мини-батч вместо всей выборки — почти без потери качества, но заметно быстрее. Отдельно расстояния считаются за $O(d)$ по размерности признаков — здесь помогает предварительное понижение размерности (PCA, эмбеддинги), особенно эффективное для текстов.</p></div>
+
+      <h3 class="sub">Квантизация признакового пространства</h3>
+      <div class="prose"><p>K-means можно использовать не только для кластеризации самой по себе, но и как метод <strong>понижения размерности</strong>: кластеризовать объекты на 500–1000 кластеров и использовать номер кластера как новый признак. Полезно, когда исходных признаков слишком много относительно объёма выборки, а также для огрубления или обезличивания признаков.</p></div>
+      <div class="callout fact">
+        <span class="mark">Bag of Visual Words</span>
+        <p>Расширение bag of words на изображения: точное попиксельное сопоставление фрагментов невозможно, поэтому фрагменты изображений кластеризуются (исторически — K-means) на 100–1000 «визуальных слов». Изображение затем описывается частотой встречаемости этих слов — так же, как текст описывается частотой встречаемости обычных слов. Сегодня похожая логика возникает автоматически внутри сверточных сетей, но сама идея квантизации остаётся актуальной: агрегация данных без раскрытия исходных признаков, интерпретируемые маркетинговые сегменты вместо сырых признаков, ускорение поиска похожих объектов (искать нужно только внутри своего и соседних кластеров).</p>
+      </div>
+
+      <h3 class="sub">Что оптимизирует K-means</h3>
+      <div class="prose"><p>Оба шага уменьшают средний квадрат евклидова расстояния от объектов до центров их кластеров:</p></div>
+      <div class="eq-box">$$\Phi_0 = \frac{1}{nK}\sum_{k=1}^{K}\sum_{i=1}^{n}(\mu_k - x_i)^2\, \mathbb{I}[a(x_i)=k]$$</div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Шаг присвоения</strong></td><td>Минимизирует каждое слагаемое $\Phi_0$ по отдельности: при фиксированных центрах для объекта остаётся минимально возможное слагаемое — кластер с ближайшим центром.</td></tr>
+            <tr><td><strong>Шаг пересчёта центра</strong></td><td>При фиксированном составе кластера минимизирует $\sum_i (\mu_k-x_i)^2\mathbb{I}[a(x_i)=k]$ по $\mu_k$. Именно из-за квадрата разности (евклидова метрика) условие экстремума при дифференцировании по $\mu_k$ даёт: оптимальный центр — среднее арифметическое точек кластера.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="mark">Почему алгоритм вообще останавливается</span>
+        <p>Гарантии сходимости к <strong>глобальному</strong> минимуму $\Phi_0$ нет, но процесс гарантированно сходится к одному из <strong>локальных</strong> минимумов: центр кластера — всегда среднее каких-то объектов выборки фиксированного размера, значит, потенциальных центров конечное число; если алгоритм не зацикливается, центры рано или поздно перестанут меняться — на практике заметно раньше полного перебора.</p>
+      </div>
+    </section>
+
+    <!-- ============ 04 ИЕРАРХИЧЕСКАЯ ============ -->
+    <section class="sec" id="hierarchical">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Дерево вложенных кластеров</p>
+        <h2 class="sec-title">Иерархическая агломеративная кластеризация</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Агломеративные vs дивизивные</strong></td><td>Агломеративные начинают с малых кластеров (обычно по одному объекту) и объединяют их в крупные. Дивизивные начинают с одного большого кластера и делят его на мелкие.</td></tr>
+            <tr><td><strong>Плоская vs иерархическая</strong></td><td>Плоская — все кластеры равноправны, на одном уровне. Иерархическая — кластеры вложены друг в друга, образуя дерево.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p><strong>Алгоритм:</strong> создаём столько кластеров, сколько объектов; итеративно объединяем два ближайших кластера, пока не выполнится критерий останова.</p></div>
+
+      <h3 class="sub">Расстояния между кластерами</h3>
+      <div class="eq-box system">
+        $$d_{avg}(U,V) = \frac{1}{|U|\cdot|V|}\sum_{u\in U}\sum_{v\in V}\rho(u,v) \qquad d_{min}(U,V) = \min_{(u,v)\in U\times V}\rho(u,v) \qquad d_{max}(U,V) = \max_{(u,v)\in U\times V}\rho(u,v)$$
+      </div>
+      <div class="prose"><p>Выбор формулы расстояния между кластерами — гиперпараметр алгоритма; есть и более сложные варианты (расстояние Уорда), а самый общий способ задания подобных формул даёт формула Ланса — Уильямса. Расстояние между отдельными объектами при этом можно задавать любой метрикой — евклидовой, манхэттенской, косинусной мерой близости.</p></div>
+
+      <h3 class="sub">Критерии останова и дендрограмма</h3>
+      <div class="prose"><p>Останов — по заданному числу кластеров либо по эвристике на основе резкого роста расстояния при слиянии. На практике чаще кластеризуют вплоть до одного общего кластера, а затем анализируют иерархию по <strong>дендрограмме</strong>: объекты — по горизонтали (в порядке, где дуги не пересекаются), расстояние слияния — по вертикали (монотонно растёт с итерациями).</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Дендрограмма: от объектов к общему кластеру</p>
+        <svg viewBox="0 0 480 170" role="img" aria-label="Дендрограмма для шести объектов: попарные слияния на малой высоте образуют промежуточные узлы, которые затем объединяются на всё большей высоте, вплоть до одного общего кластера в самом верху">
+          <g stroke="var(--accent)" stroke-width="1.6" fill="none">
+            <path d="M60,140 L60,110 L110,110 L110,140"/>
+            <path d="M85,110 L85,70 L195,70 L195,110"/>
+            <path d="M160,140 L160,110 L230,110 L230,140"/>
+            <path d="M195,70 L195,40 L340,40 L340,70"/>
+            <path d="M310,140 L310,100 L370,100 L370,140"/>
+            <path d="M340,40 L340,20 L340,20"/>
+            <path d="M340,70 L340,70"/>
+          </g>
+          <path d="M195,40 L195,20 M195,20 L490,20" stroke="var(--accent)" stroke-width="1.6" fill="none" opacity="0"/>
+          <g font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" fill="var(--ink-faint)">
+            <text x="60" y="155">x1</text><text x="110" y="155">x2</text><text x="160" y="155">x3</text><text x="230" y="155">x4</text><text x="310" y="155">x5</text><text x="370" y="155">x6</text>
+          </g>
+          <text x="20" y="25" class="axis-label">высота = расстояние слияния</text>
+        </svg>
+        <figcaption>Резкий скачок высоты слияния (например, при последнем объединении в один кластер) иногда подсказывает «естественное» число кластеров — но на практике оно часто не существует однозначно.</figcaption>
+      </figure>
+      <div class="callout fact">
+        <span class="mark">Ограничение метода</span>
+        <p>Если данные действительно обладают естественной кластерной структурой, иерархическая кластеризация обычно определяет число кластеров по дендрограмме заметно хуже, чем DBSCAN.</p>
+      </div>
+    </section>
+
+    <!-- ============ 05 DBSCAN ============ -->
+    <section class="sec" id="dbscan">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Кластеризация через плотность</p>
+        <h2 class="sec-title">DBSCAN</h2>
+      </div>
+      <div class="prose"><p><em>Density-based spatial clustering of applications with noise</em> развивает идею связных компонент (раздел 02), вводя понятие плотности. <strong>Плотность</strong> объекта $x_i$ — число других точек выборки в шаре $B(\varepsilon, x_i)$. Гиперпараметры — радиус $\varepsilon$ и порог $N_0$ по числу точек в окрестности.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Три типа точек DBSCAN</p>
+        <svg viewBox="0 0 480 170" role="img" aria-label="Плотное скопление точек в центре — основные точки с окружностями окрестности, содержащими много соседей; несколько точек на краю скопления — граничные, в чьей окрестности есть основная точка, но соседей мало; отдельные изолированные точки в стороне — шумовые">
+          <g fill="var(--accent-3)" opacity="0.9">
+            <circle cx="180" cy="80" r="4"/><circle cx="200" cy="70" r="4"/><circle cx="210" cy="95" r="4"/><circle cx="190" cy="100" r="4"/><circle cx="220" cy="75" r="4"/><circle cx="205" cy="115" r="4"/>
+          </g>
+          <circle cx="200" cy="90" r="45" fill="none" stroke="var(--accent-3)" stroke-dasharray="3 3" opacity="0.5"/>
+          <g fill="var(--accent-2)" opacity="0.9">
+            <circle cx="255" cy="60" r="4"/><circle cx="250" cy="130" r="4"/>
+          </g>
+          <circle cx="255" cy="60" r="20" fill="none" stroke="var(--accent-2)" stroke-dasharray="3 3" opacity="0.6"/>
+          <circle cx="250" cy="130" r="20" fill="none" stroke="var(--accent-2)" stroke-dasharray="3 3" opacity="0.6"/>
+          <g fill="var(--ink-faint)">
+            <circle cx="380" cy="40" r="4"/><circle cx="420" cy="140" r="4"/><circle cx="60" cy="30" r="4"/>
+          </g>
+          <g font-family="IBM Plex Mono, monospace" font-size="10.5">
+            <text x="200" y="20" text-anchor="middle" fill="var(--accent-3)">core</text>
+            <text x="255" y="45" text-anchor="middle" fill="var(--accent-2)">border</text>
+            <text x="420" y="160" text-anchor="middle" fill="var(--ink-faint)">noise</text>
+          </g>
+        </svg>
+        <figcaption><strong>Core</strong> (основные) — больше $N_0$ соседей в окрестности. <strong>Border</strong> (граничные) — соседствуют с core-точкой, но своих соседей меньше $N_0$. <strong>Noise</strong> (шумовые) — ни то, ни другое.</figcaption>
+      </figure>
+
+      <div class="prose">
+        <p><strong>Алгоритм:</strong></p>
+        <ol>
+          <li>шумовые точки убираются из рассмотрения;</li>
+          <li>основные точки с общей окрестностью соединяются ребром;</li>
+          <li>в получившемся графе выделяются компоненты связности — кластеры;</li>
+          <li>каждая граничная точка относится к кластеру ближайшей основной точки.</li>
+        </ol>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Плюсы</strong></td><td>Сам определяет число кластеров при заданных $\varepsilon$ и $N_0$; успешно работает с кластерами сложной формы — протяжённые ленты, вложенные концентрические гиперсферы.</td></tr>
+            <tr><td><strong>Минусы</strong></td><td>Заметно медленнее mini-batch K-means, чувствителен к размерности признакового пространства — применяется, когда успевает отработать за приемлемое время.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 06 ВЫБОР МЕТОДА ============ -->
+    <section class="sec" id="choosing">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Практический совет</p>
+        <h2 class="sec-title">Какой метод кластеризации выбрать</h2>
+      </div>
+      <div class="prose"><p>По частоте использования на практике на первом месте — K-means; второе место делят иерархическая кластеризация и DBSCAN.</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>K-means</strong></td><td>Самый частый выбор по умолчанию: быстрый (особенно mini-batch), масштабируется, но требует заранее знать $K$ и предполагает выпуклые «шарообразные» кластеры.</td></tr>
+            <tr><td><strong>Иерархическая</strong></td><td>Более известный и простой в понимании метод, но редко даёт качественный результат — частая проблема: один гигантский кластер и множество мелких (сильная несбалансированность размеров).</td></tr>
+            <tr><td><strong>DBSCAN</strong></td><td>Менее известен, но там, где применим, качество, как правило, выше, чем у K-means или иерархической кластеризации — особенно на кластерах сложной формы.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 07 ЛАПЛАСИАН ============ -->
+    <section class="sec" id="laplacian">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Взгляд через теорию графов</p>
+        <h2 class="sec-title">Граф выборки и его лапласиан</h2>
+      </div>
+      <div class="prose"><p>Обобщим идею связных компонент (раздел 02) и плотности (раздел 05) до общего представления выборки в виде неориентированного графа $G=(V,E)$, $V=X=\{x_1,\dots,x_\ell\}$. Есть три способа задать рёбра:</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Три способа построить граф по выборке</p>
+        <svg viewBox="0 0 480 160" role="img" aria-label="Слева полный взвешенный граф, где все вершины соединены рёбрами с весами по формуле гауссова ядра; в центре kNN-граф, где каждая вершина соединена только с несколькими ближайшими соседями; справа эпсилон-граф, где вершины соединены только если расстояние между ними меньше порога">
+          <g font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle" fill="var(--ink-faint)">
+            <text x="80" y="18">полный взвешенный</text>
+            <text x="240" y="18">kNN-граф</text>
+            <text x="400" y="18">ε-граф</text>
+          </g>
+          <g stroke="var(--accent)" stroke-width="1" opacity="0.5">
+            <line x1="40" y1="40" x2="90" y2="60"/><line x1="40" y1="40" x2="70" y2="110"/><line x1="40" y1="40" x2="120" y2="100"/>
+            <line x1="90" y1="60" x2="70" y2="110"/><line x1="90" y1="60" x2="120" y2="100"/><line x1="70" y1="110" x2="120" y2="100"/>
+            <line x1="40" y1="40" x2="120" y2="40"/><line x1="120" y1="40" x2="120" y2="100"/><line x1="120" y1="40" x2="90" y2="60"/>
+          </g>
+          <g fill="var(--accent)"><circle cx="40" cy="40" r="4"/><circle cx="120" cy="40" r="4"/><circle cx="90" cy="60" r="4"/><circle cx="70" cy="110" r="4"/><circle cx="120" cy="100" r="4"/></g>
+
+          <g stroke="var(--accent-3)" stroke-width="1.4">
+            <line x1="200" y1="40" x2="240" y2="55"/><line x1="240" y1="55" x2="270" y2="40"/>
+            <line x1="200" y1="40" x2="195" y2="90"/><line x1="195" y1="90" x2="240" y2="105"/><line x1="195" y1="90" x2="230" y2="70"/>
+          </g>
+          <g fill="var(--accent-3)"><circle cx="200" cy="40" r="4"/><circle cx="270" cy="40" r="4"/><circle cx="240" cy="55" r="4"/><circle cx="195" cy="90" r="4"/><circle cx="240" cy="105" r="4"/><circle cx="230" cy="70" r="4"/></g>
+
+          <g stroke="var(--accent-2)" stroke-width="1.4">
+            <line x1="370" y1="40" x2="410" y2="45"/><line x1="370" y1="40" x2="380" y2="75"/><line x1="410" y1="45" x2="380" y2="75"/>
+            <line x1="440" y1="95" x2="410" y2="110"/>
+          </g>
+          <g fill="var(--accent-2)"><circle cx="370" cy="40" r="4"/><circle cx="410" cy="45" r="4"/><circle cx="380" cy="75" r="4"/><circle cx="440" cy="95" r="4"/><circle cx="410" cy="110" r="4"/></g>
+        </svg>
+        <figcaption>Полный граф взвешивает <em>все</em> пары; kNN-граф соединяет каждую вершину с $k$ ближайшими соседями; ε-граф — только те пары, что находятся на расстоянии меньше порога $\varepsilon$ (обобщение метода из раздела 02).</figcaption>
+      </figure>
+
+      <div class="eq-box">
+        $$w_{ij} = \exp\left(-\frac{\|x_i-x_j\|^2}{2\sigma^2}\right)$$
+        <span class="eq-note">Вес ребра полного графа. Гиперпараметр $\sigma$ определяет, насколько важны далёкие объекты — при малом $\sigma$ вес быстро падает с расстоянием.</span>
+      </div>
+
+      <h3 class="sub">Лапласиан графа</h3>
+      <div class="prose"><p>Пусть $W$ — матрица смежности графа, $d_i=\sum_{j=1}^{\ell} w_{ij}$ — степень вершины, $D=\text{diag}(d_1,\dots,d_\ell)$. Тогда матрица $L=D-W$ называется <strong>лапласианом</strong> графа $G$.</p></div>
+      <div class="eq-box">$$f^T L f = \frac{1}{2}\sum_{i,j=1}^{\ell} w_{ij}(f_i-f_j)^2 \quad \text{для любого } f\in\mathbb{R}^\ell$$</div>
+      <div class="callout fact">
+        <span class="mark">Что это значит</span>
+        <p>Квадратичная форма лапласиана измеряет «шероховатость» функции $f$ на графе: чем сильнее значения $f_i$ и $f_j$ различаются на сильно связанных (большой вес $w_{ij}$) вершинах, тем больше $f^TLf$. Отсюда сразу следует, что $L$ симметрична (граф неориентирован) и неотрицательно определена ($w_{ij}\ge 0$, $(f_i-f_j)^2\ge 0$).</p>
+      </div>
+
+      <h3 class="sub">Теорема о числе компонент связности</h3>
+      <div class="prose"><p>Собственное значение $\lambda=0$ матрицы $L$ имеет кратность, равную числу компонент связности $k$ графа $G$. Если $A_1,\dots,A_k$ — эти компоненты, то векторы-индикаторы $f_i=([x_j\in A_i])_{j=1}^{\ell}$ — собственные векторы, отвечающие $\lambda=0$.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Граф с двумя компонентами связности</p>
+        <svg viewBox="0 0 480 140" role="img" aria-label="Две отдельные группы вершин, полностью связанные внутри себя, но без единого ребра между группами">
+          <g stroke="var(--accent)" stroke-width="1.4">
+            <line x1="80" y1="40" x2="130" y2="60"/><line x1="80" y1="40" x2="60" y2="90"/><line x1="130" y1="60" x2="60" y2="90"/><line x1="130" y1="60" x2="150" y2="100"/><line x1="60" y1="90" x2="150" y2="100"/>
+          </g>
+          <g fill="var(--accent)"><circle cx="80" cy="40" r="4"/><circle cx="130" cy="60" r="4"/><circle cx="60" cy="90" r="4"/><circle cx="150" cy="100" r="4"/></g>
+          <text x="105" y="20" text-anchor="middle" class="axis-label" fill="var(--accent)">A₁: f₁=(1,1,1,1,0,0,0)</text>
+
+          <g stroke="var(--accent-2)" stroke-width="1.4">
+            <line x1="330" y1="50" x2="380" y2="45"/><line x1="330" y1="50" x2="350" y2="95"/><line x1="380" y1="45" x2="350" y2="95"/>
+          </g>
+          <g fill="var(--accent-2)"><circle cx="330" cy="50" r="4"/><circle cx="380" cy="45" r="4"/><circle cx="350" cy="95" r="4"/></g>
+          <text x="353" y="20" text-anchor="middle" class="axis-label" fill="var(--accent-2)">A₂: f₂=(0,0,0,0,1,1,1)</text>
+          <text x="240" y="130" text-anchor="middle" class="axis-label">никакого ребра между A₁ и A₂ — граф несвязен, k=2</text>
+        </svg>
+        <figcaption>Для $k=2$ компонент у $L$ ровно два линейно независимых собственных вектора с $\lambda=0$ — индикаторы принадлежности каждой компоненте.</figcaption>
+      </figure>
+
+      <div class="callout">
+        <span class="mark">Идея доказательства (k=1)</span>
+        <p>Вектор $f=(1,\dots,1)$ — всегда собственный для $\lambda=0$, так как $Lf = Df - Wf$ и $d_i$ по определению равно сумме $i$-й строки $W$. Обратное — если существует неконстантный собственный вектор $f'$ для $\lambda=0$, то $f'^TLf'=0$, но по формуле $f^TLf$ выше это означает $f'_i=f'_j$ вдоль любого пути связного графа, то есть $f'$ обязано быть константным — противоречие. Для $k>1$ лапласиан приводится к блочно-диагональному виду, где каждый блок — лапласиан своей компоненты, и рассуждение применяется к каждому блоку.</p>
+      </div>
+
+      <div class="callout fact">
+        <span class="mark">Гипотеза спектральной кластеризации</span>
+        <p>Пусть объекты $x_j$ и $x_k$ похожи (расстояние между ними невелико). Тогда у собственных векторов $f_i$, соответствующих <strong>малым</strong> собственным значениям, координаты $f_{ij}\approx f_{ik}$ близки. Строгого доказательства нет — гипотеза лишь эмпирическая, но на её основе строится успешный алгоритм кластеризации.</p>
+      </div>
+    </section>
+
+    <!-- ============ 08 СПЕКТРАЛЬНАЯ КЛАСТЕРИЗАЦИЯ ============ -->
+    <section class="sec" id="spectral">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Кластеры из спектра графа</p>
+        <h2 class="sec-title">Спектральная кластеризация</h2>
+      </div>
+      <div class="prose"><p>Идея: если для связного графа собственные векторы малых $\lambda$ приближённо повторяют структуру «почти-компонент» (плотно связанных подграфов), можно использовать эти векторы как новые признаки и кластеризовать уже в этом пространстве.</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Шаг алгоритма</th><th>Сложность</th></tr></thead>
+          <tbody>
+            <tr><td>1. Строим по объектам граф $G$ и лапласиан $L=D-W$</td><td class="num">$O(\ell^2)$</td></tr>
+            <tr><td>2. Находим нормированные собственные векторы $u_1,\dots,u_m$, отвечающие $m$ наименьшим собственным значениям $L$</td><td class="num">$O(\ell^3)$</td></tr>
+            <tr><td>3. Составляем матрицу $U=(u_1|\dots|u_m) \in \mathbb{R}^{\ell\times m}$</td><td class="num">$O(\ell m)$</td></tr>
+            <tr><td>4. Обучаем K-means с $k$ кластерами на строках $U$</td><td class="num">$O(\ell^{mk+1})$</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Матрица $U$ размера $\ell\times m$ — это матрица «объекты-признаки», где новыми признаками служат сами собственные векторы $u_1,\dots,u_m$. Финальный K-means в шаге 4 можно заменить любым другим алгоритмом обучения — спектральное разложение просто даёт новое, «выпрямленное» признаковое пространство, где похожие по графовой структуре объекты оказываются рядом.</p>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Откуда берётся показатель $\ell^{mk+1}$</span>
+        <p>Это не эвристика Ллойда (обычный итеративный K-means со сложностью около $O(\ell m k)$ за итерацию), а сложность <strong>точного</strong> решения задачи K-means для фиксированных размерности $m$ и числа кластеров $k$ — результат из вычислительной геометрии (Inaba et al., 1994). На практике шаг 4 почти всегда выполняют эвристическим K-means, а не точным алгоритмом.</p>
+      </div>
+      <div class="prose"><p>Метод вычислительно тяжёлый (кубическая сложность по числу объектов на шаге 2), но способен находить кластеры сложной, невыпуклой формы — там, где обычный K-means на исходных признаках терпит неудачу, поскольку неявно предполагает «шарообразные» кластеры.</p></div>
+    </section>
+
+    <!-- ============ 09 КАЧЕСТВО БЕЗ РАЗМЕТКИ ============ -->
+    <section class="sec" id="quality-internal">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>Оценка результата, часть 1</p>
+        <h2 class="sec-title">Метрики качества без разметки</h2>
+      </div>
+      <div class="prose"><p>Разметки при кластеризации обычно нет — но оценить качество всё равно нужно.</p></div>
+
+      <h3 class="sub">Внутри- и межкластерное расстояние</h3>
+      <div class="eq-box system">
+        $$F_0 = \frac{\sum_{i=1}^{n}\sum_{j=i}^{n}\rho(x_i,x_j)\,\mathbb{I}[a(x_i){=}a(x_j)]}{\sum_{i=1}^{n}\sum_{j=i}^{n}\mathbb{I}[a(x_i){=}a(x_j)]} \to \min$$
+      </div>
+      <div class="prose"><p>Пары $(x_i,x_i)$ включены, чтобы избежать неопределённости $0/0$ при кластерах из одного объекта. Если есть центры $\mu_k$, часто используют средний квадрат внутрикластерного расстояния $\Phi_0$ (формула из раздела 03).</p></div>
+      <div class="eq-box">
+        $$F_1 = \frac{\sum_{i=1}^{n}\sum_{j=i}^{n}\rho(x_i,x_j)\,\mathbb{I}[a(x_i)\ne a(x_j)]}{\sum_{i=1}^{n}\sum_{j=i}^{n}\mathbb{I}[a(x_i)\ne a(x_j)]} \to \max$$
+        <span class="eq-note">Межкластерное расстояние, в отличие от $F_0$, нужно <strong>максимизировать</strong> — в разные кластеры логично выделять наиболее удалённые друг от друга объекты.</span>
+      </div>
+
+      <h3 class="sub">Коэффициент силуэта</h3>
+      <div class="prose"><p>Для объекта $x_i$: $A(x_i)$ — среднее расстояние до объектов того же кластера, $B(x_i)$ — среднее расстояние до объектов ближайшего <em>соседнего</em> кластера.</p></div>
+      <div class="eq-box">$$S(x_i) = \frac{B(x_i)-A(x_i)}{\max(B(x_i),\,A(x_i))} \in [-1,1]$$</div>
+
+      <figure class="chart">
+        <p class="chart-title">Силуэт объекта: A против B</p>
+        <svg viewBox="0 0 480 170" role="img" aria-label="Точка на границе своего кластера: расстояние A до объектов своего кластера показано короткой стрелкой, расстояние B до объектов соседнего кластера показано более длинной стрелкой">
+          <g fill="var(--accent)" opacity="0.85">
+            <circle cx="90" cy="60" r="4"/><circle cx="70" cy="90" r="4"/><circle cx="110" cy="100" r="4"/><circle cx="60" cy="60" r="4"/>
+          </g>
+          <circle cx="130" cy="80" r="5" fill="var(--accent-3)"/>
+          <g fill="var(--accent-2)" opacity="0.85">
+            <circle cx="250" cy="50" r="4"/><circle cx="280" cy="70" r="4"/><circle cx="260" cy="100" r="4"/><circle cx="290" cy="40" r="4"/>
+          </g>
+          <path d="M130,80 L90,60" stroke="var(--accent-3)" stroke-width="1.6" marker-end="url(#silA)"/>
+          <path d="M130,80 L250,50" stroke="var(--ink-faint)" stroke-width="1.6" stroke-dasharray="3 3" marker-end="url(#silB)"/>
+          <defs>
+            <marker id="silA" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--accent-3)"/></marker>
+            <marker id="silB" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--ink-faint)"/></marker>
+          </defs>
+          <text x="105" y="65" class="axis-label" fill="var(--accent-3)">A</text>
+          <text x="190" y="55" class="axis-label" fill="var(--ink-faint)">B</text>
+          <text x="240" y="150" text-anchor="middle" class="axis-label">S(x) близко к 1, когда B ≫ A — свой кластер намного ближе соседнего</text>
+        </svg>
+        <figcaption>В идеале $A(x_i) < B(x_i)$, но это не всегда так — например, если «родной» кластер вытянутой формы, а рядом есть компактный кластер поменьше.</figcaption>
+      </figure>
+      <div class="callout result">
+        <span class="mark">Почему силуэт особенно полезен</span>
+        <p>Не требует разметки <strong>и</strong> позволяет подбирать число кластеров $K$ — перебирая $K$ и выбирая то значение, при котором средний силуэт по выборке максимален.</p>
+      </div>
+    </section>
+
+    <!-- ============ 10 КАЧЕСТВО С РАЗМЕТКОЙ ============ -->
+    <section class="sec" id="quality-external">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">10</span>Оценка результата, часть 2</p>
+        <h2 class="sec-title">Метрики качества с разметкой</h2>
+      </div>
+      <div class="prose"><p>Если есть разметка $(y_1,\dots,y_\ell)$, не участвовавшая в обучении (её называют <strong>gold standard</strong>), можно оценить качество кластеризации напрямую. Это оправдано, когда размеченных данных достаточно для <em>оценки</em>, но ещё не хватает для обучения полноценного классификатора.</p></div>
+
+      <h3 class="sub">Энтропийные метрики: гомогенность, полнота, V-мера</h3>
+      <div class="prose"><p>Пусть $n$ — число объектов, $n_k$ — размер кластера $k$, $m_c$ — размер класса $c$, $n_{ck}$ — число объектов класса $c$ в кластере $k$:</p></div>
+      <div class="eq-box system">
+        $$H_{class} = -\sum_{c=1}^{C}\frac{m_c}{n}\log\frac{m_c}{n} \qquad H_{clust} = -\sum_{k=1}^{K}\frac{n_k}{n}\log\frac{n_k}{n} \qquad H_{class|clust} = -\sum_{c=1}^{C}\sum_{k=1}^{K}\frac{n_{ck}}{n}\log\frac{n_{ck}}{n_k}$$
+      </div>
+      <div class="eq-box system">
+        $$\text{Homogeneity} = 1 - \frac{H_{class|clust}}{H_{class}} \qquad \text{Completeness} = 1 - \frac{H_{clust|class}}{H_{clust}}$$
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Гомогенность</strong></td><td>Насколько знание кластера снижает неопределённость класса. $h=1$ — каждый кластер содержит объекты только одного класса. Тривиально максимизируется, если выделить каждый объект в свой кластер.</td></tr>
+            <tr><td><strong>Полнота</strong></td><td>Симметрична гомогенности (через $H_{clust|class}$). $=1$, когда все объекты одного класса всегда попадают в один кластер. Тривиально максимизируется объединением всей выборки в один кластер.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="eq-box">$$V_\beta = \frac{(1+\beta)\cdot\text{Hom}\cdot\text{Comp}}{\beta\cdot\text{Hom}+\text{Comp}} \qquad V_1 = \frac{2\cdot\text{Hom}\cdot\text{Comp}}{\text{Hom}+\text{Comp}}$$</div>
+      <div class="prose"><p>V-мера — аналог F-меры для кластеризации, комбинирующий гомогенность и полноту так же, как F-мера комбинирует точность и полноту. В отличие от них по отдельности, V-меру нельзя тривиально максимизировать вырожденным разбиением.</p></div>
+
+      <h3 class="sub">Четыре требования к внешней метрике</h3>
+      <div class="prose"><p>Хорошая внешняя метрика качества $Q$ должна одинаково реагировать на четыре типа изменений разбиения:</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Гомогенность</strong></td><td>Разделение разнородных объектов по разным кластерам должно улучшать оценку — базовое требование чистоты кластеров.</td></tr>
+            <tr><td><strong>Полнота</strong></td><td>Дробление одного «правильного» кластера на несколько мелких должно ухудшать оценку.</td></tr>
+            <tr><td><strong>Rag-bag</strong></td><td>Весь неоднородный «мусор» лучше собрать в один «мусорный» кластер, чем размазать по нескольким — тогда остальные кластеры останутся чистыми.</td></tr>
+            <tr><td><strong>Cluster size vs. quantity</strong></td><td>Лучше испортить один крупный кластер ради улучшения качества нескольких других, чем наоборот.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Единственная метрика со всеми четырьмя свойствами</span>
+        <p>Ни гомогенность и полнота по отдельности, ни многие другие популярные метрики не удовлетворяют всем четырём требованиям одновременно (например, rag-bag). Единственная известная метрика, обладающая всеми четырьмя, — <strong>BCubed</strong>.</p>
+      </div>
+
+      <h3 class="sub">BCubed</h3>
+      <div class="prose"><p>Пусть $L(x)$ — метка класса (gold standard), $C(x)$ — номер кластера от алгоритма.</p></div>
+      <div class="eq-box system">
+        $$\text{Correctness}(x,x') = \begin{cases}1, & C(x){=}C(x') \wedge L(x){=}L(x')\\ 0, & \text{иначе}\end{cases}$$
+        $$\text{Precision-BCubed} = \text{Avg}_x\big[\text{Avg}_{x':C(x)=C(x')}\,\text{Correctness}(x,x')\big]$$
+        $$\text{Recall-BCubed} = \text{Avg}_x\big[\text{Avg}_{x':L(x)=L(x')}\,\text{Correctness}(x,x')\big]$$
+      </div>
+      <div class="prose"><p>Итоговый BCubed — F-мера (гармоническое среднее) от Precision-BCubed и Recall-BCubed. Интуиция: для каждого объекта $x$ смотрим на долю его «соклассников» по кластеру, которые оказались там же и по правильной метке (precision), и на долю его «настоящих соклассников» по метке, которые действительно попали к нему в кластер (recall) — усредняем по всем объектам, а не по кластерам целиком, поэтому маленькие «плохие» кластеры не теряются при усреднении.</p></div>
+      <div class="callout">
+        <span class="mark">Пример</span>
+        <p>Кластер из 3 объектов класса «×» и одного из другого класса, объединённых с ещё одним «×» из другого кластера: Precision-BCubed $=1$, Recall-BCubed $=\frac{1}{2}$, тогда $\text{BCubed} = \dfrac{1\cdot\frac{1}{2}}{1+\frac{1}{2}} = \dfrac{1}{3}$.</p>
+      </div>
+
+      <h3 class="sub">Как выбрать метрику качества</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td>Число кластеров уже зафиксировано</td><td>Среднее внутри-/межкластерное расстояние ($F_0$, $\Phi_0$, $F_1$)</td></tr>
+            <tr><td>Есть разметка</td><td>Гомогенность и полнота; V-мера или BCubed, если нужно ещё и подбирать $K$</td></tr>
+            <tr><td>Разметки нет, число кластеров не фиксировано</td><td>Коэффициент силуэта — лучший выбор на практике</td></tr>
+            <tr><td>Кластеризация — промежуточный шаг для supervised-задачи</td><td>Можно вообще абстрагироваться от качества самой кластеризации и подбирать гиперпараметры по качеству финальной задачи (например, bag of visual words)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Важная оговорка</span>
+        <p>Разметка в задаче кластеризации часто отсутствует или сильно субъективна: одна и та же выборка может допускать несколько разумных вариантов разбиения. Задача изначально поставлена некорректно и не имеет единственного решения — поэтому формализовать «правильный» результат на практике зачастую сложно, какую бы метрику ни выбрали.</p>
+      </div>
+    </section>
+
+    <!-- ============ 11 ИТОГИ ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">11</span>Итоги</p>
+        <h2 class="sec-title">Самое важное</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Разобрано:</strong></p>
+        <ul>
+          <li>Постановка задачи кластеризации и её отличие от классификации</li>
+          <li>Простые графовые методы: связные компоненты, минимальное остовное дерево</li>
+          <li>K-means: идея, K-means++, метрики, mini-batch, квантизация признаков, целевая функция $\Phi_0$</li>
+          <li>Иерархическая агломеративная кластеризация и дендрограмма</li>
+          <li>DBSCAN: core/border/noise точки, устойчивость к сложной форме кластеров</li>
+          <li>Граф выборки, лапласиан, теорема о числе компонент связности, спектральная кластеризация</li>
+          <li>Метрики качества без разметки ($F_0$, $F_1$, силуэт) и с разметкой (гомогенность, полнота, V-мера, аксиомы внешних метрик, BCubed)</li>
+        </ul>
+        <p><strong>Что стоит запомнить:</strong></p>
+        <ul>
+          <li>Кластеризация уместна там, где классификация была бы точнее, но обучающую выборку собрать дорого — валидационную выборку для оценки собрать заметно проще</li>
+          <li>K-means оптимален для евклидовой метрики не случайно: это прямое следствие того, что среднее арифметическое минимизирует сумму квадратов отклонений</li>
+          <li>DBSCAN и спектральная кластеризация умеют работать с кластерами сложной формы там, где K-means (неявно предполагающий выпуклые «шарообразные» кластеры) терпит неудачу</li>
+          <li>Гомогенность и полноту по отдельности легко «обмануть» вырожденным разбиением — только их совместные комбинации (V-мера, BCubed) устойчивы к этому</li>
+          <li>У задачи кластеризации часто в принципе нет единственного правильного ответа — это стоит держать в голове при интерпретации любой метрики качества</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 12 ЛИТЕРАТУРА ============ -->
+    <section class="sec" id="refs">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">12</span>Литература</p>
+        <h2 class="sec-title">Источники</h2>
+      </div>
+      <ul class="lit-list">
+        <li><span class="idx">01</span>Соколов Е. А., Гусев А., Садртдинов И. · <em>Лекция 17. Кластеризация</em> · ФКН ВШЭ, 2020</li>
+        <li><span class="idx">02</span>Arthur, D., Vassilvitskii, S. 2007 · <em>k-means++: The Advantages of Careful Seeding</em> · SODA</li>
+        <li><span class="idx">03</span>Ester, M. et al. 1996 · <em>A Density-Based Algorithm for Discovering Clusters (DBSCAN)</em> · KDD</li>
+        <li><span class="idx">04</span>Von Luxburg, U. 2007 · <em>A Tutorial on Spectral Clustering</em> · Statistics and Computing</li>
+        <li><span class="idx">05</span>Inaba, M., Katoh, N., Imai, H. 1994 · <em>Applications of Weighted Voronoi Diagrams and Randomization to Variance-Based k-Clustering</em> · SoCG</li>
+        <li><span class="idx">06</span>Amigó, E. et al. 2009 · <em>A Comparison of Extrinsic Clustering Evaluation Metrics based on Formal Constraints</em> · Information Retrieval — аксиомы внешних метрик и BCubed</li>
+        <li><span class="idx">07</span>Rosenberg, A., Hirschberg, J. 2007 · <em>V-Measure: A Conditional Entropy-Based External Cluster Evaluation Measure</em> · EMNLP-CoNLL</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект лекции · Кластеризация · ФКН ВШЭ, курс ML, Лекция 17</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>

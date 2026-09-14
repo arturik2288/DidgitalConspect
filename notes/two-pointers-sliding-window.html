@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Two Pointers &amp; Sliding Window — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#0a0a0d;
+      --surface:#131318;
+      --surface-2:#1a1a22;
+      --ink:#f5f5fa;
+      --ink-soft:#c3c3d2;
+      --ink-faint:#83839a;
+      --accent:#00e5ff;
+      --accent-strong:#7df3ff;
+      --accent-soft:#0d2b30;
+      --accent-2:#ff5fd1;
+      --accent-2-soft:#2a0f24;
+      --accent-3:#a6ff4d;
+      --accent-3-soft:#182408;
+      --rule:#26262f;
+      --shadow: 0 1px 2px rgba(0,229,255,.07), 0 10px 28px -12px rgba(0,0,0,.7);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(0,229,255,.04) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 90%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.result .mark{ color:var(--accent-3); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.fact .mark{ color:var(--accent-2); }
+    .callout.warn{ border-color:color-mix(in srgb, #ff8a3d 40%, transparent); background:#2e1c0d; }
+    .callout.warn .mark{ color:#ff8a3d; }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    pre{
+      background:var(--surface-2); border:1px solid var(--rule); border-radius:8px;
+      padding:14px 16px; overflow-x:auto; font-family:'IBM Plex Mono',monospace;
+      font-size:13px; line-height:1.55; margin:14px 0; color:var(--ink-soft);
+    }
+    pre .cm{color:var(--ink-faint);}
+    pre .kw{color:var(--accent-2);}
+    pre .bad{color:#ff8a3d;}
+    pre .good{color:var(--accent-3);}
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:9px 13px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.num{font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+    th.num{text-align:right;}
+    td.diff{white-space:nowrap; font-family:'IBM Plex Mono',monospace; font-size:12.5px;}
+    td.diff.easy{color:var(--accent-3);}
+    td.diff.medium{color:#e8c15a;}
+    td.diff.hard{color:#ff5f6d;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+    mjx-container[jax="CHTML"]{ color: var(--ink); }
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    ol.order-list{counter-reset:ord; list-style:none; margin:16px 0; padding:0; max-width:68ch;}
+    ol.order-list li{
+      counter-increment:ord; position:relative; padding:10px 14px 10px 48px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; margin-bottom:8px;
+      font-size:14.5px;
+    }
+    ol.order-list li::before{
+      content:counter(ord); position:absolute; left:12px; top:50%; transform:translateY(-50%);
+      width:22px; height:22px; border-radius:6px; background:var(--accent-soft); color:var(--accent);
+      font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+    }
+    ol.order-list li code{color:var(--accent-strong);}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/it.html">← Раздел «IT»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Алгоритмы · Паттерны · LeetCode</p>
+      <h1 class="title">Two Pointers &amp; Sliding Window</h1>
+      <p class="subtitle">Как свести O(n²) к O(n): встречные и однонаправленные указатели, окно фиксированного и переменного размера, частая ошибка при обновлении состояния окна — и список задач для отработки с рекомендованным порядком прохождения.</p>
+      <div class="meta-row">
+        <span>Паттерны подготовки к собеседованиям</span>
+        <span>Two Pointers · Sliding Window</span>
+        <span>18.09.2026</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#motivation"><span class="n">01</span>Мотивация</a>
+      <a href="#tp-opposite"><span class="n">02</span>Встречные указатели</a>
+      <a href="#tp-same"><span class="n">03</span>Указатели в одном направлении</a>
+      <a href="#sw-fixed"><span class="n">04</span>Окно фиксированного размера</a>
+      <a href="#sw-variable"><span class="n">05</span>Окно переменного размера</a>
+      <a href="#sw-mistake"><span class="n">06</span>Частая ошибка</a>
+      <a href="#tasks-tp"><span class="n">07</span>Задачи: Two Pointers</a>
+      <a href="#tasks-sw"><span class="n">08</span>Задачи: Sliding Window</a>
+      <a href="#order"><span class="n">09</span>Порядок выполнения</a>
+      <a href="#summary"><span class="n">10</span>Итоги</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 МОТИВАЦИЯ ============ -->
+    <section class="sec" id="motivation">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Мотивация</p>
+        <h2 class="sec-title">Как свести O(n²) к O(n)</h2>
+      </div>
+      <div class="prose">
+        <p>Наивное решение многих задач на массивах и строках — перебрать все пары индексов вложенным циклом: для каждого $i$ проверить все $j$. Это $O(n^2)$: на массиве в миллион элементов — уже триллион операций, задача не решается за разумное время.</p>
+        <p><strong>Two Pointers</strong> — паттерн, где вместо одного индекса по структуре данных (обычно отсортированному массиву или строке) двигаются два (иногда больше) указателя, устроенных так, что каждый шаг либо приближает к ответу, либо безопасно исключает часть данных из рассмотрения. В результате весь проход занимает $O(n)$ вместо $O(n^2)$.</p>
+        <p><strong>Sliding Window</strong> — важный частный случай two pointers: оба указателя двигаются в одном направлении и вместе образуют непрерывное «окно» по массиву или строке. Паттерн применяется, когда нужно найти оптимальный (максимальный/минимальный/подходящий под условие) непрерывный участок данных.</p>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Общая идея, объединяющая оба паттерна: вместо того чтобы каждый раз начинать проверку заново, переиспользуем уже проделанную работу. Указатель почти никогда не двигается назад — а значит суммарное число шагов по всему проходу линейно, даже если кажется, что вложенность (внешний цикл + внутренний <code>while</code>) должна давать $O(n^2)$.</p>
+      </div>
+    </section>
+
+    <!-- ============ 02 ВСТРЕЧНЫЕ УКАЗАТЕЛИ ============ -->
+    <section class="sec" id="tp-opposite">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Two Pointers, часть 1</p>
+        <h2 class="sec-title">Встречные указатели (opposite direction)</h2>
+      </div>
+      <div class="prose"><p><code>left</code> стартует с начала структуры, <code>right</code> — с конца, и они двигаются навстречу друг другу. Паттерн работает, когда массив отсортирован или задача обладает свойством <strong>монотонности</strong> — то есть увеличение/уменьшение одного из указателей предсказуемо меняет результат в одну сторону.</p></div>
+
+      <h3 class="sub">Classic: Two Sum II</h3>
+      <div class="prose"><p>Дан отсортированный массив, нужно найти два числа с заданной суммой <code>target</code>. Логика движения указателей опирается на сравнение с <code>target</code>:</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><code>arr[left] + arr[right] &lt; target</code></td><td>двигаем <code>left</code> вправо — это единственный способ увеличить сумму, раз массив отсортирован</td></tr>
+            <tr><td><code>arr[left] + arr[right] &gt; target</code></td><td>двигаем <code>right</code> влево — единственный способ уменьшить сумму</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Two Sum II: указатели сходятся к ответу</p>
+        <svg viewBox="0 0 480 150" role="img" aria-label="Отсортированный массив из семи чисел с указателем left в начале и указателем right в конце; на каждом шаге один из указателей сдвигается к центру в зависимости от того, больше или меньше текущая сумма относительно target, пока указатели не встретятся на паре с нужной суммой">
+          <g font-family="IBM Plex Mono, monospace" font-size="12" text-anchor="middle">
+            <rect x="20" y="40" width="50" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="45" y="61" fill="var(--ink-soft)">2</text>
+            <rect x="75" y="40" width="50" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="100" y="61" fill="var(--ink-soft)">7</text>
+            <rect x="130" y="40" width="50" height="34" rx="5" fill="var(--accent-2)" opacity="0.85"/><text x="155" y="61" fill="var(--bg)">11</text>
+            <rect x="185" y="40" width="50" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="210" y="61" fill="var(--ink-soft)">15</text>
+            <rect x="240" y="40" width="50" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="265" y="61" fill="var(--ink-soft)">18</text>
+            <rect x="295" y="40" width="50" height="34" rx="5" fill="var(--accent-2)" opacity="0.85"/><text x="320" y="61" fill="var(--bg)">20</text>
+            <rect x="350" y="40" width="50" height="34" rx="5" fill="var(--surface-2)" stroke="var(--rule)"/><text x="375" y="61" fill="var(--ink-soft)">24</text>
+          </g>
+          <text x="155" y="100" text-anchor="middle" class="axis-label" fill="var(--accent-2)">left →</text>
+          <text x="320" y="100" text-anchor="middle" class="axis-label" fill="var(--accent-2)">← right</text>
+          <text x="240" y="125" text-anchor="middle" class="axis-label">target = 31: 11+20=31 → найдено, left и right остановились</text>
+        </svg>
+        <figcaption>Каждый шаг сравнения либо находит ответ, либо навсегда исключает один из указателей от дальнейшего рассмотрения — отсюда $O(n)$ вместо перебора всех пар за $O(n^2)$.</figcaption>
+      </figure>
+
+      <h3 class="sub">Другой тип рассуждения: Container With Most Water</h3>
+      <div class="prose"><p>Здесь указатели двигаются не по сравнению с целевым значением, а <strong>жадно</strong>: на каждом шаге отбрасывается более короткая (заведомо худшая) из двух границ, потому что именно она ограничивает объём воды между ними — при сужении контейнера расстояние между стенками может только уменьшиться, поэтому единственный шанс увеличить объём — заменить именно короткую стенку на потенциально более высокую.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Container With Most Water: отбрасываем более короткую стенку</p>
+        <svg viewBox="0 0 480 170" role="img" aria-label="Столбцы разной высоты, представляющие стенки контейнера; между указателями left и right закрашена область воды, ограниченная высотой более короткой стенки; на следующем шаге более короткий указатель сдвигается внутрь в надежде найти более высокую стенку">
+          <g font-family="IBM Plex Mono, monospace" font-size="10" text-anchor="middle">
+            <rect x="30" y="30" width="30" height="110" fill="var(--accent-2)" opacity="0.85"/>
+            <rect x="70" y="90" width="30" height="50" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="110" y="70" width="30" height="70" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="150" y="100" width="30" height="40" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="190" y="50" width="30" height="90" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="230" y="110" width="30" height="30" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <rect x="270" y="20" width="30" height="120" fill="var(--accent-2)" opacity="0.85"/>
+          </g>
+          <rect x="60" y="50" width="210" height="90" fill="var(--accent)" opacity="0.18"/>
+          <line x1="60" y1="50" x2="270" y2="50" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="4 3"/>
+          <text x="45" y="20" text-anchor="middle" class="axis-label" fill="var(--accent-2)">left</text>
+          <text x="285" y="12" text-anchor="middle" class="axis-label" fill="var(--accent-2)">right</text>
+          <text x="165" y="65" text-anchor="middle" class="axis-label" fill="var(--accent-strong)">вода ограничена левой (короткой) стенкой</text>
+          <text x="240" y="158" text-anchor="middle" class="axis-label">высота левой стенки ограничивает объём → двигаем left</text>
+        </svg>
+        <figcaption>Объём воды = ширина × высота более короткой стенки. Двигать нужно именно короткую границу — сдвиг высокой стенки может только уменьшить объём.</figcaption>
+      </figure>
+
+    </section>
+
+    <!-- ============ 03 TP SAME DIRECTION ============ -->
+    <section class="sec" id="tp-same">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Two Pointers, часть 2</p>
+        <h2 class="sec-title">Указатели в одном направлении (same direction / fast-slow)</h2>
+      </div>
+      <div class="prose"><p>Оба указателя двигаются слева направо, но с разной скоростью или разной логикой продвижения. В отличие от встречных указателей, здесь один указатель — это «известная хорошая» позиция (куда писать валидный результат, или где сейчас находится медленный обход), а другой — разведчик, исследующий структуру дальше.</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>In-place модификации</strong></td><td><code>slow</code> указывает, куда писать следующий валидный элемент, <code>fast</code> бежит вперёд в поисках новых значений — классика: Remove Duplicates, Move Zeroes.</td></tr>
+            <tr><td><strong>Linked List: fast &amp; slow pointers</strong></td><td>Алгоритм Флойда (Floyd's cycle detection): <code>slow</code> двигается на 1 шаг, <code>fast</code> — на 2 шага за итерацию; если указатели встретились — в списке есть цикл. Тот же приём находит середину связного списка.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Floyd's cycle detection: быстрый и медленный указатель</p>
+        <svg viewBox="0 0 480 200" role="img" aria-label="Связный список из шести узлов, где последний узел ссылается обратно на третий узел, образуя цикл; медленный указатель slow двигается на один узел за шаг, быстрый указатель fast — на два узла за шаг; в какой-то момент оба указателя оказываются в одном и том же узле цикла, что означает наличие цикла">
+          <g font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle">
+            <circle cx="50" cy="90" r="20" fill="var(--surface-2)" stroke="var(--rule)"/><text x="50" y="94" fill="var(--ink-soft)">1</text>
+            <circle cx="130" cy="90" r="20" fill="var(--surface-2)" stroke="var(--rule)"/><text x="130" y="94" fill="var(--ink-soft)">2</text>
+            <circle cx="210" cy="90" r="20" fill="var(--surface-2)" stroke="var(--rule)"/><text x="210" y="94" fill="var(--ink-soft)">3</text>
+            <circle cx="290" cy="50" r="20" fill="var(--accent-2)" opacity="0.85"/><text x="290" y="54" fill="var(--bg)">4</text>
+            <circle cx="350" cy="110" r="20" fill="var(--surface-2)" stroke="var(--rule)"/><text x="350" y="114" fill="var(--ink-soft)">5</text>
+            <circle cx="270" cy="150" r="20" fill="var(--surface-2)" stroke="var(--rule)"/><text x="270" y="154" fill="var(--ink-soft)">6</text>
+          </g>
+          <g fill="none" stroke="var(--ink-faint)" stroke-width="1.4">
+            <path d="M70,90 L110,90" marker-end="url(#tpArrow)"/>
+            <path d="M150,90 L190,90" marker-end="url(#tpArrow)"/>
+            <path d="M225,78 L275,58" marker-end="url(#tpArrow)"/>
+            <path d="M305,64 L335,98" marker-end="url(#tpArrow)"/>
+            <path d="M335,124 L288,144" marker-end="url(#tpArrow)"/>
+            <path d="M252,140 L222,102" marker-end="url(#tpArrow)"/>
+          </g>
+          <defs><marker id="tpArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--ink-faint)"/></marker></defs>
+          <text x="50" y="130" text-anchor="middle" class="axis-label" fill="var(--accent-strong)">slow (×1)</text>
+          <text x="290" y="20" text-anchor="middle" class="axis-label" fill="var(--accent-2)">fast (×2) — встреча в цикле</text>
+        </svg>
+        <figcaption>Если в списке есть цикл, быстрый указатель неизбежно «догонит» медленный внутри цикла — встреча двух указателей и есть признак цикла.</figcaption>
+      </figure>
+
+      <h3 class="sub">Как распознать, что нужен Two Pointers</h3>
+      <div class="pill-row">
+        <span class="pill">массив/строка отсортированы (или сортировка не портит задачу)</span>
+        <span class="pill">пары/тройки элементов с условием на сумму или разность</span>
+        <span class="pill">нужна in-place модификация без лишней памяти</span>
+        <span class="pill">linked list + цикл, середина, N-й элемент с конца</span>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Сложность</span>
+        <p>Обычно $O(n)$, либо $O(n\log n)$, если данные приходится сначала отсортировать; дополнительная память — $O(1)$. В обоих вариантах (встречные и однонаправленные указатели) после прохода указатель почти никогда не откатывается назад — именно это и даёт линейную сложность вместо квадратичной.</p>
+      </div>
+    </section>
+
+    <!-- ============ 04 SW FIXED ============ -->
+    <section class="sec" id="sw-fixed">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Sliding Window, часть 1</p>
+        <h2 class="sec-title">Окно фиксированного размера</h2>
+      </div>
+      <div class="prose"><p>Sliding Window — частный случай two pointers, где <code>left</code> и <code>right</code> двигаются в <strong>одном</strong> направлении и вместе образуют непрерывное «окно». Когда размер окна <code>k</code> задан заранее, окно просто «едет» по массиву: <code>right</code> идёт вперёд, а <code>left = right - k + 1</code> следует за ним на фиксированном расстоянии.</p></div>
+      <div class="prose"><p>Ключевая идея — обновлять сумму (или другое состояние окна) <strong>инкрементально</strong>, а не пересчитывать с нуля на каждом шаге:</p></div>
+      <pre>window_sum = sum(arr[:k])
+best = window_sum
+for right in range(k, len(arr)):
+    window_sum += arr[right] - arr[right - k]
+    best = max(best, window_sum)</pre>
+      <div class="callout result">
+        <span class="mark">Почему это быстрее</span>
+        <p>Пересчёт суммы окна с нуля на каждом шаге даёт $O(n\cdot k)$. Инкрементальное обновление — добавили один новый элемент справа, убрали один старый элемент слева — превращает это в $O(n)$: каждый элемент массива обрабатывается ровно дважды (один раз входит в окно, один раз выходит), независимо от размера окна $k$.</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Окно фиксированного размера k=3 «едет» по массиву</p>
+        <svg viewBox="0 0 480 150" role="img" aria-label="Массив из семи чисел с окном размера три, обведённым рамкой; рамка последовательно сдвигается на одну позицию вправо на каждом шаге, при этом слева выходит один элемент, а справа входит один новый">
+          <g font-family="IBM Plex Mono, monospace" font-size="12" text-anchor="middle">
+            <rect x="20" y="30" width="48" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="44" y="50" fill="var(--ink-soft)">4</text>
+            <rect x="68" y="30" width="48" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="92" y="50" fill="var(--ink-soft)">2</text>
+            <rect x="116" y="30" width="48" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="140" y="50" fill="var(--ink-soft)">7</text>
+            <rect x="164" y="30" width="48" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="188" y="50" fill="var(--ink-soft)">1</text>
+            <rect x="212" y="30" width="48" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="236" y="50" fill="var(--ink-soft)">9</text>
+            <rect x="260" y="30" width="48" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="284" y="50" fill="var(--ink-soft)">3</text>
+            <rect x="308" y="30" width="48" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="332" y="50" fill="var(--ink-soft)">5</text>
+          </g>
+          <rect x="20" y="26" width="144" height="40" fill="none" stroke="var(--ink-faint)" stroke-width="1.6" stroke-dasharray="3 2"/>
+          <rect x="116" y="80" width="144" height="40" fill="none" stroke="var(--accent)" stroke-width="1.6" stroke-dasharray="3 2"/>
+          <g font-family="IBM Plex Mono, monospace" font-size="12" text-anchor="middle">
+            <rect x="116" y="84" width="48" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="140" y="104" fill="var(--ink-soft)">7</text>
+            <rect x="164" y="84" width="48" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="188" y="104" fill="var(--ink-soft)">1</text>
+            <rect x="212" y="84" width="48" height="32" fill="var(--accent-3)" opacity="0.85"/><text x="236" y="104" fill="var(--bg)">9</text>
+          </g>
+          <text x="92" y="18" text-anchor="middle" class="axis-label" fill="var(--ink-faint)">окно #1: сумма = 13</text>
+          <text x="188" y="140" text-anchor="middle" class="axis-label" fill="var(--accent-strong)">окно #3: сумма = 13 − 4 − 2 + 1 + 9 = 17 (инкрементально)</text>
+        </svg>
+        <figcaption>При переходе от одного окна к следующему пересчитывать нужно не всю сумму заново, а только разницу: минус элемент, покинувший окно слева, плюс элемент, вошедший справа.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 05 SW VARIABLE ============ -->
+    <section class="sec" id="sw-variable">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Sliding Window, часть 2</p>
+        <h2 class="sec-title">Окно переменного размера</h2>
+      </div>
+      <div class="prose"><p>Здесь размер окна заранее не известен: <code>right</code> расширяет окно вправо, пока не нарушится заданное условие. Как только условие нарушено, окно сужают, двигая <code>left</code> вправо, пока условие снова не станет валидным:</p></div>
+      <pre>left = 0
+for right in range(len(arr)):
+    <span class="cm"># добавить arr[right] в состояние окна</span>
+    while <span class="cm">&lt;условие нарушено&gt;</span>:
+        <span class="cm"># убрать arr[left] из состояния окна</span>
+        left += 1
+    <span class="cm"># окно [left, right] валидно — обновить ответ</span></pre>
+
+      <figure class="chart">
+        <p class="chart-title">Окно расширяется до нарушения условия, затем сужается</p>
+        <svg viewBox="0 0 480 260" role="img" aria-label="Массив из восьми чисел; окно расширяется вправо, пока условие выполняется, затем при нарушении условия граница left сдвигается вправо, сужая окно, пока условие снова не станет верным">
+          <text x="20" y="18" text-anchor="start" class="axis-label" fill="var(--accent-3)">шаг 1 — right расширяет: [a,b] валидно</text>
+          <rect x="20" y="28" width="90" height="36" fill="none" stroke="var(--accent-3)" stroke-width="1.8"/>
+          <g font-family="IBM Plex Mono, monospace" font-size="12" text-anchor="middle">
+            <rect x="20" y="30" width="45" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="42" y="50" fill="var(--ink-soft)">a</text>
+            <rect x="65" y="30" width="45" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="87" y="50" fill="var(--ink-soft)">b</text>
+            <rect x="110" y="30" width="45" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="132" y="50" fill="var(--ink-soft)">c</text>
+            <rect x="155" y="30" width="45" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="177" y="50" fill="var(--ink-soft)">a</text>
+            <rect x="200" y="30" width="45" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="222" y="50" fill="var(--ink-soft)">d</text>
+            <rect x="245" y="30" width="45" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="267" y="50" fill="var(--ink-soft)">e</text>
+          </g>
+
+          <text x="20" y="98" text-anchor="start" class="axis-label" fill="#ff8a3d">шаг 2 — right расширяет: [a,b,c] всё ещё валидно</text>
+          <rect x="20" y="108" width="135" height="36" fill="none" stroke="#ff8a3d" stroke-width="1.8"/>
+          <g font-family="IBM Plex Mono, monospace" font-size="12" text-anchor="middle">
+            <rect x="20" y="110" width="45" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="42" y="130" fill="var(--ink-soft)">a</text>
+            <rect x="65" y="110" width="45" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="87" y="130" fill="var(--ink-soft)">b</text>
+            <rect x="110" y="110" width="45" height="32" fill="var(--accent-2)" opacity="0.85"/><text x="132" y="130" fill="var(--bg)">a</text>
+          </g>
+
+          <text x="20" y="178" text-anchor="start" class="axis-label" fill="#ff8a3d">шаг 3 — right добавляет второй «a»: условие нарушено (повтор!)</text>
+          <rect x="20" y="188" width="180" height="36" fill="none" stroke="#ff8a3d" stroke-width="1.8" stroke-dasharray="3 2"/>
+          <g font-family="IBM Plex Mono, monospace" font-size="12" text-anchor="middle">
+            <rect x="20" y="190" width="45" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="42" y="210" fill="var(--ink-soft)">a</text>
+            <rect x="65" y="190" width="45" height="32" fill="var(--surface-2)" stroke="var(--rule)"/><text x="87" y="210" fill="var(--ink-soft)">b</text>
+            <rect x="110" y="190" width="45" height="32" fill="var(--accent-2)" opacity="0.85"/><text x="132" y="210" fill="var(--bg)">a</text>
+            <rect x="155" y="190" width="45" height="32" fill="var(--accent-2)" opacity="0.85"/><text x="177" y="210" fill="var(--bg)">a</text>
+          </g>
+
+          <text x="245" y="205" text-anchor="start" class="axis-label" fill="var(--accent-strong)">left сдвигается вправо, пока</text>
+          <text x="245" y="220" text-anchor="start" class="axis-label" fill="var(--accent-strong)">окно снова не станет валидным</text>
+        </svg>
+        <figcaption>Расширение и сужение чередуются, но <code>left</code> за весь проход двигается вперёд не больше $n$ раз — суммарная работа обоих указателей за весь проход линейна (amortized $O(n)$), а не квадратична.</figcaption>
+      </figure>
+
+      <div class="callout fact">
+        <span class="mark">Почему это O(n), а не O(n²)</span>
+        <p>На первый взгляд конструкция «цикл <code>for</code> + вложенный <code>while</code>» выглядит как $O(n^2)$. Но <code>left</code> никогда не откатывается назад — за весь проход он может увеличиться максимум $n$ раз, столько же раз максимум увеличивается <code>right</code>. Суммарное число шагов обоих указателей ограничено $2n$ — то есть <strong>амортизированно</strong> линейно.</p>
+      </div>
+
+      <h3 class="sub">Как распознать, что нужен Sliding Window</h3>
+      <div class="pill-row">
+        <span class="pill">задача про непрерывный подмассив/подстроку</span>
+        <span class="pill">слова «longest», «shortest», «maximum sum», «minimum window», «at most k distinct»</span>
+        <span class="pill">условие внутри окна можно проверять/обновлять инкрементально</span>
+      </div>
+    </section>
+
+    <!-- ============ 06 ЧАСТАЯ ОШИБКА ============ -->
+    <section class="sec" id="sw-mistake">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Важный нюанс</p>
+        <h2 class="sec-title">Частая ошибка: вход и выход окна нужно проверять независимо</h2>
+      </div>
+      <div class="prose">
+        <p>Если состояние окна — не просто сумма всех элементов, а сумма или счётчик <strong>по условию</strong> (например, «сумма только там, где выполняется X»), то добавление входящего и удаление уходящего элемента нужно проверять <strong>независимо друг от друга</strong>, двумя отдельными <code>if</code>, а не одной конструкцией <code>if/else</code>.</p>
+      </div>
+      <div class="prose"><p>Разберём на классической задаче <strong>Grumpy Bookstore Owner</strong>: хозяин магазина в некоторые минуты «ворчлив» (<code>grumpy[i]=1</code>) и теряет покупателей <code>customers[i]</code>; используя приём (окно из <code>minutes</code> минут), можно один раз «подавить ворчливость». Нужно посчитать, сколько дополнительных покупателей это спасёт.</p></div>
+      <pre><span class="bad"># НЕПРАВИЛЬНО (если условие входа ≠ условие выхода в конкретный момент):</span>
+if grumpy[i]:
+    extra += customers[i]
+else:
+    counter += customers[i]  <span class="cm"># забыли, что уходящий элемент мог быть grumpy!</span>
+
+<span class="good"># ПРАВИЛЬНО — вход и выход проверяются отдельно:</span>
+if grumpy[i]:                    <span class="cm"># входящий элемент</span>
+    extra += customers[i]
+if grumpy[i - minutes]:          <span class="cm"># уходящий элемент — проверяется отдельно!</span>
+    extra -= customers[i - minutes]</pre>
+      <div class="callout warn">
+        <span class="mark">!</span>
+        <p>Ошибка возникает ровно в момент, когда входящий и уходящий элементы <strong>одновременно</strong> удовлетворяют разным условиям — например, входящий элемент не «ворчлив», а уходящий был «ворчлив» (или наоборот). Код, завязывающий оба события на одну и ту же ветку <code>if/else</code>, в этот момент теряет информацию: он не может одновременно сказать «входящий не ворчлив, поэтому не добавляем в extra» и «уходящий ворчлив, поэтому нужно вычесть из extra» — потому что <code>else</code> относится только к текущему, входящему элементу.</p>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Общее правило</span>
+        <p>Как только состояние окна перестаёт быть «просто суммой всех элементов» и начинает зависеть от условия на каждый элемент — операции добавления и удаления из окна почти всегда стоит писать как два независимых блока кода, а не как ветки одного условного оператора.</p>
+      </div>
+    </section>
+
+    <!-- ============ 07 ЗАДАЧИ TWO POINTERS ============ -->
+    <section class="sec" id="tasks-tp">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Практика</p>
+        <h2 class="sec-title">Список задач: Two Pointers</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">#</th><th>Задача</th><th>Сложность</th></tr></thead>
+          <tbody>
+            <tr><td class="num">167</td><td>Two Sum II — Input Array Is Sorted</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">125</td><td>Valid Palindrome</td><td class="diff easy">Easy</td></tr>
+            <tr><td class="num">26</td><td>Remove Duplicates from Sorted Array</td><td class="diff easy">Easy</td></tr>
+            <tr><td class="num">283</td><td>Move Zeroes</td><td class="diff easy">Easy</td></tr>
+            <tr><td class="num">88</td><td>Merge Sorted Array</td><td class="diff easy">Easy</td></tr>
+            <tr><td class="num">141</td><td>Linked List Cycle</td><td class="diff easy">Easy</td></tr>
+            <tr><td class="num">876</td><td>Middle of the Linked List</td><td class="diff easy">Easy</td></tr>
+            <tr><td class="num">11</td><td>Container With Most Water</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">15</td><td>3Sum</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">16</td><td>3Sum Closest</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">18</td><td>4Sum</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">75</td><td>Sort Colors (Dutch national flag)</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">80</td><td>Remove Duplicates from Sorted Array II</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">19</td><td>Remove Nth Node From End of List</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">142</td><td>Linked List Cycle II</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">986</td><td>Interval List Intersections</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">611</td><td>Valid Triangle Number</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">42</td><td>Trapping Rain Water</td><td class="diff hard">Hard</td></tr>
+            <tr><td class="num">632</td><td>Smallest Range Covering Elements from K Lists</td><td class="diff hard">Hard</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 08 ЗАДАЧИ SLIDING WINDOW ============ -->
+    <section class="sec" id="tasks-sw">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Практика</p>
+        <h2 class="sec-title">Список задач: Sliding Window</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th class="num">#</th><th>Задача</th><th>Сложность</th></tr></thead>
+          <tbody>
+            <tr><td class="num">643</td><td>Maximum Average Subarray I</td><td class="diff easy">Easy</td></tr>
+            <tr><td class="num">219</td><td>Contains Duplicate II</td><td class="diff easy">Easy</td></tr>
+            <tr><td class="num">1456</td><td>Maximum Number of Vowels in a Substring of Given Length</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">3</td><td>Longest Substring Without Repeating Characters</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">209</td><td>Minimum Size Subarray Sum</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">424</td><td>Longest Repeating Character Replacement</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">438</td><td>Find All Anagrams in a String</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">567</td><td>Permutation in String</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">1052</td><td>Grumpy Bookstore Owner</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">1004</td><td>Max Consecutive Ones III</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">904</td><td>Fruit Into Baskets</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">1493</td><td>Longest Subarray of 1's After Deleting One Element</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">1438</td><td>Longest Continuous Subarray With Absolute Diff Less Than or Equal to Limit</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">1234</td><td>Replace the Substring for Balanced String</td><td class="diff medium">Medium</td></tr>
+            <tr><td class="num">76</td><td>Minimum Window Substring</td><td class="diff hard">Hard</td></tr>
+            <tr><td class="num">239</td><td>Sliding Window Maximum</td><td class="diff hard">Hard</td></tr>
+            <tr><td class="num">995</td><td>Minimum Number of K Consecutive Bit Flips</td><td class="diff hard">Hard</td></tr>
+            <tr><td class="num">30</td><td>Substring with Concatenation of All Words</td><td class="diff hard">Hard</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 09 ПОРЯДОК ВЫПОЛНЕНИЯ ============ -->
+    <section class="sec" id="order">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>План отработки</p>
+        <h2 class="sec-title">Рекомендуемый порядок выполнения</h2>
+      </div>
+      <div class="prose"><p>Для списка Sliding Window имеет смысл идти не по порядку номеров, а по нарастанию сложности внутри самого паттерна:</p></div>
+      <ol class="order-list">
+        <li>Закрыть <code>1052</code> (Grumpy Bookstore Owner) и <code>438</code> (Find All Anagrams in a String) — это ещё задачи на fixed size, добить их до конца, пока паттерн окна фиксированного размера свежий в памяти.</li>
+        <li>Перейти к variable size: начать с <code>3</code> (Longest Substring Without Repeating Characters) — самая базовая, эталонная задача этого паттерна.</li>
+        <li>Дальше по нарастанию: <code>209</code> → <code>424</code> → <code>567</code> → <code>1004</code> → <code>904</code>.</li>
+        <li>В конце — hard-задачи (<code>76</code>, <code>239</code>) для полноты картины, если до собеседования остаётся время.</li>
+      </ol>
+    </section>
+
+    <!-- ============ 10 ИТОГИ ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">10</span>Итоги</p>
+        <h2 class="sec-title">Самое важное</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Разобрано:</strong></p>
+        <ul>
+          <li>Two Pointers: встречные указатели (Two Sum II, Container With Most Water) и указатели в одном направлении (in-place модификации, Floyd's cycle detection)</li>
+          <li>Sliding Window как частный случай Two Pointers: окно фиксированного и переменного размера, инкрементальное обновление состояния</li>
+          <li>Почему вложенный <code>while</code> внутри <code>for</code> в variable size window всё равно даёт амортизированно $O(n)$</li>
+          <li>Частая ошибка при неоднородном условии внутри окна — вход и выход нужно проверять раздельно</li>
+          <li>Список задач по обоим паттернам и рекомендованный порядок отработки</li>
+        </ul>
+        <p><strong>Что стоит запомнить:</strong></p>
+        <ul>
+          <li>Оба паттерна работают на одной и той же идее: не пересчитывать состояние с нуля, а обновлять его инкрементально при движении указателей</li>
+          <li>Признак задачи на Two Pointers — отсортированность, пары/тройки с условием на сумму, in-place без лишней памяти, вопросы про цикл/середину в связном списке</li>
+          <li>Признак задачи на Sliding Window — «непрерывный» подмассив/подстрока и слова «longest/shortest/maximum/minimum window»</li>
+          <li>Асимметричное условие внутри окна — самый частый источник багов: пишите вход и выход раздельными <code>if</code></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект · Two Pointers &amp; Sliding Window · Паттерны подготовки к алгоритмическим собеседованиям</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>
