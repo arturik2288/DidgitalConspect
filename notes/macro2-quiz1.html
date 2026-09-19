@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Макроэкономика 2 Квиз 1 — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#f6f2e9;
+      --surface:#ffffff;
+      --surface-2:#efe7d4;
+      --ink:#232019;
+      --ink-soft:#6b6353;
+      --ink-faint:#9a927e;
+      --accent:#2f5590;
+      --accent-strong:#1f3d66;
+      --accent-soft:#dde9e8;
+      --accent-2:#a8703a;
+      --accent-2-soft:#f3e3cd;
+      --accent-3:#3f7d5c;
+      --accent-3-soft:#e1efe4;
+      --bad:#a5432c;
+      --bad-soft:#f6e2da;
+      --rule:#ddd2b8;
+      --shadow: 0 1px 2px rgba(35,32,25,0.06), 0 6px 20px -8px rgba(35,32,25,0.15);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent-2);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:860px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:860px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:860px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:62ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:860px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:44px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:22px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(20px,3vw,26px);}
+    .sec-count{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-faint);}
+    .prose{max-width:70ch;}
+    .prose p{margin:0 0 14px;}
+
+    strong{color:var(--ink);}
+
+    /* ---------- reference box ---------- */
+    .refbox{
+      background:var(--accent-2-soft); border:1px solid var(--accent-2); border-radius:12px;
+      padding:18px 22px 20px; margin:18px 0;
+    }
+    .refbox .reflabel{
+      font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--accent-2); margin-bottom:10px; display:block; font-weight:700;
+    }
+    .refrow{display:flex; align-items:baseline; gap:14px; padding:8px 0; border-top:1px dashed color-mix(in srgb, var(--accent-2) 40%, transparent);}
+    .refrow:first-of-type{border-top:none;}
+    .refrow .rk{font-size:13.5px; color:var(--ink-soft); min-width:15rem; flex-shrink:0;}
+    .refrow .rv{overflow-x:auto;}
+
+    /* ---------- quiz question ---------- */
+    .quiz-q{padding:20px 0; border-bottom:1px solid var(--rule);}
+    .quiz-q:last-child{border-bottom:none;}
+    .q-top{display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; justify-content:space-between;}
+    .q-body{display:flex; gap:10px; flex:1; min-width:220px;}
+    .q-num{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-faint); padding-top:3px; flex-shrink:0; min-width:3.2ch;}
+    .q-text{margin:0; font-size:15.5px; color:var(--ink);}
+    .q-choices{display:flex; gap:8px; flex-shrink:0;}
+    .choice-btn{
+      font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:700;
+      padding:7px 16px; border-radius:999px; border:1.5px solid var(--rule);
+      background:var(--surface); color:var(--ink-soft); cursor:pointer;
+      transition:transform .1s ease;
+    }
+    .choice-btn:hover:not(.disabled){border-color:var(--accent); color:var(--accent);}
+    .choice-btn:active:not(.disabled){transform:scale(0.96);}
+    .choice-btn.disabled{cursor:default;}
+    .choice-btn.is-correct{background:var(--accent-3-soft); border-color:var(--accent-3); color:var(--accent-3);}
+    .choice-btn.chosen-wrong{background:var(--bad-soft); border-color:var(--bad); color:var(--bad);}
+
+    .q-feedback{
+      font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13.5px;
+      margin-top:10px; max-height:0; overflow:hidden; opacity:0;
+      transition:max-height .25s ease, opacity .25s ease, margin .25s ease;
+    }
+    .q-feedback.show{max-height:40px; opacity:1;}
+    .q-feedback.good{color:var(--accent-3);}
+    .q-feedback.bad{color:var(--bad);}
+
+    .q-bottom{margin-top:12px;}
+    .answer-toggle{
+      font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700;
+      letter-spacing:.03em; padding:6px 14px; border-radius:999px;
+      background:var(--surface-2); border:1px solid var(--rule); color:var(--ink-soft);
+      cursor:pointer;
+    }
+    .answer-toggle:hover{border-color:var(--accent-2); color:var(--accent-2);}
+    .answer-toggle.open{background:var(--accent-soft); border-color:var(--accent); color:var(--accent);}
+
+    .q-explain{
+      margin-top:12px; padding:14px 16px; background:var(--surface); border:1px solid var(--rule);
+      border-radius:10px; box-shadow:var(--shadow); max-width:66ch;
+    }
+    .q-explain p{margin:8px 0 0; font-size:14px;}
+    .verdict{
+      display:inline-flex; align-items:center; font-family:'IBM Plex Mono',monospace; font-weight:700;
+      font-size:11.5px; letter-spacing:.04em; padding:3px 10px; border-radius:6px;
+    }
+    .verdict.yes{background:var(--accent-3-soft); color:var(--accent-3); border:1px solid var(--accent-3);}
+    .verdict.no{background:var(--bad-soft); color:var(--bad); border:1px solid var(--bad);}
+
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (max-width:560px){
+      .q-body{min-width:0;}
+      .q-top{flex-direction:column;}
+    }
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/economics.html">← Раздел «Экономика»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Macroeconomics of Financial Markets · Самопроверка</p>
+      <h1 class="title">Макроэкономика 2 Квиз 1</h1>
+      <p class="subtitle">50 утверждений в трёх частях: межвременная оптимизация, рикардианская эквивалентность и спор Кругмана про госдолг, модель Рамсея–Касса–Купманса. Отметьте «Да» или «Нет», затем откройте «Ответ», чтобы увидеть разбор.</p>
+      <div class="meta-row">
+        <span>50 утверждений</span><span>·</span><span>3 части</span><span>·</span><span>да / нет + обоснование</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#reference"><span class="n">00</span>Справочные формулы</a>
+      <a href="#part1"><span class="n">01</span>Межвременная оптимизация</a>
+      <a href="#part2"><span class="n">02</span>Рикардо и Кругман</a>
+      <a href="#part3"><span class="n">03</span>Модель Рамсея</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <section class="sec" id="reference">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">00</span>Шпаргалка</p>
+        <h2 class="sec-title">Справочные соотношения</h2>
+      </div>
+      <div class="refbox">
+        <span class="reflabel">Держите перед глазами при решении</span>
+        <div class="refrow"><span class="rk">Динамическое БО домохозяйства</span><span class="rv">\( A_{t+1} = (A_t + Y_t^d - C_t)(1+r) \)</span></div>
+        <div class="refrow"><span class="rk">Уравнение Эйлера (Рамсей–Кейнс)</span><span class="rv">\( \dfrac{u'(C_t)}{u'(C_{t+1})} = \dfrac{1+r}{1+\rho} \)</span></div>
+        <div class="refrow"><span class="rk">NPG, конечный горизонт</span><span class="rv">\( \dfrac{A_T}{(1+r)^{T-t}} = 0 \)</span></div>
+        <div class="refrow"><span class="rk">NPG, бесконечный горизонт</span><span class="rv">\( \displaystyle\lim_{T\to\infty}\dfrac{A_T}{(1+r)^{T-t}} = 0 \)</span></div>
+        <div class="refrow"><span class="rk">Межвременное БО домохозяйства</span><span class="rv">\( \displaystyle\sum_{\tau=0}^{\infty}\dfrac{C_{t+\tau}}{(1+r)^\tau} = A_t + \sum_{\tau=0}^{\infty}\dfrac{Y^d_{t+\tau}}{(1+r)^\tau} \)</span></div>
+        <div class="refrow"><span class="rk">Межвременное БО государства</span><span class="rv">\( \displaystyle\sum_{\tau=0}^{\infty}\dfrac{G_{t+\tau}}{(1+r)^\tau} + b_t = \sum_{\tau=0}^{\infty}\dfrac{T_{t+\tau}}{(1+r)^\tau} \)</span></div>
+        <div class="refrow"><span class="rk">Консолидация (Рикардо)</span><span class="rv">\( \displaystyle\sum_{\tau=0}^{\infty}\dfrac{C_{t+\tau}}{(1+r)^\tau} = \sum_{\tau=0}^{\infty}\dfrac{Y_{t+\tau}-G_{t+\tau}}{(1+r)^\tau} \)</span></div>
+        <div class="refrow"><span class="rk">Рамсей, стационар</span><span class="rv">\( f'(k^{*}) = \rho+n+\delta, \qquad c^{*} = f(k^{*}) - (n+\delta)k^{*} \)</span></div>
+        <div class="refrow"><span class="rk">Золотое правило Солоу</span><span class="rv">\( f'(k^{gr}) = n+\delta \)</span></div>
+        <div class="refrow"><span class="rk">Норма сбережений в модели Рамсея</span><span class="rv">\( s^{*} = \dfrac{(n+\delta)\alpha}{\rho+n+\delta} \)</span></div>
+      </div>
+    </section>
+
+    <section class="sec" id="part1">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Часть 1 <span class="sec-count">· 19 утверждений</span></p>
+        <h2 class="sec-title">Межвременная оптимизация</h2>
+      </div>
+      <div class="prose"><p>Динамическое и межвременное бюджетное ограничение домохозяйства, условие отсутствия игр Понци, уравнение Эйлера, эффекты замещения и дохода.</p></div>
+      <div class="quiz-part" id="quizPart1"></div>
+    </section>
+
+    <section class="sec" id="part2">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Часть 2 <span class="sec-count">· 21 утверждение</span></p>
+        <h2 class="sec-title">Рикардианская эквивалентность, Эйбел и Кругман</h2>
+      </div>
+      <div class="prose"><p>Нейтральность способа финансирования госрасходов, условия нарушения эквивалентности, и спор Кругмана с «deficit hawks» о госдолге в ловушке ликвидности.</p></div>
+      <div class="quiz-part" id="quizPart2"></div>
+    </section>
+
+    <section class="sec" id="part3">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Часть 3 <span class="sec-count">· 10 утверждений</span></p>
+        <h2 class="sec-title">Модель Рамсея</h2>
+      </div>
+      <div class="prose"><p>Стационарная норма сбережений, модифицированное золотое правило, эквивалентность децентрализованного равновесия и командного оптимума, вытеснение при аккордных налогах.</p></div>
+      <div class="quiz-part" id="quizPart3"></div>
+    </section>
+
+  </main>
+
+  <footer class="page-foot">Источник теории: лекционный материал курса «Macroeconomics of Financial Markets» — межвременной выбор, рикардианская эквивалентность, модель Рамсея–Касса–Купманса — и P. Krugman, <i>End This Depression Now!</i>, гл. 8.</footer>
+
+  <script>
+  var QUIZ_DATA = {
+    part1: [
+      {n:"1.1", c:"yes", q:"Динамическое бюджетное ограничение домохозяйства описывает динамику его активов или долга.", e:"\\( A_{t+1} = (A_t + Y_t^d - C_t)(1+r) \\) — это уравнение движения именно запасовой переменной \\(A_t\\): как богатство (или долг) сегодня превращается в богатство завтра. Потребление входит как аргумент, но объект динамики — актив."},
+      {n:"1.2", c:"no", q:"Динамическое бюджетное ограничение домохозяйства — это уравнение динамики его потребления.", e:"То же уравнение описывает динамику \\(A_t\\), а не \\(C_t\\). Соотношение, связывающее \\(C_t\\) и \\(C_{t+1}\\) напрямую — отдельный результат оптимизации, уравнение Эйлера (см. 1.12), а не бюджетное ограничение само по себе."},
+      {n:"1.3", c:"yes", q:"Условие отсутствия игр Понци требует, чтобы приведённая стоимость богатства агента в последнем периоде жизни (конечный горизонт) равнялась нулю.", e:"Это его точная формулировка: \\( A_T/(1+r)^{T-t} = 0 \\)."},
+      {n:"1.4", c:"yes", q:"Рациональный агент не должен оставлять богатство после смерти (без мотива наследства).", e:"Если \\(A_T>0\\), агент мог бы потратить остаток раньше и получить больше суммарной полезности — оставлять положительное богатство нерационально."},
+      {n:"1.5", c:"yes", q:"Рациональный инвестор не должен давать в долг агенту, если тот не расплатится по долгам до смерти.", e:"Симметричная половина того же условия: \\(A_T<0\\) означало бы, что кредитор согласился одолжить тому, кто заведомо не вернёт долг — иррационально для кредитора. Отсюда единственный совместимый вариант — \\(A_T=0\\)."},
+      {n:"1.6", c:"yes", q:"Межвременное бюджетное ограничение домохозяйства требует: приведённая стоимость расходов на потребление равна приведённой стоимости будущих доходов (с учётом налогов и накопленного богатства/долга).", e:"Прямая формулировка \\( \\sum C_{t+\\tau}/(1+r)^\\tau = A_t + \\sum Y^d_{t+\\tau}/(1+r)^\\tau \\), полученная подстановкой NPG-условия в развёрнутое вперёд динамическое ограничение."},
+      {n:"1.7", c:"yes", q:"Если в текущем периоде домохозяйство имеет положительное богатство, оно может позволить себе отрицательную приведённую стоимость сбережений в будущем.", e:"Из \\( A_t = -\\sum S_{t+\\tau}/(1+r)^\\tau \\): при \\(A_t>0\\) сумма будущих дисконтированных сбережений должна быть отрицательна — можно постепенно «проедать» накопленное богатство, а не только жить на доход."},
+      {n:"1.8", c:"yes", q:"NPG в модели с бесконечным горизонтом требует: приведённая стоимость богатства (долга) должна стремиться к нулю на бесконечном горизонте.", e:"Это в точности \\( \\lim_{T\\to\\infty} A_T/(1+r)^{T-t} = 0 \\) — предельный переход от конечногоризонтного условия при \\(T\\to\\infty\\)."},
+      {n:"1.9", c:"yes", q:"NPG в бесконечном горизонте требует: темп прироста богатства (долга) не должен систематически превышать ставку процента.", e:"Содержательная интерпретация того же предела: если богатство/долг растёт с темпом строго меньше \\(r\\), знаменатель \\((1+r)^{T-t}\\) «обгоняет» числитель и предел равен нулю автоматически. Условие про темп роста, а не про уровень."},
+      {n:"1.10", c:"no", q:"NPG в бесконечном горизонте требует: если агент имеет долг, он рано или поздно должен быть полностью погашен.", e:"Частая ошибка: условие не требует обнуления долга ни в какой конечный момент — только чтобы темп его роста не превышал \\(r\\) вечно. Долг может расти линейно сколь угодно долго, не нарушая NPG."},
+      {n:"1.11", c:"no", q:"Оптимальный межвременной выбор потребления требует равенства полезностей от текущего и будущего потребления.", e:"Условие оптимума — равенство отношения предельных полезностей цене (\\(u'(C_t)/u'(C_{t+1}) = (1+r)/(1+\\rho)\\)), а не равенство уровней полезности (и даже не равенство самих предельных полезностей — это случилось бы лишь при \\(r=\\rho\\))."},
+      {n:"1.12", c:"yes", q:"Оптимальный межвременной выбор требует: с учётом субъективного дисконтирования отношение предельных полезностей потребления в двух соседних периодах равно отношению соответствующих стоимостей.", e:"Это и есть уравнение Эйлера \\(u'(C_t)/u'(C_{t+1}) = (1+r)/(1+\\rho)\\) — предельная норма замещения между \\(C_t\\) и \\(C_{t+1}\\) в оптимуме равна относительной цене."},
+      {n:"1.13", c:"yes", q:"Если нормировать стоимость единицы потребления в первом периоде к 1, то \\(1/(1+r)\\) — стоимость единицы потребления во втором периоде.", e:"Прямое следствие бюджетной линии \\(C_t + C_{t+1}/(1+r) = \\text{const}\\): коэффициент при \\(C_{t+1}\\) и есть относительная цена будущего потребления."},
+      {n:"1.14", c:"yes", q:"Увеличение \\(\\rho\\) снизит отношение \\(u'(C_t)/u'(C_{t+1})\\), приводя к росту \\(C_t\\) и снижению \\(C_{t+1}\\).", e:"В \\(u'(C_t)/u'(C_{t+1}) = (1+r)/(1+\\rho)\\) рост \\(\\rho\\) увеличивает знаменатель правой части и снижает отношение. Так как \\(u'\\) убывает, уменьшение отношения означает, что \\(C_t\\) относительно вырос, а \\(C_{t+1}\\) снизился: более нетерпеливый агент сдвигает потребление к настоящему."},
+      {n:"1.15", c:"yes", q:"Увеличение ставки процента снижает относительную стоимость потребления во втором периоде и увеличивает отношение \\(u'(C_t)/u'(C_{t+1})\\) в оптимуме.", e:"Цена \\(C_{t+1}\\) равна \\(1/(1+r)\\) и падает при росте \\(r\\) (будущее потребление дешевеет). Одновременно правая часть уравнения Эйлера \\((1+r)/(1+\\rho)\\) растёт — значит и отношение предельных полезностей в новом оптимуме выше."},
+      {n:"1.16", c:"yes", q:"Эффекты межвременного замещения и дохода противоположны по воздействию на потребление и сбережения в текущем периоде, если потребитель — кредитор без начального богатства.", e:"Замещение: \\(r\\uparrow \\Rightarrow C_t\\downarrow, S_t\\uparrow\\). Доход (при \\(S_t>0\\), т.е. потребитель — нетто-кредитор): \\(r\\uparrow \\Rightarrow C_t\\uparrow, S_t\\downarrow\\). На \\(C_t\\) и на \\(S_t\\) в текущем периоде эффекты действуют в разные стороны."},
+      {n:"1.17", c:"no", q:"Эффекты замещения и дохода противоположны по воздействию на потребление во втором периоде для кредитора без начального богатства.", e:"Здесь оба эффекта совпадают: замещение даёт \\(C_{t+1}\\uparrow\\) (будущее потребление подешевело), доход (при \\(S_t>0\\)) тоже даёт \\(C_{t+1}\\uparrow\\) (вырос совокупный доход). На \\(C_{t+1}\\) эффекты однонаправленны, а не противоположны."},
+      {n:"1.18", c:"yes", q:"Если \\(r>\\rho\\), потребление репрезентативного агента будет возрастать на протяжении жизненного цикла.", e:"Прямое следствие уравнения Эйлера: \\(r>\\rho \\Rightarrow u'(C_t)>u'(C_{t+1}) \\Rightarrow C_t<C_{t+1}\\) (убывающая \\(u'\\)) — траектория потребления растущая."},
+      {n:"1.19", c:"no", q:"Тренд в потребительских расходах может быть объяснён траекторией дохода, но не различием между \\(r\\) и \\(\\rho\\).", e:"Всё наоборот: направление динамики потребления (растёт/падает/постоянно) определяется исключительно соотношением \\(r\\) и \\(\\rho\\) и не зависит от того, растёт, падает или постоянен доход \\(Y_t\\). Ожидания по доходу определяют уровень потребления через межвременное ограничение, а не его тренд."}
+    ],
+    part2: [
+      {n:"2.1", c:"yes", q:"Выбор между финансированием госзакупок за счёт налогов или займов иррелевантен для потребления.", e:"Это содержание рикардианской эквивалентности (Barro, 1974): в консолидированном ограничении \\( \\sum C = \\sum(Y-G) \\) налоги и долг взаимно уничтожаются — остаётся только траектория \\(G\\)."},
+      {n:"2.2", c:"yes", q:"Ограничением на потребление выступает приведённая сумма будущих госзакупок, а не способ их финансирования.", e:"Прямое прочтение того же консолидированного ограничения: только \\( \\sum G_{t+\\tau}/(1+r)^\\tau \\) входит в правую часть, \\(T\\) и \\(b\\) из неё исчезли."},
+      {n:"2.3", c:"no", q:"Фискальная политика в принципе не должна оказывать воздействие на потребление.", e:"Подмена тезиса: эквивалентность нейтральна только к способу финансирования данной траектории G (налоги сейчас или долг), а не к фискальной политике вообще. Изменение самого \\(G\\) прямо входит в \\(\\sum(Y-G)\\) и меняет доступное потребление."},
+      {n:"2.4", c:"yes", q:"Домохозяйства не должны рассматривать владение гособлигациями как накопление чистого богатства.", e:"Это ответ Барро на вопрос из названия его статьи «Are Government Bonds Net Wealth?» — нет, потому что обеспечением облигаций служат будущие налоги, которые заплатят те же домохозяйства (или их наследники)."},
+      {n:"2.5", c:"no", q:"Эквивалентность возникает только при бесконечном горизонте; конечный горизонт неизбежно её нарушает.", e:"Неверно слово «неизбежно»: при межпоколенческом альтруизме (мотив завещания) конечный горизонт домохозяйства не мешает эквивалентности — родители, заботясь о полезности потомков, фактически восстанавливают бесконечный горизонт «династии». Нарушение возможно, но не гарантировано самой по себе конечностью горизонта."},
+      {n:"2.6", c:"yes", q:"Даже если домохозяйство доживает снижение налогов, но их рост ожидается лишь после его смерти, это не означает однозначного нарушения эквивалентности.", e:"Тот же аргумент об альтруизме: если агент ценит полезность потомков (с поправкой на дисконт), снижение налогов при жизни, компенсируемое их ростом после смерти, всё равно ложится на бюджет «династии» — эквивалентность может сохраниться."},
+      {n:"2.7", c:"yes", q:"Наличие искажающего налогообложения может привести к нарушению рикардианской эквивалентности.", e:"Вывод результата явно требует аккордных (не искажающих) налогов. Пропорциональный налог на потребление или на труд входит прямо в предельные условия — перераспределение во времени такого налога уже меняет поведение, а не только бюджет."},
+      {n:"2.8", c:"no", q:"Эквивалентность справедлива для любого типа налогообложения — аккордные они или искажающие, не важно.", e:"Прямо противоположно 2.7 — тип налога принципиален: результат доказан именно для аккордных налогов."},
+      {n:"2.9", c:"yes", q:"Рикардианская эквивалентность может нарушаться, если часть домохозяйств сталкивается с ограничениями ликвидности.", e:"Модель предполагает единую ставку \\(r\\) для заимствования и сбережения. Если часть агентов не может занимать по этой ставке, снижение налогов сегодня — реальное расширение бюджета сейчас (они не могут заранее занять под будущий доход), и они увеличивают потребление, а не сберегают всё в ожидании будущих налогов."},
+      {n:"2.10", c:"yes", q:"По Кругману, США вряд ли имеют дело с ситуацией, когда спекулянты на рынке гособлигаций провоцируют долговой кризис и более глубокую рецессию.", e:"Аргумент про «bond vigilantes»: несмотря на ≈$5 трлн новых займов США в 2008–2011 гг. и постоянные предупреждения, доходность гособлигаций к 2012 г. была близка к историческому минимуму — паники спекулянтов не случилось, и в условиях ловушки ликвидности она маловероятна в принципе."},
+      {n:"2.11", c:"no", q:"Кругман объясняет колебания доходности гособлигаций США 2009–2012 гг. изменениями в монетарной политике, регулирующей долгосрочную ставку.", e:"Его объяснение другое: низкая и стабильная доходность — следствие ловушки ликвидности (избыточные частные сбережения, ставка ФРС у нуля), из-за чего госзаймы не конкурируют с частным сектором за ограниченные ресурсы, а абсорбируют избыток сбережений — а не результат целевого управления долгосрочной ставкой со стороны ФРС."},
+      {n:"2.12", c:"no", q:"Кругман согласен, что в ловушке ликвидности рост госдолга приведёт к значительному росту ставки процента и помешает стимулированию ФРС.", e:"Это тезис его оппонентов («deficit hawks»), с которым Кругман спорит: в ловушке ликвидности рост госзаимствований не вытесняет частные инвестиции и не толкает ставки вверх, потому что поглощает избыточные сбережения, а не конкурирует за дефицитные средства."},
+      {n:"2.13", c:"yes", q:"По Кругману, после кризиса 2008–2009 экономика США оказалась в ловушке ликвидности, и рост госдолга в таких условиях решает проблему избытка частных сбережений и может вывести экономику из рецессии.", e:"Центральный тезис его аргументации: государство выступает «третьей стороной», занимая у тех, кто хочет сберегать больше, чем кто-либо готов занять при нулевой ставке, и тратя эти средства — тем самым закрывая дефицит совокупного спроса."},
+      {n:"2.14", c:"no", q:"Кругман считает, что раз рецессия 2008–2011 вызвана недостаточными сбережениями частного сектора, выход требует бюджетных профицитов.", e:"Диаметрально неверно сформулирована причина: по Кругману, проблема — не недостаток, а избыток частных сбережений; отсюда рецепт — не профициты, а дефициты, поглощающие этот избыток."},
+      {n:"2.15", c:"no", q:"Кругман считает, что в ловушке ликвидности сокращение госзакупок будет воспринято как снижение налоговой нагрузки в будущем, повысит доверие и приведёт к росту ВВП.", e:"Версия аргумента «expansionary austerity» / «confidence fairy», который Кругман прямо оспаривает: сокращение госрасходов в депрессивной экономике снижает совокупный спрос напрямую, а эффект доверия недостаточен, чтобы это компенсировать."},
+      {n:"2.16", c:"yes", q:"По Кругману, ограничительная фискальная политика в рецессии может не улучшить, а ухудшить отношение госдолга к ВВП даже в среднесрочной перспективе.", e:"Логика self-defeating austerity: сокращение расходов в спаде снижает ВВП (знаменатель) сильнее и быстрее, чем сам долг (числитель), так что отношение долг/ВВП может вырасти, а не упасть."},
+      {n:"2.17", c:"no", q:"В основе тезиса Кругмана «новые долги могут решить проблемы, созданные старыми долгами» лежит принцип рикардианской эквивалентности («новые и старые долги эквивалентны»).", e:"Наоборот: аргумент работает именно потому, что рикардианская эквивалентность нарушена — агенты неоднородны (закредитованные должники и избыточно сберегающие кредиторы), часть ограничена в заимствовании. При едином репрезентативном агенте и полной эквивалентности госдолг был бы полностью нейтрален."},
+      {n:"2.18", c:"yes", q:"Кругман считает, что списание плохих долгов в частном секторе и инфляция помогли бы США быстрее выйти из рецессии.", e:"Оба канала снижают реальное долговое бремя закредитованных домохозяйств, позволяя им нарастить расходы — это соответствует его диагнозу избыточного частного долга как корня проблемы."},
+      {n:"2.19", c:"no", q:"По Кругману, списание плохих долгов и инфляция только усугубляют рецессию, а лучшие средства — дефляция и полное погашение старых долгов.", e:"Позиция «ликвидационистов», которую Кругман прямо критикует: дефляция, по его мнению, увеличивает реальную тяжесть долга (debt-deflation Фишера) и усугубляет, а не лечит депрессию."},
+      {n:"2.20", c:"yes", q:"По Кругману, самостоятельный выход из рецессии затруднён тем, что «должники» не могут повысить расходы, а «кредиторы» не имеют стимула тратить больше.", e:"Асимметричный аргумент про «Minsky-момент»: должники вынуждены сокращать спрос под давлением пересмотренных лимитов заимствования, а кредиторы при ставке около нуля не заинтересованы наращивать расходы взамен — экономика «застревает» без внешнего толчка."},
+      {n:"2.21", c:"yes", q:"Фискальное стимулирование за счёт роста госдолга может решить проблему депрессивной экономики, где потребители с ограничениями ликвидности не могут восстановить расходы до желаемого уровня.", e:"Итоговый синтез позиции Кругмана: государство временно берёт на себя роль недостающего заёмщика/тратящего, компенсируя то, что закредитованные домохозяйства сделать не могут."}
+    ],
+    part3: [
+      {n:"3.1", c:"yes", q:"Из-за нетерпеливости домохозяйств равновесная норма сбережений в модели Рамсея ниже нормы, обеспечивающей золотое правило Солоу.", e:"\\( s^{*} = \\dfrac{(n+\\delta)\\alpha}{\\rho+n+\\delta} \\). При \\(\\rho=0\\) (полное терпение) \\(s^{*}=\\alpha\\) — это в точности золотое правило. При \\(\\rho>0\\) знаменатель больше, \\(s^{*}<\\alpha\\): нетерпеливость снижает норму сбережений ниже золотоправильного уровня."},
+      {n:"3.2", c:"no", q:"Т.к. накопление капитала в Солоу и Рамсее описывается одинаково, равновесная норма сбережений совпадает с золотоправильной.", e:"Технология накопления капитала (уравнение движения \\(k\\)) действительно одна и та же, но в Солоу норма сбережений — экзогенный параметр, а в Рамсее она выводится из оптимизации с нетерпеливостью \\(\\rho\\). Совпадение — лишь частный случай \\(\\rho=0\\) (см. 3.1), в общем случае они различны."},
+      {n:"3.3", c:"yes", q:"Стационарная норма сбережений отрицательно зависит от \\(\\rho\\): чем выше \\(\\rho\\), тем меньше домохозяйства ценят будущее и меньше сберегают.", e:"По формуле \\(s^{*} = (n+\\delta)\\alpha/(\\rho+n+\\delta)\\) — числитель не зависит от \\(\\rho\\), знаменатель растёт с \\(\\rho\\), значит \\(s^{*}\\) убывает по \\(\\rho\\)."},
+      {n:"3.4", c:"no", q:"Норма сбережений положительно зависит от \\(\\rho\\); снижение капиталовооружённости даёт большее снижение потребления, чем выпуска.", e:"Утверждение начинается с ложной посылки: зависимость \\(s^{*}\\) от \\(\\rho\\) отрицательная, а не положительная (см. 3.3) — этого достаточно, чтобы утверждение было неверным. Побочно верно, что \\(k^{*}\\) падает с ростом \\(\\rho\\) (из \\(f'(k^{*})=\\rho+n+\\delta\\) и \\(f''<0\\)), но это не имеет отношения к знаку зависимости самой нормы сбережений."},
+      {n:"3.5", c:"yes", q:"Стационарная капиталовооружённость по модифицированному золотому правилу в Рамсее ниже, чем по простому золотому правилу в Солоу.", e:"Сравниваем условия: \\(f'(k^{gr})=n+\\delta\\) (Солоу) и \\(f'(k^{*})=\\rho+n+\\delta\\) (Рамсей). Так как \\(\\rho>0\\), \\(f'(k^{*})>f'(k^{gr})\\), а поскольку \\(f''<0\\), большему предельному продукту соответствует меньший запас капитала: \\(k^{*}<k^{gr}\\)."},
+      {n:"3.6", c:"no", q:"Стационарная ставка процента по модифицированному золотому правилу ниже стационарной ставки по простому золотому правилу в Солоу.", e:"Считаем явно: \\(r^{*}=f'(k^{*})-\\delta=\\rho+n\\); \\(r^{gr}=f'(k^{gr})-\\delta=n\\). Так как \\(\\rho>0\\), \\(r^{*}=\\rho+n>n=r^{gr}\\) — ставка в Рамсее выше, а не ниже."},
+      {n:"3.7", c:"yes", q:"Равновесие в децентрализованной экономике модели Рамсея является Парето-эффективным.", e:"Бюджетное ограничение домохозяйства при равновесных факторных ценах (\\(w_t=f(k_t)-k_tf'(k_t)\\), \\(r_t=f'(k_t)-\\delta\\)) тождественно совпадает с ресурсным ограничением планировщика. Децентрализованное равновесие воспроизводит решение социального планировщика, а оно по построению Парето-эффективно — динамический аналог первой теоремы благосостояния."},
+      {n:"3.8", c:"no", q:"Равновесие в децентрализованной экономике необязательно совпадает с решением задачи социального планировщика.", e:"Прямо противоречит 3.7: при совершенной конкуренции и оплате факторов по предельному продукту децентрализованное равновесие в точности совпадает с командным оптимумом — доказывается алгебраически подстановкой цен факторов в бюджет домохозяйства."},
+      {n:"3.9", c:"yes", q:"Госзакупки, финансируемые аккордными налогами, приводят к полному вытеснению потребления в стационарном состоянии.", e:"Условие \\(\\dot c=0\\) (\\(f'(k^{*})=\\rho+n+\\delta\\)) не зависит от \\(g\\) — госзакупки не входят ни в предпочтения, ни в производственную функцию, значит стационарный \\(k^{*}\\) и выпуск \\(f(k^{*})\\) не меняются при изменении \\(g\\). При этом \\(c^{*}=f(k^{*})-(n+\\delta)k^{*}-g^{*}\\) — весь прирост \\(g\\) вычитается один в один из \\(c^{*}\\): полное вытеснение."},
+      {n:"3.10", c:"no", q:"Госзакупки, финансируемые аккордными налогами, приводят к полному вытеснению инвестиций в стационарном состоянии.", e:"Раз \\(k^{*}\\) не меняется (см. 3.9), не меняются и стационарные инвестиции \\((n+\\delta)k^{*}\\), нужные лишь для поддержания капиталовооружённости при росте населения и износе. Вытесняется именно потребление, а не инвестиции."}
+    ]
+  };
+
+  function renderPart(containerId, items){
+    var el = document.getElementById(containerId);
+    el.innerHTML = items.map(function(item){
+      return '' +
+        '<div class="quiz-q" data-correct="'+item.c+'">' +
+          '<div class="q-top">' +
+            '<div class="q-body"><span class="q-num">'+item.n+'</span><p class="q-text">'+item.q+'</p></div>' +
+            '<div class="q-choices">' +
+              '<button class="choice-btn" data-choice="yes" type="button">Да</button>' +
+              '<button class="choice-btn" data-choice="no" type="button">Нет</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="q-feedback"></div>' +
+          '<div class="q-bottom">' +
+            '<button class="answer-toggle" type="button">Ответ</button>' +
+            '<div class="q-explain" hidden>' +
+              '<span class="verdict '+item.c+'">'+(item.c==='yes' ? 'да' : 'нет')+'</span>' +
+              '<p>'+item.e+'</p>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  renderPart('quizPart1', QUIZ_DATA.part1);
+  renderPart('quizPart2', QUIZ_DATA.part2);
+  renderPart('quizPart3', QUIZ_DATA.part3);
+
+  document.querySelectorAll('.quiz-part').forEach(function(part){
+    part.addEventListener('click', function(e){
+      var choiceBtn = e.target.closest('.choice-btn');
+      if (choiceBtn){
+        var qEl = choiceBtn.closest('.quiz-q');
+        if (qEl.dataset.answered === '1') return;
+        qEl.dataset.answered = '1';
+        var correct = qEl.dataset.correct;
+        var choice = choiceBtn.dataset.choice;
+        qEl.querySelectorAll('.choice-btn').forEach(function(b){
+          b.classList.add('disabled');
+          if (b.dataset.choice === correct) b.classList.add('is-correct');
+        });
+        var feedback = qEl.querySelector('.q-feedback');
+        if (choice === correct){
+          feedback.textContent = 'Молодец, тобой гордится Челеховский!';
+          feedback.className = 'q-feedback show good';
+        } else {
+          choiceBtn.classList.add('chosen-wrong');
+          feedback.textContent = 'Пахнешь слабостью';
+          feedback.className = 'q-feedback show bad';
+        }
+        return;
+      }
+      var toggleBtn = e.target.closest('.answer-toggle');
+      if (toggleBtn){
+        var qEl2 = toggleBtn.closest('.quiz-q');
+        var explain = qEl2.querySelector('.q-explain');
+        var isHidden = explain.hasAttribute('hidden');
+        if (isHidden){
+          explain.removeAttribute('hidden');
+          toggleBtn.textContent = 'Скрыть ответ';
+          toggleBtn.classList.add('open');
+        } else {
+          explain.setAttribute('hidden','');
+          toggleBtn.textContent = 'Ответ';
+          toggleBtn.classList.remove('open');
+        }
+      }
+    });
+  });
+
+  (function(){
+    var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+    var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+    if(!sections.length) return;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          var id = '#' + entry.target.id;
+          links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+        }
+      });
+    }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+  </script>
+</body>
+</html>

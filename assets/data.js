@@ -15,6 +15,42 @@
 
 const NOTES = [
   {
+    id: "macro2-quiz1",
+    title: "Макроэкономика 2 Квиз 1",
+    division: "economics",
+    category: "Макроэкономика",
+    date: "2026-09-22",
+    displayDate: "22 сен 2026",
+    description: "Интерактивная самопроверка: 50 утверждений в трёх частях (межвременная оптимизация, рикардианская эквивалентность и Кругман, модель Рамсея) — отметьте да/нет и откройте разбор с обоснованием.",
+    tags: ["квиз", "самопроверка"],
+    file: "../notes/macro2-quiz1.html",
+    example: false
+  },
+  {
+    id: "ml-optimization",
+    title: "Оптимизация в ML: от градиентного спуска до Adam",
+    division: "it",
+    category: "Машинное обучение",
+    date: "2026-09-21",
+    displayDate: "21 сен 2026",
+    description: "Выпуклость и No Free Lunch theorem, градиентный и стохастический градиентный спуск с оценками сходимости, momentum и Nesterov, AdaGrad/RMSProp/Adam/AdamW, а также практика: расписания learning rate, большие батчи (LARS, LAMB), усреднение весов (SWA), предобуславливание.",
+    tags: ["градиентный спуск", "Adam"],
+    file: "../notes/ml-optimization.html",
+    example: false
+  },
+  {
+    id: "is-mp-pc-model",
+    title: "Модель IS-MP-PC",
+    division: "economics",
+    category: "Макроэкономика",
+    date: "2026-09-20",
+    displayDate: "20 сен 2026",
+    description: "Современная альтернатива IS-LM и AD-AS: кривая Филлипса, кривая IS, правило монетарной политики (MP) и кривая IS-MP; правило Тейлора, аналитическое решение модели, мягкий vs жёсткий центральный банк, адаптивные ожидания, петли инфляция-выпуск и принцип Тейлора.",
+    tags: ["IS-MP-PC", "правило Тейлора"],
+    file: "../notes/is-mp-pc-model.html",
+    example: false
+  },
+  {
     id: "binary-search",
     title: "Binary Search",
     division: "it",

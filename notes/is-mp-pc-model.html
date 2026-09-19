@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Модель IS-MP-PC — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#f6f2e9;
+      --surface:#ffffff;
+      --surface-2:#efe7d4;
+      --ink:#232019;
+      --ink-soft:#6b6353;
+      --ink-faint:#9a927e;
+      --accent:#2f5590;
+      --accent-strong:#1f3d66;
+      --accent-soft:#dde9e8;
+      --accent-2:#a8703a;
+      --accent-2-soft:#f3e3cd;
+      --accent-3:#3f7d5c;
+      --accent-3-soft:#e1efe4;
+      --rule:#ddd2b8;
+      --shadow: 0 1px 2px rgba(35,32,25,0.06), 0 6px 20px -8px rgba(35,32,25,0.15);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent-2);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    blockquote.quote{
+      margin:20px 0; padding:4px 0 4px 20px;
+      border-left:3px solid var(--accent-2);
+      font-family:'Fraunces',serif; font-style:italic; color:var(--ink);
+      font-size:15.5px; max-width:68ch;
+    }
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.result .mark{ color:var(--accent-2); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.fact .mark{ color:var(--accent-3); }
+    .callout.warn{ border-color:color-mix(in srgb, #a5432c 40%, transparent); background:#f6e2da; }
+    .callout.warn .mark{ color:#a5432c; }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    td.num{font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums;}
+    th.num{text-align:right;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:700px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/economics.html">← Раздел «Экономика»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Макроэкономика-1 (углублённый курс) · Лекции 15–18 · конспект</p>
+      <h1 class="title">Модель IS-MP-PC</h1>
+      <p class="subtitle">Современная альтернатива IS-LM и AD-AS: как связаны инфляция, выпуск и правило денежно-кредитной политики центрального банка. Вывод модели, кривая IS-MP, аналитическое решение, принцип Тейлора, динамика адаптивных ожиданий и петли инфляция-выпуск.</p>
+      <div class="meta-row">
+        <span>А.О. Мишин, НИУ ВШЭ</span>
+        <span>Macroeconomics-1 · Лекции 15–18</span>
+        <span>4-й модуль 2026 г.</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#motivation"><span class="n">01</span>Мотивация</a>
+      <a href="#three-elements"><span class="n">02</span>Три элемента</a>
+      <a href="#phillips"><span class="n">03</span>Кривая Филлипса</a>
+      <a href="#is-curve"><span class="n">04</span>Кривая IS</a>
+      <a href="#from-lm-to-rule"><span class="n">05</span>От LM к правилу</a>
+      <a href="#mp-curve"><span class="n">06</span>Кривая MP</a>
+      <a href="#is-mp"><span class="n">07</span>Кривая IS-MP</a>
+      <a href="#full-graph"><span class="n">08</span>График и AD-шок</a>
+      <a href="#taylor-rule"><span class="n">09</span>Правило Тейлора</a>
+      <a href="#expectations-shock"><span class="n">10</span>Шок ожиданий</a>
+      <a href="#analytical"><span class="n">11</span>Аналитическое решение</a>
+      <a href="#soft-hard"><span class="n">12</span>Мягкий vs жёсткий ЦБ</a>
+      <a href="#adaptive"><span class="n">13</span>Адаптивные ожидания</a>
+      <a href="#temp-shock"><span class="n">14</span>Временный шок и петли</a>
+      <a href="#non-adaptive"><span class="n">15</span>Если не адаптивны</a>
+      <a href="#taylor-principle"><span class="n">16</span>Принцип Тейлора</a>
+      <a href="#summary"><span class="n">17</span>Итоги</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 МОТИВАЦИЯ ============ -->
+    <section class="sec" id="motivation">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Мотивация</p>
+        <h2 class="sec-title">Не только IS-LM и AD-AS</h2>
+      </div>
+      <div class="prose">
+        <p>Модели IS-LM и AD-AS показывают, как экономика приспосабливается от краткосрочного к долгосрочному равновесию за счёт изменения уровня цен. Но у этого подхода есть слабое место: насколько реалистично моделировать монетарную политику через кривую LM — то есть через спрос на реальную денежную массу?</p>
+        <p>В этой лекции прежние идеи пересматриваются и расширяются тремя способами:</p>
+        <ol>
+          <li>Вместо традиционной кривой LM описывается современная реализация монетарной политики: центральный банк устанавливает процентную ставку, следуя определённому правилу.</li>
+          <li>Основное внимание уделяется тому, как свойства этого правила влияют на поведение экономики.</li>
+          <li>Гораздо больше внимания уделяется роли инфляционных ожиданий — именно они окажутся ключом к пониманию динамики модели.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ 02 ТРИ ЭЛЕМЕНТА ============ -->
+    <section class="sec" id="three-elements">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Строительные блоки</p>
+        <h2 class="sec-title">Модель с тремя элементами</h2>
+      </div>
+      <div class="prose">
+        <p>Модель IS-MP-PC (Income-Spending / Monetary Policy / Phillips Curve) строится из трёх уравнений:</p>
+        <ol>
+          <li><strong>Кривая Филлипса (PC)</strong> — как инфляция зависит от выпуска.</li>
+          <li><strong>Кривая IS</strong> — как выпуск зависит от процентных ставок.</li>
+          <li><strong>Правило денежно-кредитной политики (MP)</strong> — как центральный банк устанавливает процентные ставки в зависимости от инфляции и/или выпуска.</li>
+        </ol>
+        <p>Вторые два элемента (IS и MP) объединяются в новую кривую <strong>IS-MP</strong>, которую затем можно совместить с кривой Филлипса на одном графике с двумя осями — <em>Inflation</em> и <em>Output</em>.</p>
+      </div>
+    </section>
+
+    <!-- ============ 03 КРИВАЯ ФИЛЛИПСА ============ -->
+    <section class="sec" id="phillips">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Элемент первый</p>
+        <h2 class="sec-title">Кривая Филлипса: три источника инфляции</h2>
+      </div>
+      <div class="eq-box">
+        $$\pi_t = \pi_t^e + \gamma(y_t - y_t^*) + \varepsilon_t^\pi, \qquad \gamma > 0$$
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Инфляционные ожидания $\pi_t^e$</strong></td><td>Ожидания населения относительно инфляции в момент $t$. Рост ожиданий на 1 п.п. увеличивает фактическую инфляцию ровно на 1 п.п. — люди торгуются о <em>реальной</em> заработной плате, и более высокая ожидаемая инфляция транслируется один к одному в более высокую номинальную зарплату, а через неё — в цены.</td></tr>
+            <tr><td><strong>Разрыв выпуска $y_t-y_t^*$</strong></td><td>Разница между логарифмом реального ВВП и логарифмом естественного уровня выпуска. Естественный уровень — это уровень ВВП, соответствующий естественному уровню безработицы. Через закон Оукена разрыв выпуска и отклонение безработицы от естественного уровня связаны отрицательно, поэтому коэффициент $\gamma$ описывает, на сколько процентов вырастет инфляция из-за увеличения разрыва выпуска на 1 процентный пункт.</td></tr>
+            <tr><td><strong>Инфляционные шоки $\varepsilon_t^\pi$</strong></td><td>Всё, что напрямую не связано с ожиданиями или разрывом выпуска — например, «шоки предложения» (скачок цен на нефть), которые временно повышают инфляцию. Верхний индекс $\pi$ отличает этот шок от шока совокупного спроса $\varepsilon_t^y$ в кривой IS (раздел 04); нижний индекс $t$ подчёркивает, что шок меняется во времени.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Кривая Филлипса и её сдвиги</p>
+        <svg viewBox="0 0 480 260" role="img" aria-label="Три восходящие линии на графике инфляция-выпуск: базовая кривая Филлипса проходит через точку с координатами естественный выпуск и ожидаемая инфляция; вторая линия сдвинута параллельно вверх из-за положительного инфляционного шока; третья линия ещё выше из-за роста инфляционных ожиданий">
+          <line x1="50" y1="230" x2="450" y2="230" stroke="var(--rule)"/>
+          <line x1="50" y1="230" x2="50" y2="20" stroke="var(--rule)"/>
+          <text x="450" y="246" text-anchor="end" class="axis-label">Output</text>
+          <text x="30" y="18" text-anchor="start" class="axis-label">Inflation</text>
+
+          <line x1="80" y1="200" x2="420" y2="40" stroke="var(--accent)" stroke-width="2.2"/>
+          <line x1="80" y1="160" x2="420" y2="0" stroke="var(--accent-2)" stroke-width="2" stroke-dasharray="5 3"/>
+          <line x1="80" y1="120" x2="420" y2="-40" stroke="#a5432c" stroke-width="2" stroke-dasharray="2 3" opacity="0"/>
+
+          <line x1="250" y1="230" x2="250" y2="120" stroke="var(--rule)" stroke-dasharray="2 2"/>
+          <line x1="50" y1="120" x2="250" y2="120" stroke="var(--rule)" stroke-dasharray="2 2"/>
+          <text x="42" y="123" text-anchor="end" class="axis-label">π<tspan baseline-shift="sub" font-size="9">t</tspan><tspan baseline-shift="super" font-size="9">e</tspan></text>
+          <text x="250" y="246" text-anchor="middle" class="axis-label">y*</text>
+
+          <text x="400" y="60" text-anchor="end" class="curve-label" fill="var(--accent)">PC (ε<tspan baseline-shift="super" font-size="8">π</tspan>=0)</text>
+          <text x="400" y="22" text-anchor="end" class="curve-label" fill="var(--accent-2)">PC (ε<tspan baseline-shift="super" font-size="8">π</tspan>&gt;0 или π<tspan baseline-shift="sub" font-size="8">t</tspan><tspan baseline-shift="super" font-size="8">e</tspan>↑)</text>
+        </svg>
+        <figcaption>Положительный инфляционный шок и рост инфляционных ожиданий действуют на кривую Филлипса одинаково — параллельно сдвигают её вверх; разрыв выпуска определяет движение <em>вдоль</em> одной и той же кривой.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 04 КРИВАЯ IS ============ -->
+    <section class="sec" id="is-curve">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Элемент второй</p>
+        <h2 class="sec-title">Кривая IS: реальная ставка и шоки спроса</h2>
+      </div>
+      <div class="eq-box">
+        $$y_t = y_t^* - \alpha(i_t - \pi_t - r^*) + \varepsilon_t^y, \qquad \alpha > 0$$
+      </div>
+
+      <h3 class="sub">Реальная процентная ставка</h3>
+      <div class="prose">
+        <p>Номинальная ставка в момент $t$ равна $i_t$, поэтому реальная ставка равна $i_t - \pi_t$. Тут стоит задать вопрос: почему не $i_t - \pi_{t+1}^e$ (номинальная ставка минус ожидаемая на следующий период инфляция — стандартное определение реальной ставки)? Ответ: рассматриваются <strong>статичные адаптивные ожидания</strong>, при которых $\pi_{t+1}^e = \pi_t$ — то есть люди ожидают, что инфляция следующего периода будет равна инфляции текущего. При этом допущении оба определения реальной ставки совпадают.</p>
+        <p>Переменная $r^*$ — <strong>естественная процентная ставка</strong>: ставка, при которой реальный ВВП равен естественному уровню выпуска. Если $\varepsilon_t^y=0$, то реальная ставка $r^*$ означает $y_t=y_t^*$.</p>
+      </div>
+
+      <h3 class="sub">Шоки совокупного спроса</h3>
+      <div class="prose">
+        <p>На решения о совокупных расходах влияют многие факторы помимо реальной процентной ставки — фискальная политика, цены на активы, потребительские и деловые настроения. Всё это моделируется как временные отклонения совокупного спроса — шок $\varepsilon_t^y$. Верхний индекс $y$ отличает его от шока предложения $\varepsilon_t^\pi$, который сдвигает саму кривую Филлипса.</p>
+      </div>
+    </section>
+
+    <!-- ============ 05 ОТ LM К ПРАВИЛУ ============ -->
+    <section class="sec" id="from-lm-to-rule">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Как определяются ставки</p>
+        <h2 class="sec-title">От кривой LM — к правилу монетарной политики</h2>
+      </div>
+      <div class="prose"><p>Инфляция зависит от выпуска (кривая Филлипса), а выпуск — от процентных ставок (кривая IS). Осталось определить сами процентные ставки.</p></div>
+
+      <h3 class="sub">Традиционный подход: кривая LM</h3>
+      <div class="eq-box">
+        $$\frac{m_t}{p_t} = \delta - \mu i_t + \theta y_t \quad\Longrightarrow\quad y_t = \frac{1}{\theta}\left(\frac{m_t}{p_t} - \delta + \mu i_t\right)$$
+        <span class="eq-note">Спрос на реальную денежную массу связывает номинальные ставки и выпуск. Положительная связь между выпуском и ставками (из этой формулы) в сочетании с отрицательной связью в кривой IS даёт единственные значения для выпуска и ставок. Центральный банк задаёт положение кривой LM, меняя $m_t$; цены определяются отдельно, в модели AS-AD.</span>
+      </div>
+
+      <h3 class="sub">Современный подход: правило вместо денежной массы</h3>
+      <div class="prose"><p>Вместо кривой LM монетарная политика моделируется так, что центральный банк устанавливает <strong>номинальные</strong> процентные ставки напрямую, в соответствии с определённым правилом. Три причины предпочесть этот подход:</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Реализм 1</strong></td><td>Современные центральные банки не используют денежную базу как основной инструмент монетарной политики.</td></tr>
+            <tr><td><strong>Реализм 2</strong></td><td>Традиционный подход использует отдельную модель AS-AD для описания определения цен (и, следовательно, инфляции) отдельно от процентных ставок. Но большинство современных центральных банков устанавливают ставки, очень внимательно следя именно за инфляционной динамикой.</td></tr>
+            <tr><td><strong>Простота</strong></td><td>Выпуск, инфляция и процентные ставки определяются в одной модели, поэтому подход технически проще, чем работа с двумя разными наборами графиков (IS-LM и AS-AD).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 06 КРИВАЯ MP ============ -->
+    <section class="sec" id="mp-curve">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Элемент третий</p>
+        <h2 class="sec-title">Кривая MP: монетарное правило</h2>
+      </div>
+      <div class="eq-box">
+        $$i_t = r^* + \pi^* + \beta_\pi(\pi_t - \pi^*), \qquad \beta_\pi > 0$$
+        <span class="eq-note">$\pi^*$ — целевой (таргетируемый) уровень инфляции центрального банка.</span>
+      </div>
+      <div class="prose">
+        <p>Особенности правила:</p>
+        <ul>
+          <li>Центральный банк увеличивает $i_t$, когда $\pi_t$ растёт, и снижает $i_t$, когда $\pi_t$ падает.</li>
+          <li>Когда $\pi_t=\pi^*$ и общественность при формировании инфляционных ожиданий доверяет целевому уровню инфляции центрального банка (так что $\pi_t^e=\pi^*$), реальная процентная ставка равна своему естественному значению $r^*$.</li>
+        </ul>
+      </div>
+      <div class="callout result">
+        <span class="mark">Смысл правила</span>
+        <p>Такое монетарное правило помогает обеспечивать уровень инфляции, соответствующий желаемому целевому показателю центрального банка, — при условии, что общественность соответствующим образом скорректирует свои инфляционные ожидания.</p>
+      </div>
+    </section>
+
+    <!-- ============ 07 КРИВАЯ IS-MP ============ -->
+    <section class="sec" id="is-mp">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Сведение к двум переменным</p>
+        <h2 class="sec-title">Кривая IS-MP</h2>
+      </div>
+      <div class="prose"><p>Полная модель — система из трёх уравнений (PC, IS, MP), что затрудняет её изображение на графике с двумя осями. Правило монетарной политики делает процентные ставки функцией от инфляции, поэтому это правило можно подставить в кривую IS и получить новую взаимосвязь между выпуском и инфляцией — кривую <strong>IS-MP</strong>.</p></div>
+      <div class="eq-box">
+        $$y_t = y_t^* - \alpha(\beta_\pi - 1)(\pi_t - \pi^*) + \varepsilon_t^y$$
+      </div>
+      <div class="prose"><p>Увеличение инфляции на 1 процентный пункт приводит к изменению разрыва выпуска на $-\alpha(\beta_\pi-1)$ (в процентах). Поскольку $\alpha>0$, знак этого изменения зависит от $\beta_\pi$:</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td>$\beta_\pi > 1$</td><td>кривая IS-MP имеет <strong>отрицательный</strong> наклон — отрицательная взаимосвязь между выпуском и инфляцией (стандартный, привычный случай).</td></tr>
+            <tr><td>$\beta_\pi < 1$</td><td>кривая IS-MP имеет <strong>положительный</strong> наклон — положительная взаимосвязь между выпуском и инфляцией.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="mark">Почему так: интуиция шаг за шагом</span>
+        <p>Рост инфляции на 1 п.п. приводит (по правилу MP) к росту <strong>номинальной</strong> ставки на $\beta_\pi$ п.п. При статичных ожиданиях реальная процентная ставка при этом меняется на $\beta_\pi - 1$ п.п. (номинальная ставка выросла на $\beta_\pi$, но сама инфляция, которую нужно вычесть, выросла на 1). Если $\beta_\pi>1$, рост инфляции приводит к <strong>более высоким</strong> реальным процентным ставкам — а через отрицательную связь в кривой IS это означает более <strong>низкий</strong> выпуск.</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Наклон IS-MP зависит от агрессивности β<tspan>π</tspan></p>
+        <svg viewBox="0 0 480 220" role="img" aria-label="Слева кривая IS-MP с отрицательным наклоном при бета больше единицы: рост инфляции ведёт к падению выпуска. Справа кривая IS-MP с положительным наклоном при бета меньше единицы: рост инфляции ведёт к росту выпуска">
+          <line x1="30" y1="190" x2="220" y2="190" stroke="var(--rule)"/>
+          <line x1="30" y1="190" x2="30" y2="20" stroke="var(--rule)"/>
+          <line x1="60" y1="170" x2="200" y2="40" stroke="var(--accent)" stroke-width="2.2"/>
+          <text x="125" y="208" text-anchor="middle" class="axis-label">β<tspan baseline-shift="sub" font-size="9">π</tspan> &gt; 1</text>
+          <text x="10" y="18" class="axis-label">Inflation</text>
+          <text x="220" y="204" text-anchor="end" class="axis-label">Output</text>
+
+          <line x1="270" y1="190" x2="460" y2="190" stroke="var(--rule)"/>
+          <line x1="270" y1="190" x2="270" y2="20" stroke="var(--rule)"/>
+          <line x1="300" y1="40" x2="440" y2="170" stroke="var(--accent-2)" stroke-width="2.2"/>
+          <text x="365" y="208" text-anchor="middle" class="axis-label">β<tspan baseline-shift="sub" font-size="9">π</tspan> &lt; 1</text>
+          <text x="250" y="18" class="axis-label">Inflation</text>
+          <text x="460" y="204" text-anchor="end" class="axis-label">Output</text>
+        </svg>
+        <figcaption>При $\beta_\pi>1$ центральный банк реагирует на инфляцию настолько сильно, что реальные ставки растут — выпуск падает. Именно случай $\beta_\pi>1$ соответствует стандартной, привычной по учебникам отрицательной связи инфляции и выпуска и называется <strong>принципом Тейлора</strong> (подробнее — раздел 16).</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 08 ГРАФИК И AD ШОК ============ -->
+    <section class="sec" id="full-graph">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Полная картина</p>
+        <h2 class="sec-title">График модели и шок совокупного спроса</h2>
+      </div>
+      <div class="prose"><p>Простейший случай: оба шока равны нулю ($\varepsilon_t^\pi=\varepsilon_t^y=0$), а ожидания общественности относительно инфляции равны целевому показателю центрального банка ($\pi_t^e=\pi^*$). В этом случае кривые PC и IS-MP пересекаются ровно в точке $(y^*, \pi^*)$.</p></div>
+
+      <div class="fig-grid">
+        <figure class="chart">
+          <p class="chart-title">Базовое равновесие</p>
+          <svg viewBox="0 0 260 220" role="img" aria-label="Нисходящая кривая IS-MP и восходящая кривая PC пересекаются в точке с координатами естественный выпуск и целевая инфляция">
+            <line x1="30" y1="190" x2="240" y2="190" stroke="var(--rule)"/>
+            <line x1="30" y1="190" x2="30" y2="20" stroke="var(--rule)"/>
+            <line x1="45" y1="35" x2="225" y2="175" stroke="var(--accent)" stroke-width="2.2"/>
+            <line x1="45" y1="175" x2="225" y2="35" stroke="var(--accent-2)" stroke-width="2.2"/>
+            <line x1="135" y1="190" x2="135" y2="105" stroke="var(--rule)" stroke-dasharray="2 2"/>
+            <line x1="30" y1="105" x2="135" y2="105" stroke="var(--rule)" stroke-dasharray="2 2"/>
+            <text x="24" y="108" text-anchor="end" class="axis-label">π*</text>
+            <text x="135" y="204" text-anchor="middle" class="axis-label">y*</text>
+            <text x="60" y="28" class="curve-label" fill="var(--accent-2)">PC</text>
+            <text x="200" y="28" class="curve-label" fill="var(--accent)">IS-MP</text>
+          </svg>
+          <figcaption>Ожидаемая инфляция равна целевой: $\pi_t^e=\pi^*$.</figcaption>
+        </figure>
+        <figure class="chart">
+          <p class="chart-title">Положительный шок спроса ε<tspan style="font-size:10px">y</tspan>&gt;0</p>
+          <svg viewBox="0 0 260 220" role="img" aria-label="Кривая IS-MP сдвигается вправо из-за положительного шока спроса, кривая PC остаётся на месте; новая точка пересечения даёт более высокую инфляцию и более высокий выпуск">
+            <line x1="30" y1="190" x2="240" y2="190" stroke="var(--rule)"/>
+            <line x1="30" y1="190" x2="30" y2="20" stroke="var(--rule)"/>
+            <line x1="45" y1="35" x2="225" y2="175" stroke="var(--accent)" stroke-width="2" opacity="0.35"/>
+            <line x1="85" y1="35" x2="265" y2="175" stroke="var(--accent)" stroke-width="2.2"/>
+            <line x1="45" y1="175" x2="225" y2="35" stroke="var(--accent-2)" stroke-width="2.2"/>
+            <line x1="165" y1="190" x2="165" y2="75" stroke="var(--rule)" stroke-dasharray="2 2"/>
+            <line x1="30" y1="75" x2="165" y2="75" stroke="var(--rule)" stroke-dasharray="2 2"/>
+            <text x="24" y="78" text-anchor="end" class="axis-label">π&gt;π*</text>
+            <text x="165" y="204" text-anchor="middle" class="axis-label">y&gt;y*</text>
+          </svg>
+          <figcaption>IS-MP сдвигается вправо; PC не меняется — новое равновесие даёт более высокие $\pi$ и $y$.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============ 09 ПРАВИЛО ТЕЙЛОРА ============ -->
+    <section class="sec" id="taylor-rule">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>От эмпирики к формуле</p>
+        <h2 class="sec-title">Правило Тейлора</h2>
+      </div>
+      <div class="prose"><p>В знаменитой статье 1993 года Джон Тейлор предложил конкретную формулу взаимосвязи ставки по федеральным фондам $i$ с текущим состоянием экономики (все переменные — в процентах):</p></div>
+      <div class="eq-box">$$i_t = 2\% + \pi_t + 0.5(\pi_t - 2\%) + 0.5(y_t - y_t^*)$$</div>
+      <div class="prose">
+        <p>Формула хорошо эмпирически описывала монетарную политику ФРС в 1984–1992 гг. Тейлор подчёркивал, что механически следовать такому простому правилу «практически невозможно», но утверждал, что оно может служить «руководством» для центральных банков, стремящихся избежать ловушек дискреционной политики (принятия решений «по ситуации», без явного правила).</p>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Проверка временем</span>
+        <p>Более поздние данные показывают: правило Тейлора неплохо описывало ставку ФРС в 1990-е и 2000-е годы, но заметно разошлось с фактической политикой в периоды около нулевых ставок (2008–2015, 2020–2021) и во время всплеска инфляции 2021–2023 годов — простое правило по-прежнему полезно как ориентир, но не как точный прогноз.</p>
+      </div>
+
+      <h3 class="sub">Обобщённое правило в модели IS-MP-PC</h3>
+      <div class="prose"><p>Правило монетарной политики можно расширить, добавив реакцию на разрыв выпуска, как у Тейлора:</p></div>
+      <div class="eq-box">$$i_t = r^* + \pi^* + \beta_\pi(\pi_t - \pi^*) + \beta_y(y_t - y_t^*)$$</div>
+      <div class="prose"><p>Подставляя это выражение в кривую IS и перегруппировывая слагаемые, получаем обобщённую кривую IS-MP:</p></div>
+      <div class="eq-box">$$y_t - y_t^* = -\frac{\alpha(\beta_\pi - 1)}{1+\alpha\beta_y}(\pi_t - \pi^*) + \frac{1}{1+\alpha\beta_y}\varepsilon_t^y$$</div>
+      <div class="callout result">
+        <span class="mark">Вывод</span>
+        <p>Расширение правила монетарной политики с учётом реакции на разрыв выпуска <strong>не меняет основную форму</strong> кривой IS-MP — знак наклона по-прежнему определяется тем, больше или меньше единицы $\beta_\pi$. Добавление $\beta_y$ лишь масштабирует коэффициенты (делает кривую более пологой при прочих равных), но не меняет качественных выводов всей дальнейшей логики конспекта.</p>
+      </div>
+    </section>
+
+    <!-- ============ 10 ШОК ОЖИДАНИЙ ============ -->
+    <section class="sec" id="expectations-shock">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">10</span>Анализ шоков, часть 1</p>
+        <h2 class="sec-title">Изменение инфляционных ожиданий</h2>
+      </div>
+      <div class="prose">
+        <p>В простейшем примере (раздел 08) ожидания населения были равны целевому показателю инфляции центрального банка: $\pi_t^e=\pi^*$. Теперь рассмотрим случай, когда ожидания увеличиваются и становятся больше целевого уровня: $\pi_t^e=\bar\pi > \pi^* = \pi_1$.</p>
+      </div>
+      <div class="prose">
+        <p>После увеличения инфляционных ожиданий:</p>
+        <ul>
+          <li>Кривая PC сдвигается вверх.</li>
+          <li>Выпуск оказывается <strong>ниже</strong> своего естественного уровня.</li>
+          <li>Инфляция растёт — в конечном итоге она принимает значение <strong>между</strong> $\pi^*$ и $\bar\pi$ (не долетает до нового уровня ожиданий целиком).</li>
+        </ul>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Рост инфляционных ожиданий: с π₁ до π̄</p>
+        <svg viewBox="0 0 300 230" role="img" aria-label="Кривая PC сдвигается вверх параллельно из-за роста инфляционных ожиданий; кривая IS-MP не меняется; новая точка пересечения лежит между старым и новым уровнем инфляции, а выпуск оказывается ниже естественного уровня">
+          <line x1="30" y1="200" x2="270" y2="200" stroke="var(--rule)"/>
+          <line x1="30" y1="200" x2="30" y2="20" stroke="var(--rule)"/>
+          <line x1="45" y1="45" x2="255" y2="185" stroke="var(--accent)" stroke-width="2.2"/>
+          <line x1="45" y1="180" x2="255" y2="40" stroke="var(--accent-2)" stroke-width="2" opacity="0.35"/>
+          <line x1="45" y1="120" x2="255" y2="-20" stroke="var(--accent-2)" stroke-width="2.2"/>
+          <line x1="150" y1="200" x2="150" y2="112" stroke="var(--rule)" stroke-dasharray="2 2"/>
+          <line x1="30" y1="112" x2="150" y2="112" stroke="var(--rule)" stroke-dasharray="2 2"/>
+          <line x1="105" y1="200" x2="105" y2="150" stroke="var(--rule)" stroke-dasharray="2 2"/>
+          <line x1="30" y1="150" x2="105" y2="150" stroke="var(--rule)" stroke-dasharray="2 2"/>
+          <text x="24" y="115" text-anchor="end" class="axis-label">π₂</text>
+          <text x="24" y="153" text-anchor="end" class="axis-label">π₁=π*</text>
+          <text x="150" y="214" text-anchor="middle" class="axis-label">y₂</text>
+          <text x="270" y="214" text-anchor="end" class="axis-label">y*</text>
+        </svg>
+        <figcaption>Инфляция $\pi_2$ оказывается между исходной $\pi_1=\pi^*$ и новыми ожиданиями $\bar\pi$ — выпуск падает ниже естественного уровня $y^*$ до $y_2$.</figcaption>
+      </figure>
+
+      <div class="callout">
+        <span class="mark">Открытый вопрос</span>
+        <p>Насколько сильно новый уровень инфляции отклонится от целевого значения? Это зависит и от правила денежно-кредитной политики, и от других параметров модели — влияния реальных ставок на выпуск ($\alpha$) и влияния выпуска на инфляцию ($\gamma$). Графически ответить на это сложно — понадобится алгебра (раздел 11).</p>
+      </div>
+    </section>
+
+    <!-- ============ 11 АНАЛИТИЧЕСКОЕ РЕШЕНИЕ ============ -->
+    <section class="sec" id="analytical">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">11</span>От графиков к алгебре</p>
+        <h2 class="sec-title">Аналитическое решение модели</h2>
+      </div>
+      <div class="prose"><p>Подставим кривую IS-MP $y_t = y_t^* - \alpha(\beta_\pi-1)(\pi_t-\pi^*) + \varepsilon_t^y$ в кривую Филлипса и сгруппируем слагаемые при $\pi_t$:</p></div>
+      <div class="eq-box system">
+        $$\pi_t = \left(\frac{1}{1+\alpha\gamma(\beta_\pi-1)}\right)\pi_t^e + \left(\frac{\alpha\gamma(\beta_\pi-1)}{1+\alpha\gamma(\beta_\pi-1)}\right)\pi^* + \frac{\gamma\varepsilon_t^y+\varepsilon_t^\pi}{1+\alpha\gamma(\beta_\pi-1)}$$
+      </div>
+      <div class="prose"><p>Обозначив $\theta = \dfrac{1}{1+\alpha\gamma(\beta_\pi-1)}$, получаем компактную формулу:</p></div>
+      <div class="formula-box">
+        <div class="eq">π<sub>t</sub> = θπ<sub>t</sub><sup>e</sup> + (1−θ)π* + θ(γε<sub>t</sub><sup>y</sup>+ε<sub>t</sub><sup>π</sup>)</div>
+      </div>
+
+      <h3 class="sub">Интерпретация: инфляция</h3>
+      <div class="prose">
+        <p>При стандартном предположении $\beta_\pi > 1$ (принцип Тейлора, раздел 16) получаем $0 < \theta < 1$. Это означает: <strong>инфляция всегда находится между целевым показателем центрального банка и инфляционными ожиданиями населения</strong> — ровно то, что мы наблюдали на графике в разделе 10, теперь доказано алгебраически.</p>
+        <p>Математически $\theta$ отрицательно зависит от $\alpha$, $\gamma$ и $\beta_\pi>1$ — а значит, целевой показатель инфляции центрального банка играет тем <strong>бόльшую</strong> роль в определении инфляции, чем:</p>
+        <ul>
+          <li>$\gamma$ увеличивается — кривая Филлипса становится более крутой;</li>
+          <li>$\alpha$ увеличивается — кривая IS становится более пологой;</li>
+          <li>$\beta_\pi>1$ увеличивается — центральный банк сильнее реагирует на изменения инфляции (кривая IS-MP становится более пологой).</li>
+        </ul>
+      </div>
+
+      <h3 class="sub">Интерпретация: выпуск</h3>
+      <div class="prose"><p>Из решения по инфляции следует $\pi_t - \pi^* = \theta(\pi_t^e - \pi^* + \gamma\varepsilon_t^y + \varepsilon_t^\pi)$. Подставляя это в кривую IS-MP и упрощая:</p></div>
+      <div class="eq-box">$$y_t = y_t^* - \alpha\theta(\beta_\pi-1)(\pi_t^e - \pi^* + \varepsilon_t^\pi) + \big(1-\theta\alpha\gamma(\beta_\pi-1)\big)\varepsilon_t^y$$</div>
+      <div class="callout fact">
+        <span class="mark">Вывод</span>
+        <p>Выпуск не достигает естественного уровня, если инфляционные ожидания превышают целевой показатель инфляции ($\pi_t^e>\pi^*$). Величина этого дефицита выпуска положительно зависит от $\alpha$ и $\beta_\pi$ (чем сильнее центральный банк реагирует на инфляцию и чем чувствительнее выпуск к ставкам — тем больше просядет выпуск) и <strong>отрицательно</strong> зависит от $\gamma$ (чем круче кривая Филлипса, тем меньшего изменения выпуска достаточно, чтобы погасить избыточную инфляцию).</p>
+      </div>
+    </section>
+
+    <!-- ============ 12 МЯГКИЙ VS ЖЁСТКИЙ ============ -->
+    <section class="sec" id="soft-hard">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">12</span>Практическое следствие</p>
+        <h2 class="sec-title">Реакция центрального банка на инфляцию</h2>
+      </div>
+      <div class="prose"><p>Расчёты показывают: чем агрессивнее центральный банк реагирует на инфляцию (чем выше $\beta_\pi$), тем меньше будет рост инфляции и тем больше будет падение выпуска при одном и том же шоке.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Рост инфляционных ожиданий при двух значениях β<tspan style="font-size:10px">π</tspan></p>
+        <svg viewBox="0 0 480 240" role="img" aria-label="Две кривые IS-MP с разным наклоном пересекаются со сдвинутой вверх кривой PC в двух разных точках: пологая кривая IS-MP при низком бета даёт большее увеличение инфляции и меньшее падение выпуска, крутая кривая IS-MP при высоком бета даёт меньшее увеличение инфляции, но большее падение выпуска">
+          <line x1="40" y1="210" x2="460" y2="210" stroke="var(--rule)"/>
+          <line x1="40" y1="210" x2="40" y2="20" stroke="var(--rule)"/>
+          <line x1="60" y1="60" x2="440" y2="195" stroke="var(--accent)" stroke-width="2" opacity="0.9"/>
+          <line x1="220" y1="30" x2="330" y2="195" stroke="var(--accent-strong)" stroke-width="2.2"/>
+          <line x1="60" y1="190" x2="440" y2="40" stroke="var(--accent-2)" stroke-width="2" opacity="0.35"/>
+          <line x1="60" y1="110" x2="440" y2="-30" stroke="var(--accent-2)" stroke-width="2.2"/>
+
+          <line x1="345" y1="210" x2="345" y2="87" stroke="var(--rule)" stroke-dasharray="2 2"/>
+          <line x1="40" y1="87" x2="345" y2="87" stroke="var(--rule)" stroke-dasharray="2 2"/>
+          <line x1="270" y1="210" x2="270" y2="127" stroke="var(--rule)" stroke-dasharray="2 2"/>
+          <line x1="40" y1="127" x2="270" y2="127" stroke="var(--rule)" stroke-dasharray="2 2"/>
+
+          <text x="34" y="90" text-anchor="end" class="axis-label">π₂ (низкий β)</text>
+          <text x="34" y="130" text-anchor="end" class="axis-label">πₕ (высокий β)</text>
+          <text x="345" y="224" text-anchor="middle" class="axis-label">y₂</text>
+          <text x="270" y="224" text-anchor="middle" class="axis-label">yₕ</text>
+          <text x="90" y="55" class="curve-label" fill="var(--accent-strong)">IS-MP, высокий β<tspan baseline-shift="sub" font-size="8">π</tspan></text>
+          <text x="380" y="180" class="curve-label" fill="var(--accent)">IS-MP, низкий β<tspan baseline-shift="sub" font-size="8">π</tspan></text>
+        </svg>
+        <figcaption>При том же росте инфляционных ожиданий: более крутая кривая IS-MP (высокий $\beta_\pi$) пересекает сдвинутую PC при <em>меньшей</em> инфляции, но <em>большем</em> падении выпуска.</figcaption>
+      </figure>
+
+      <div class="callout warn">
+        <span class="mark">Контринтуитивный результат</span>
+        <p>Хотим ли мы «мягкий» центральный банк, который ограничивает рост реальных процентных ставок при росте инфляции, чтобы защитить выпуск? Или «жёсткий» центральный банк, который агрессивно повышает ставки и очень обеспокоен возвращением инфляции к целевому показателю? Казалось бы, мягкий центральный банк с большей вероятностью избежит крупных рецессий. Модель говорит об <strong>обратном</strong>: при шоках совокупного спроса рецессии меньше и короче, когда центральный банк действует агрессивно. И чем больше людей верят, что центральный банк поддерживает свой низкий целевой показатель инфляции, тем меньше вероятность, что экономика будет проходить через циклы подъёма и спада.</p>
+      </div>
+      <div class="prose"><p>Симуляция подтверждает это на цифрах: при более жёстком центральном банке ($\beta_\pi$ выше) инфляция после шока растёт медленнее и падает быстрее; сама рецессия (падение выпуска) острее, но заметно короче. Среднее падение выпуска за весь эпизод одинаково для обоих сценариев — определённый объём кумулятивного падения выпуска ниже естественного уровня необходим, чтобы вернуть инфляцию к целевому показателю центрального банка в любом случае, но жёсткий центральный банк «расплачивается» за это быстрее.</p></div>
+    </section>
+
+    <!-- ============ 13 АДАПТИВНЫЕ ОЖИДАНИЯ ============ -->
+    <section class="sec" id="adaptive">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">13</span>Динамика во времени</p>
+        <h2 class="sec-title">Как меняются инфляционные ожидания?</h2>
+      </div>
+      <div class="prose">
+        <p>После роста инфляционных ожиданий выпуск падает ниже естественного уровня, а инфляция растёт. Что происходит дальше? Как реагируют ожидания населения?</p>
+        <p>В работе Милтона Фридмана 1968 года предполагалось, что люди постепенно адаптируют свои ожидания на основе прошлых значений инфляции — простейший пример:</p>
+      </div>
+      <div class="eq-box">$$\pi_t^e = \pi_{t-1}$$</div>
+      <div class="prose"><p>При такой формулировке ожиданий кривая Филлипса превращается в модифицированную версию, знакомую по классическому виду:</p></div>
+      <div class="eq-box">$$\pi_t - \pi_{t-1} = \gamma(y_t - y_t^*) + \varepsilon_t^\pi$$</div>
+      <div class="prose"><p>Иными словами, должна быть положительная связь между <strong>изменением</strong> инфляции и разрывом выпуска (в качестве альтернативы (прокси) — отрицательная связь между изменением инфляции и уровнем безработицы). Эмпирическая проверка на данных США 1955–2019 гг. подтверждает такую отрицательную связь между изменением инфляции и уровнем безработицы.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Инфляционные ожидания постепенно приспосабливаются назад к целевому уровню</p>
+        <svg viewBox="0 0 480 220" role="img" aria-label="Серия параллельных кривых PC, постепенно опускающихся вниз к исходному положению, каждая пересекается с одной и той же исходной кривой IS-MP; точки пересечения последовательно двигаются вниз-вправо, приближаясь к исходной точке равновесия с естественным выпуском и целевой инфляцией">
+          <line x1="40" y1="190" x2="460" y2="190" stroke="var(--rule)"/>
+          <line x1="40" y1="190" x2="40" y2="20" stroke="var(--rule)"/>
+          <line x1="60" y1="170" x2="440" y2="40" stroke="var(--accent)" stroke-width="2.2"/>
+          <line x1="60" y1="40" x2="440" y2="170" stroke="var(--accent-2)" stroke-width="1.6" opacity="0.3"/>
+          <line x1="60" y1="65" x2="440" y2="195" stroke="var(--accent-2)" stroke-width="1.6" opacity="0.5"/>
+          <line x1="60" y1="90" x2="440" y2="220" stroke="var(--accent-2)" stroke-width="1.6" opacity="0.7"/>
+          <line x1="60" y1="115" x2="440" y2="245" stroke="var(--accent-2)" stroke-width="2.2"/>
+          <g fill="var(--ink)">
+            <circle cx="345" cy="80" r="3.5"/>
+            <circle cx="300" cy="100" r="3.5"/>
+            <circle cx="255" cy="122" r="3.5"/>
+          </g>
+          <path d="M345,80 Q322,90 300,100 Q278,111 255,122" fill="none" stroke="var(--ink-faint)" stroke-width="1.3" marker-end="url(#adArrow)"/>
+          <defs><marker id="adArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--ink-faint)"/></marker></defs>
+          <text x="250" y="205" text-anchor="middle" class="axis-label">y* (равновесие)</text>
+          <text x="380" y="60" class="axis-label" fill="var(--accent-2)">PC сдвигается вниз каждый период</text>
+        </svg>
+        <figcaption>Если инфляция в предыдущем периоде была выше, чем ожидали, ожидания на текущий период адаптируются вверх (и наоборот) — при затухающем шоке ожидания и кривая PC постепенно возвращаются к исходному положению, а инфляция и выпуск приспосабливаются назад к начальному равновесию $(\pi^*, y^*)$.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 14 ВРЕМЕННЫЙ ШОК И ПЕТЛИ ============ -->
+    <section class="sec" id="temp-shock">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">14</span>Динамика во времени, продолжение</p>
+        <h2 class="sec-title">Временный шок спроса и петли инфляция-выпуск</h2>
+      </div>
+      <div class="prose">
+        <p>Рассмотрим влияние <strong>временного</strong> шока совокупного спроса: $\varepsilon_t^y$ увеличивается на несколько периодов, а затем возвращается к 0. Это сдвигает кривую IS-MP вправо в те периоды, когда $\varepsilon_t^y>0$, и возвращает её назад, когда шок заканчивается. Рассмотрим случай статичных адаптивных ожиданий ($\pi_t^e=\pi_{t-1}$) период за периодом.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Период</th><th>Что происходит</th></tr></thead>
+          <tbody>
+            <tr><td>1 (старт)</td><td>Равновесие: $\pi_1=\pi^*$, $y=y^*$, $\varepsilon^y=0$, $\pi_t^e=\pi_1$.</td></tr>
+            <tr><td>2</td><td>Начинается шок: $\varepsilon_2^y>0$. IS-MP сдвигается вправо; PC пока не меняется ($\pi_t^e$ всё ещё $=\pi_1$). Новое равновесие: инфляция и выпуск <strong>оба растут</strong> — $\pi_2>\pi_1$, $y>y^*$.</td></tr>
+            <tr><td>3</td><td>Ожидания подстраиваются: $\pi_t^e=\pi_2$. PC сдвигается вверх; IS-MP остаётся сдвинутой (шок всё ещё действует). Новое равновесие: инфляция растёт ещё сильнее ($\pi_3>\pi_2$), а выпуск начинает <strong>снижаться</strong> обратно (но остаётся выше $y^*$).</td></tr>
+            <tr><td>4</td><td>Ожидания снова подстраиваются: $\pi_t^e=\pi_3$. PC сдвигается ещё выше; IS-MP всё ещё сдвинута. Инфляция растёт до $\pi_4$, выпуск продолжает снижаться (по-прежнему выше $y^*$).</td></tr>
+            <tr><td>5</td><td>Шок заканчивается: $\varepsilon_t^y=0$ для $t\ge5$. IS-MP возвращается в исходное положение. Но ожидания <strong>всё ещё высоки</strong> ($\pi_t^e=\pi_4$) — PC осталась сдвинутой вверх. Новое пересечение происходит при выпуске <strong>ниже</strong> $y^*$: в экономике начинается рецессия!</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Петля против часовой стрелки в пространстве «выпуск — инфляция»</p>
+        <svg viewBox="0 0 460 300" role="img" aria-label="Замкнутая петлеобразная траектория на графике с выпуском по горизонтали и инфляцией по вертикали: движение начинается в точке равновесия, идёт вправо-вверх при росте шока спроса, затем вверх с постепенным возвратом влево по мере роста инфляционных ожиданий, затем резко влево-вниз при завершении шока в рецессию, и наконец возвращается по нижней дуге обратно в исходную точку — вся траектория закручивается против часовой стрелки">
+          <line x1="40" y1="260" x2="420" y2="260" stroke="var(--rule)"/>
+          <line x1="40" y1="260" x2="40" y2="20" stroke="var(--rule)"/>
+          <text x="420" y="276" text-anchor="end" class="axis-label">Output</text>
+          <text x="20" y="16" class="axis-label">Inflation</text>
+
+          <path d="M150,190 C220,150 260,120 250,80 C245,58 210,45 175,55 C140,65 110,110 100,160 C92,200 115,235 150,240 C170,242 190,225 200,205"
+                fill="none" stroke="var(--accent-strong)" stroke-width="2.4" marker-end="url(#loopArrow)"/>
+          <defs><marker id="loopArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--accent-strong)"/></marker></defs>
+
+          <circle cx="150" cy="190" r="4.5" fill="var(--ink)"/>
+          <text x="150" y="208" text-anchor="middle" class="axis-label">1: π*, y*</text>
+          <circle cx="220" cy="150" r="4" fill="var(--accent-2)"/>
+          <text x="240" y="148" class="axis-label" fill="var(--accent-2)">2: π↑, y↑</text>
+          <circle cx="250" cy="80" r="4" fill="var(--accent-2)"/>
+          <text x="270" y="78" class="axis-label" fill="var(--accent-2)">3: π↑↑, y↓</text>
+          <circle cx="175" cy="55" r="4" fill="var(--accent-2)"/>
+          <text x="120" y="45" class="axis-label" fill="var(--accent-2)">4: π↑↑↑, y↓↓</text>
+          <circle cx="100" cy="160" r="4" fill="#a5432c"/>
+          <text x="20" y="165" text-anchor="start" class="axis-label" fill="#a5432c">5: рецессия, y&lt;y*</text>
+        </svg>
+        <figcaption>Временный положительный шок совокупного спроса при адаптивных ожиданиях порождает петлю <strong>против часовой стрелки</strong>: сначала выпуск и инфляция растут вместе, потом инфляция продолжает расти при снижающемся выпуске, затем резкая рецессия — и постепенное возвращение к исходной точке по мере того, как ожидания и PC приспосабливаются обратно вниз.</figcaption>
+      </figure>
+
+      <div class="callout fact">
+        <span class="mark">Эмпирическое подтверждение</span>
+        <p>Именно такие петли против часовой стрелки видны на реальных данных США: диаграммы рассеяния «инфляция — выпуск» по годам за 1960–1983 и 1983–2009 гг. образуют похожие зигзагообразные петлевые траектории, а не простую прямую линию — модель IS-MP-PC с адаптивными ожиданиями качественно воспроизводит эту динамику.</p>
+      </div>
+    </section>
+
+    <!-- ============ 15 НЕАДАПТИВНЫЕ ОЖИДАНИЯ ============ -->
+    <section class="sec" id="non-adaptive">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">15</span>Альтернативный сценарий</p>
+        <h2 class="sec-title">А что, если ожидания не адаптивны?</h2>
+      </div>
+      <div class="prose">
+        <p>Можно представить, что у многих людей нет времени или знаний, чтобы полностью понять, что именно происходит в экономике, — и предположение о формировании ожиданий по образцу прошлого года, вероятно, работает достаточно хорошо для большинства случаев. Но можно представить и ситуации, в которых инфляционные ожидания населения <strong>не</strong> формируются адаптивно.</p>
+        <p>Например, если население считает, что центральный банк всегда будет действовать, чтобы быстро вернуть инфляцию к целевому показателю, оно может предположить, что отклонения от целевого показателя будут временными — и попросту не менять свои ожидания в ответ на временный шок.</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Положительный шок спроса при неизменных инфляционных ожиданиях</p>
+        <svg viewBox="0 0 300 230" role="img" aria-label="Кривая IS-MP сдвигается вправо из-за шока спроса, а кривая PC остаётся неподвижной, потому что ожидания не меняются; новая точка пересечения лежит на той же неподвижной кривой PC правее и выше исходной точки; когда шок заканчивается, экономика возвращается напрямую по той же кривой PC обратно в исходную точку, без петли">
+          <line x1="30" y1="200" x2="270" y2="200" stroke="var(--rule)"/>
+          <line x1="30" y1="200" x2="30" y2="20" stroke="var(--rule)"/>
+          <line x1="45" y1="180" x2="255" y2="40" stroke="var(--accent-2)" stroke-width="2.2"/>
+          <line x1="45" y1="120" x2="255" y2="-20" stroke="var(--accent)" stroke-width="2" opacity="0.35"/>
+          <line x1="85" y1="120" x2="295" y2="-20" stroke="var(--accent)" stroke-width="2.2"/>
+          <circle cx="105" cy="150" r="4" fill="var(--ink)"/>
+          <circle cx="150" cy="105" r="4" fill="var(--accent-2)"/>
+          <path d="M105,150 C120,135 135,120 150,105" fill="none" stroke="var(--ink-faint)" stroke-width="1.4" marker-end="url(#naArrow)"/>
+          <defs><marker id="naArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--ink-faint)"/></marker></defs>
+          <text x="105" y="214" text-anchor="middle" class="axis-label">y*</text>
+          <text x="24" y="153" text-anchor="end" class="axis-label">π*</text>
+        </svg>
+        <figcaption>Движение происходит <strong>вдоль неподвижной</strong> кривой PC — без петли: когда шок заканчивается, экономика тем же путём возвращается назад в исходную точку.</figcaption>
+      </figure>
+
+      <div class="callout result">
+        <span class="mark">Сравнение с адаптивным сценарием</span>
+        <p>Если ожидания не меняются, реакция экономики на временный шок оказывается гораздо «чище»: инфляция и выпуск двигаются вдоль одной и той же кривой Филлипса туда и обратно, без рецессии в конце и без петли на графике. Именно доверие населения к тому, что центральный банк удержит инфляцию около цели, определяет, будет ли шок сопровождаться дополнительными потерями выпуска после его окончания.</p>
+      </div>
+    </section>
+
+    <!-- ============ 16 ПРИНЦИП ТЕЙЛОРА ============ -->
+    <section class="sec" id="taylor-principle">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">16</span>Условие устойчивости</p>
+        <h2 class="sec-title">Принцип Тейлора и макроэкономическая стабильность</h2>
+      </div>
+      <div class="prose">
+        <p>До сих пор предполагалось, что $\beta_\pi>1$. Это ведёт к тому, что IS-MP имеет отрицательный наклон: чем больше инфляция, тем меньше выпуск. Поскольку первоначально предложенное Тейлором правило имело именно это свойство, идея о том, что правила монетарной политики должны удовлетворять условию $\beta_\pi>1$, стала известна как <strong>принцип Тейлора</strong>.</p>
+      </div>
+
+      <div class="prose"><p>Подставив адаптивные ожидания $\pi_t^e=\pi_{t-1}$ в решение модели по инфляции (раздел 11), получаем:</p></div>
+      <div class="eq-box">$$\pi_t = \theta\pi_{t-1} + (1-\theta)\pi^* + \theta(\gamma\varepsilon_t^y+\varepsilon_t^\pi)$$</div>
+      <div class="prose"><p>Это авторегрессионный процесс порядка 1 (AR(1)) относительно инфляции. Математически, в зависимости от значения $\theta$, такой процесс может быть <strong>стабильным</strong> или <strong>нестабильным</strong> — совсем как геометрическая прогрессия с знаменателем $\theta$: если $|\theta|<1$, последовательные отклонения от $\pi^*$ затухают; если $\theta>1$, они бесконечно нарастают.</p></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Случай</th><th>Условие на β<tspan style="font-size:11px">π</tspan></th><th>Значение θ</th><th>Поведение</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>$\beta_\pi > 1$</td><td>$0 &lt; \theta &lt; 1$</td><td><strong>Стабильно</strong>: инфляция и выпуск колеблются вокруг долгосрочных средних значений.</td></tr>
+            <tr><td>2</td><td>$1-\dfrac{1}{\alpha\gamma} &lt; \beta_\pi &lt; 1$</td><td>$\theta &gt; 1$</td><td><strong>Нестабильно</strong>: инфляция в конечном итоге улетает до плюс или минус бесконечности.</td></tr>
+            <tr><td>3</td><td>$\beta_\pi &lt; 1-\dfrac{1}{\alpha\gamma}$</td><td>$\theta &lt; 0$</td><td>Знакопеременная (осциллирующая) динамика — за пределами графической интуиции курса.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout">
+        <span class="mark">Экономический смысл</span>
+        <p>Соблюдение принципа Тейлора означает: в случае шоков, которые увеличивают инфляцию, центральный банк повышает реальные процентные ставки и тем самым сдерживает рост инфляции. Напротив, когда $\beta_\pi<1$, действия центрального банка в случае шоков, увеличивающих инфляцию, приводят к более <strong>низким</strong> реальным процентным ставкам и более высокому выпуску — что ещё сильнее подпитывает первоначальный рост инфляции, толкая систему к неустойчивости.</p>
+      </div>
+
+      <h3 class="sub">Случай 2 графически: положительный наклон IS-MP, но неустойчиво</h3>
+      <div class="prose"><p>При $1-\frac{1}{\alpha\gamma}<\beta_\pi<1$ кривая IS-MP $y_t=y_t^*-\alpha(\beta_\pi-1)(\pi_t-\pi^*)+\varepsilon_t^y$ по-прежнему имеет <strong>положительный</strong> наклон (поскольку $\beta_\pi<1$), но в этом диапазоне наклон IS-MP всегда <strong>больше</strong> (круче) наклона кривой PC.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Рост ожиданий при 1 − 1/(αγ) &lt; β<tspan style="font-size:10px">π</tspan> &lt; 1: инфляция расходится</p>
+        <svg viewBox="0 0 300 230" role="img" aria-label="Восходящая кривая IS-MP более крутая, чем восходящая кривая PC; при росте инфляционных ожиданий кривая PC сдвигается вверх, и новая точка пересечения оказывается значительно выше и правее исходной — каждое следующее увеличение ожиданий уводит инфляцию всё дальше и дальше вверх, а не возвращает её к равновесию">
+          <line x1="30" y1="200" x2="270" y2="200" stroke="var(--rule)"/>
+          <line x1="30" y1="200" x2="30" y2="20" stroke="var(--rule)"/>
+          <line x1="70" y1="190" x2="150" y2="20" stroke="var(--accent)" stroke-width="2.2"/>
+          <line x1="45" y1="150" x2="255" y2="60" stroke="var(--accent-2)" stroke-width="2" opacity="0.35"/>
+          <line x1="45" y1="90" x2="255" y2="0" stroke="var(--accent-2)" stroke-width="2.2"/>
+          <circle cx="106" cy="126" r="4" fill="var(--ink)"/>
+          <circle cx="129" cy="66" r="4" fill="#a5432c"/>
+          <path d="M106,126 C115,105 122,86 129,66" fill="none" stroke="#a5432c" stroke-width="1.6" marker-end="url(#divArrow)"/>
+          <defs><marker id="divArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#a5432c"/></marker></defs>
+          <text x="150" y="14" class="curve-label" fill="var(--accent)">IS-MP (круче)</text>
+          <text x="200" y="55" class="curve-label" fill="var(--accent-2)">PC</text>
+        </svg>
+        <figcaption>Поскольку IS-MP круче PC, каждый следующий сдвиг PC вверх (по мере роста ожиданий) уводит точку пересечения всё <strong>дальше</strong> от исходного равновесия, а не ближе к нему — инфляция раскручивается в каждом следующем периоде до бесконечности.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 17 ИТОГИ ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">17</span>Итоги</p>
+        <h2 class="sec-title">Самое важное</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Разобрано:</strong></p>
+        <ul>
+          <li>Три элемента модели: кривая Филлипса, кривая IS, правило монетарной политики (MP)</li>
+          <li>Вывод кривой IS-MP и то, почему её наклон определяется знаком $\beta_\pi-1$</li>
+          <li>Правило Тейлора: историческая формула, эмпирическая проверка, обобщение с реакцией на выпуск</li>
+          <li>Аналитическое решение модели через $\theta$: инфляция и выпуск как функции ожиданий, цели и шоков</li>
+          <li>Контринтуитивный результат: более жёсткий центральный банк даёт более короткие и мягкие рецессии</li>
+          <li>Адаптивные ожидания (Фридман): динамика приспособления инфляции и выпуска обратно к равновесию</li>
+          <li>Временный шок спроса: петля против часовой стрелки в пространстве инфляция-выпуск, подтверждённая эмпирическими данными США</li>
+          <li>Альтернатива с неадаптивными ожиданиями: движение вдоль неизменной PC без петли</li>
+          <li>Принцип Тейлора ($\beta_\pi>1$) и три случая устойчивости инфляции как AR(1)-процесса</li>
+        </ul>
+        <p><strong>Что стоит запомнить:</strong></p>
+        <ul>
+          <li>Современный подход моделирует монетарную политику через правило установления ставки, а не через кривую LM — это и реалистичнее, и технически проще</li>
+          <li>Знак наклона IS-MP определяется тем, больше или меньше единицы $\beta_\pi$ — именно поэтому принцип Тейлора ($\beta_\pi>1$) так важен</li>
+          <li>Инфляция в равновесии модели всегда находится между целевым показателем ЦБ и инфляционными ожиданиями населения — доверие к ЦБ буквально «подтягивает» инфляцию к цели</li>
+          <li>Жёсткая реакция центрального банка на инфляцию не увеличивает, а уменьшает совокупные потери экономики от шоков — потому что предотвращает раскручивание ожиданий</li>
+          <li>Петли на графике «инфляция-выпуск» — не аномалия данных, а прямое следствие того, что ожидания подстраиваются к инфляции не мгновенно, а с лагом</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <span class="mark">Дополнительные материалы</span>
+        <p>Для углублённого самостоятельного изучения: еженедельные подкасты <em>Macro Musings</em>; сайт <em>Econs</em> — популяризация исследований по политике центральных банков; <em>VoxEU</em> — обзоры современных экономических исследований; книга Джозефа Вана «Central Banking 101»; блог <em>Liberty Street Economics</em> — данные и анализ текущей экономической и денежно-кредитной политики.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект лекции · Модель IS-MP-PC · НИУ ВШЭ, Макроэкономика-1 (углублённый курс), Лекции 15–18</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>
