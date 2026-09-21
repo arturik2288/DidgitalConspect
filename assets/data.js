@@ -15,6 +15,18 @@
 
 const NOTES = [
   {
+    id: "macro1-exam-block2-task3",
+    title: "Макроэкономика-1. Экзамен Блок 2 Задание 3",
+    division: "economics",
+    category: "Макроэкономика",
+    date: "2026-09-23",
+    displayDate: "23 сен 2026",
+    description: "Стохастическая AS-AD с рациональными ожиданиями: как отличить конструкцию через LM от ловушки ликвидности через эффект Пигу, универсальный алгоритм решения, Policy Ineffectiveness Proposition, критика Лукаса и полный разбор демоверсии.",
+    tags: ["AS-AD", "рациональные ожидания"],
+    file: "../notes/macro1-exam-block2-task3.html",
+    example: false
+  },
+  {
     id: "macro2-quiz1",
     title: "Макроэкономика 2 Квиз 1",
     division: "economics",
