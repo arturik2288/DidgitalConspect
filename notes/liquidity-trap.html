@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ловушка ликвидности — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#f6f2e9;
+      --surface:#ffffff;
+      --surface-2:#efe7d4;
+      --ink:#232019;
+      --ink-soft:#6b6353;
+      --ink-faint:#9a927e;
+      --accent:#2f5590;
+      --accent-strong:#1f3d66;
+      --accent-soft:#dde9e8;
+      --accent-2:#a8703a;
+      --accent-2-soft:#f3e3cd;
+      --accent-3:#3f7d5c;
+      --accent-3-soft:#e1efe4;
+      --bad:#a5432c;
+      --bad-soft:#f6e2da;
+      --rule:#ddd2b8;
+      --shadow: 0 1px 2px rgba(35,32,25,0.06), 0 6px 20px -8px rgba(35,32,25,0.15);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent-2);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.result .mark{ color:var(--accent-2); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.fact .mark{ color:var(--accent-3); }
+    .callout.warn{ border-color:color-mix(in srgb, var(--bad) 40%, transparent); background:var(--bad-soft); }
+    .callout.warn .mark{ color:var(--bad); }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    td.num{font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums;}
+    th.num{text-align:right;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:700px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/economics.html">← Раздел «Экономика»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Макроэкономика · IS-LM</p>
+      <h1 class="title">Ловушка ликвидности</h1>
+      <p class="subtitle">Почему при низкой ставке денежная политика перестаёт работать: спрос на деньги, трансмиссионный механизм, диаграмма IS-LM, нулевая нижняя граница и настоящая причина ловушки.</p>
+      <div class="meta-row">
+        <span>Макроэкономика</span>
+        <span>Кейнсианская модель IS-LM</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#assets"><span class="n">01</span>Деньги и облигации</a>
+      <a href="#money-demand"><span class="n">02</span>Спрос на деньги</a>
+      <a href="#transmission"><span class="n">03</span>Трансмиссия в норме</a>
+      <a href="#why-breaks"><span class="n">04</span>Почему звено ломается</a>
+      <a href="#is-lm"><span class="n">05</span>Ловушка в IS-LM</a>
+      <a href="#vs-investment"><span class="n">06</span>Vs инвестиционная ловушка</a>
+      <a href="#zlb"><span class="n">07</span>Нулевая граница (ZLB)</a>
+      <a href="#root-cause"><span class="n">08</span>Настоящая причина</a>
+      <a href="#summary"><span class="n">09</span>Итог и определение</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 ============ -->
+    <section class="sec" id="assets">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Портфель домохозяйства</p>
+        <h2 class="sec-title">Два актива: деньги и облигации</h2>
+      </div>
+      <div class="prose"><p>В кейнсианской модели богатство хранится в двух формах:</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Актив</th><th>Ликвидность</th><th>Доходность</th><th>Риск</th></tr></thead>
+          <tbody>
+            <tr><td>Деньги</td><td>абсолютная</td><td>0</td><td>нет риска изменения цены</td></tr>
+            <tr><td>Облигации</td><td>ниже</td><td>процент $i$</td><td>цена может меняться</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p><strong>Ключевой факт:</strong> цена облигации и ставка процента движутся в противоположные стороны.</p>
+      </div>
+      <div class="prose"><p>Для бессрочной облигации (консоли) с ежегодным купоном $C$:</p></div>
+      <div class="eq-box">$$P = \frac{C}{i}$$</div>
+      <div class="prose">
+        <ul>
+          <li>ставка растёт → старая облигация с фиксированным купоном менее привлекательна → её цена падает;</li>
+          <li>ставка падает → цена облигации растёт.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 02 ============ -->
+    <section class="sec" id="money-demand">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Предпочтение ликвидности</p>
+        <h2 class="sec-title">Спрос на деньги (Кейнс)</h2>
+      </div>
+      <div class="prose"><p>Три мотива держать деньги:</p></div>
+      <div class="prose">
+        <ol>
+          <li><strong>Трансакционный</strong> — для покупок; зависит от дохода $Y$.</li>
+          <li><strong>Мотив предосторожности</strong> — на непредвиденные расходы; тоже зависит от $Y$.</li>
+          <li><strong>Спекулятивный</strong> — ключевой для темы.</li>
+        </ol>
+      </div>
+      <div class="prose"><p><strong>Спекулятивный мотив.</strong> Облигация приносит процент $i$, но несёт риск капитального убытка: если ставка вырастет, цена облигации упадёт.</p></div>
+      <div class="eq-box">$$\text{Ожидаемая доходность облигации} = i + \text{ожидаемое изменение её цены}$$</div>
+      <div class="prose"><p>Линейная функция спроса на деньги:</p></div>
+      <div class="formula-box">
+        <div class="eq">L = kY − hi</div>
+        <div class="formula-legend">
+          <div class="item"><b>k</b>чувствительность спроса на деньги к доходу</div>
+          <div class="item"><b>h</b>чувствительность к ставке: чем выше $i$, тем дороже держать деньги (упущенный процент), тем меньше спрос на них</div>
+        </div>
+      </div>
+      <div class="prose"><p>Равновесие денежного рынка (предложение $M$ задаёт ЦБ):</p></div>
+      <div class="eq-box">$$\frac{M}{P} = kY - h\,i$$</div>
+    </section>
+
+    <!-- ============ 03 ============ -->
+    <section class="sec" id="transmission">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Как это работает без сбоев</p>
+        <h2 class="sec-title">Денежная политика в норме</h2>
+      </div>
+      <figure class="chart">
+        <p class="chart-title">Трансмиссионный механизм</p>
+        <svg viewBox="0 0 480 90" role="img" aria-label="Цепочка из пяти блоков, соединённых стрелками: рост денежной массы M ведёт к снижению ставки i, что ведёт к росту инвестиций I, что ведёт к росту совокупного спроса AD, что ведёт к росту выпуска Y">
+          <g font-family="IBM Plex Mono, monospace" font-size="13" text-anchor="middle">
+            <rect x="10" y="30" width="80" height="34" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+            <text x="50" y="52" fill="var(--accent-strong)">M ↑</text>
+            <path d="M92,47 L112,47" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#ltArrow)"/>
+            <rect x="114" y="30" width="80" height="34" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+            <text x="154" y="52" fill="var(--accent-strong)">i ↓</text>
+            <path d="M196,47 L216,47" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#ltArrow)"/>
+            <rect x="218" y="30" width="80" height="34" rx="8" fill="var(--accent-3-soft)" stroke="var(--accent-3)"/>
+            <text x="258" y="52" fill="var(--accent-3)">I ↑</text>
+            <path d="M300,47 L320,47" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#ltArrow)"/>
+            <rect x="322" y="30" width="70" height="34" rx="8" fill="var(--accent-3-soft)" stroke="var(--accent-3)"/>
+            <text x="357" y="52" fill="var(--accent-3)">AD ↑</text>
+            <path d="M394,47 L414,47" stroke="var(--ink-faint)" stroke-width="1.6" marker-end="url(#ltArrow)"/>
+            <rect x="416" y="30" width="58" height="34" rx="8" fill="var(--accent-3-soft)" stroke="var(--accent-3)"/>
+            <text x="445" y="52" fill="var(--accent-3)">Y ↑</text>
+          </g>
+          <defs><marker id="ltArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--ink-faint)"/></marker></defs>
+        </svg>
+        <figcaption>ЦБ увеличивает $M$ → у людей больше денег, чем они хотят держать → излишек идёт на покупку облигаций → цена облигаций растёт → ставка падает → кредит дешевле → инвестиции и выпуск растут.</figcaption>
+      </figure>
+      <div class="callout warn">
+        <span class="mark">!</span>
+        <p><strong>Ловушка ликвидности ломает первое звено:</strong> $M$ растёт, а $i$ не падает.</p>
+      </div>
+    </section>
+
+    <!-- ============ 04 ============ -->
+    <section class="sec" id="why-breaks">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Механизм разрыва</p>
+        <h2 class="sec-title">Почему первое звено ломается</h2>
+      </div>
+      <div class="prose"><p>Если ставка уже очень низкая, одновременно выполняется:</p></div>
+      <div class="prose">
+        <ol>
+          <li><strong>Процентный доход по облигациям почти нулевой</strong> — держать облигацию вместо денег почти ничего не даёт.</li>
+          <li><strong>Цена облигаций очень высокая, риск асимметричен.</strong> Производная
+            <div class="eq-box" style="margin:10px 0;">$$\frac{dP}{di} = -\frac{C}{i^2}$$</div>
+            огромна по модулю при малом $i$: крошечный рост ставки даёт большой капитальный убыток.
+          </li>
+          <li><strong>Все ожидают, что ставка дальше не упадёт, а только вырастет</strong> — ниже падать некуда, значит облигации в ожидании подешевеют.</li>
+        </ol>
+      </div>
+      <div class="callout">
+        <span class="mark">Итог</span>
+        <p>Никто не хочет держать облигации по такой цене, все предпочитают деньги. Спрос на деньги становится <strong>бесконечно эластичным по ставке</strong> ($h \to \infty$). Дополнительные деньги от ЦБ оседают у людей (в «матрасе» или на банковских резервах), а не идут на покупку облигаций. Цена облигаций не растёт, ставка не падает.</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Спрос на деньги при низкой ставке</p>
+        <svg viewBox="0 0 460 220" role="img" aria-label="Кривая спроса на деньги L убывает при высокой ставке процента, но при достижении минимального уровня ставки становится строго горизонтальной; сдвиг предложения денег вправо вдоль этого горизонтального участка не меняет равновесную ставку">
+          <line x1="40" y1="190" x2="430" y2="190" stroke="var(--rule)"/>
+          <line x1="40" y1="190" x2="40" y2="20" stroke="var(--rule)"/>
+          <path d="M40,60 C140,80 220,110 280,150 L 420,150" fill="none" stroke="var(--accent)" stroke-width="2.4"/>
+          <line x1="180" y1="190" x2="180" y2="20" stroke="var(--rule)" stroke-dasharray="2 2"/>
+          <line x1="320" y1="190" x2="320" y2="20" stroke="var(--rule)" stroke-dasharray="2 2"/>
+          <circle cx="180" cy="150" r="4.5" fill="var(--ink)"/>
+          <circle cx="320" cy="150" r="4.5" fill="var(--ink)"/>
+          <path d="M195,150 L305,150" stroke="var(--accent-2)" stroke-width="2" marker-end="url(#ltArrow2)"/>
+          <defs><marker id="ltArrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="var(--accent-2)"/></marker></defs>
+          <text x="250" y="140" text-anchor="middle" class="axis-label" fill="var(--accent-2)">M₁ → M₂: ставка не падает</text>
+          <text x="80" y="70" class="axis-label" fill="var(--accent)">L (спрос на деньги)</text>
+          <text x="355" y="170" class="axis-label">горизонтальный участок = ловушка</text>
+          <text x="180" y="206" text-anchor="middle" class="axis-label">M₁</text>
+          <text x="320" y="206" text-anchor="middle" class="axis-label">M₂</text>
+          <text x="10" y="24" class="axis-label">i</text>
+          <text x="430" y="206" text-anchor="end" class="axis-label">M</text>
+        </svg>
+        <figcaption>Графически: кривая спроса на деньги при низкой ставке горизонтальна. Сдвиг предложения денег вправо ($M_1\to M_2$) не меняет равновесную ставку.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 05 ============ -->
+    <section class="sec" id="is-lm">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Формальная модель</p>
+        <h2 class="sec-title">Ловушка ликвидности в модели IS-LM</h2>
+      </div>
+      <h3 class="sub">Кривая LM</h3>
+      <div class="prose"><p>Множество пар $(Y, i)$, уравновешивающих денежный рынок. Из $\frac{M}{P} = kY - h\,i$:</p></div>
+      <div class="eq-box">$$i = \frac{kY - M/P}{h}, \qquad \text{наклон LM} = \frac{k}{h}$$</div>
+      <div class="prose"><p>При $h \to \infty$ наклон $\to 0$: <strong>LM горизонтальна</strong> на уровне минимальной ставки. На практике LM рисуют ломаной: горизонтальный участок слева (ловушка), затем восходящий.</p></div>
+
+      <h3 class="sub">Кривая IS (упрощённо)</h3>
+      <div class="eq-box">
+        $$Y = \alpha\,(A_0 - b\,i), \qquad \alpha = \frac{1}{1-c}$$
+        <span class="eq-note">$\alpha$ — простой кейнсианский мультипликатор; $A_0$ — автономные расходы (включая $G$); $b$ — чувствительность инвестиций к ставке.</span>
+      </div>
+
+      <h3 class="sub">Решение системы</h3>
+      <div class="eq-box">$$Y\left(1 + \frac{\alpha b k}{h}\right) = \alpha A_0 + \frac{\alpha b}{h}\cdot\frac{M}{P}$$</div>
+
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td>Мультипликатор денежной политики</td><td>$\dfrac{dY}{d(M/P)} = \dfrac{\alpha b}{h + \alpha b k} \;\xrightarrow{h\to\infty}\; 0$ → денежная политика бессильна</td></tr>
+            <tr><td>Мультипликатор фискальной политики</td><td>$\dfrac{dY}{dG} = \dfrac{\alpha}{1 + \alpha b k / h} \;\xrightarrow{h\to\infty}\; \alpha$ → фискальная политика работает на полную мощь</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Диаграмма IS-LM в ловушке ликвидности</p>
+        <svg viewBox="0 0 460 240" role="img" aria-label="Кривая LM ломаная: горизонтальный участок слева, восходящий справа. Кривая IS убывающая, пересекает LM на горизонтальном участке. Сдвиг LM вправо (монетарная экспансия) не меняет точку пересечения и равновесный выпуск. Сдвиг IS вправо (фискальная экспансия) заметно увеличивает равновесный выпуск, оставаясь в пределах горизонтального участка LM">
+          <line x1="40" y1="210" x2="440" y2="210" stroke="var(--rule)"/>
+          <line x1="40" y1="210" x2="40" y2="20" stroke="var(--rule)"/>
+          <path d="M40,140 L260,140 C320,140 360,90 420,30" fill="none" stroke="var(--accent-2)" stroke-width="2.2"/>
+          <text x="330" y="70" class="axis-label" fill="var(--accent-2)">LM</text>
+          <path d="M100,40 C160,90 220,130 300,190" fill="none" stroke="var(--accent)" stroke-width="2"/>
+          <text x="120" y="55" class="axis-label" fill="var(--accent)">IS</text>
+          <path d="M150,40 C210,90 270,130 350,190" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3" opacity="0.7"/>
+          <text x="330" y="175" class="axis-label" fill="var(--accent)">IS' (фискальная экспансия)</text>
+          <circle cx="182" cy="140" r="4.5" fill="var(--ink)"/>
+          <circle cx="230" cy="140" r="4.5" fill="var(--ink)"/>
+          <path d="M182,155 L230,155" stroke="var(--accent-3)" stroke-width="2" marker-end="url(#ltArrow3)"/>
+          <defs><marker id="ltArrow3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="var(--accent-3)"/></marker></defs>
+          <text x="205" y="172" text-anchor="middle" class="axis-label" fill="var(--accent-3)">ΔY (фискальная — полный эффект)</text>
+          <text x="10" y="24" class="axis-label">i</text>
+          <text x="440" y="226" text-anchor="end" class="axis-label">Y</text>
+        </svg>
+        <figcaption>На горизонтальном участке LM сдвиг LM вправо (рост $M$) не меняет равновесный $Y$. Сдвиг IS вправо (рост $G$) двигает $Y$ на всю величину простого мультипликатора $\alpha$ — вытеснения нет, ставка не растёт.</figcaption>
+      </figure>
+
+      <h3 class="sub">Интуиция</h3>
+      <div class="prose"><p>В норме рост $G$ поднимает $Y$ → растёт спрос на деньги → ставка растёт → частные инвестиции вытесняются (<strong>эффект вытеснения, crowding out</strong>). В ловушке ставка не растёт (людям всё равно, держать деньги или облигации) → вытеснения нет → мультипликатор полный.</p></div>
+      <div class="callout result">
+        <span class="mark">Запомнить</span>
+        <p>В ловушке ликвидности монетарная экспансия (сдвиг LM вправо вдоль горизонтального участка) не меняет $Y$, а фискальная экспансия (сдвиг IS вправо) даёт максимальный эффект.</p>
+      </div>
+    </section>
+
+    <!-- ============ 06 ============ -->
+    <section class="sec" id="vs-investment">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Не путать</p>
+        <h2 class="sec-title">Ловушка ликвидности vs инвестиционная ловушка</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>Ловушка ликвидности</th><th>Инвестиционная ловушка</th></tr></thead>
+          <tbody>
+            <tr><td>Что ломается</td><td>$M\uparrow \to i\downarrow$ (1-е звено)</td><td>$i\downarrow \to I\uparrow$ (2-е звено)</td></tr>
+            <tr><td>Параметр</td><td>$h \to \infty$</td><td>$b \to 0$</td></tr>
+            <tr><td>Какая кривая особая</td><td>LM горизонтальна</td><td>IS вертикальна</td></tr>
+            <tr><td>Пример</td><td>ставка у нуля, деньги оседают</td><td>кризис, фирмы не инвестируют при любой ставке</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>В обоих случаях денежная политика не влияет на $Y$, но по разным причинам. Подробный разбор второго случая — в отдельном конспекте «Инвестиционная ловушка».</p></div>
+    </section>
+
+    <!-- ============ 07 ============ -->
+    <section class="sec" id="zlb">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Современная формулировка</p>
+        <h2 class="sec-title">Нулевая нижняя граница (ZLB)</h2>
+      </div>
+      <div class="prose"><p>У Кейнса «минимальная» ставка положительна и держится на ожиданиях. Сегодня ловушку формулируют через <strong>zero lower bound</strong>: номинальная ставка не может опуститься сильно ниже нуля, потому что наличные всегда дают доходность 0. Если облигация даёт меньше нуля — выгоднее держать кэш.</p></div>
+      <div class="prose"><p>При $i = 0$ деньги и краткосрочные облигации — <strong>совершенные заменители</strong>: вливание денег просто меняет одно на другое без эффекта.</p></div>
+
+      <h3 class="sub">Реальная ставка и дефляционная спираль</h3>
+      <div class="prose"><p>На инвестиции влияет <strong>реальная</strong> ставка:</p></div>
+      <div class="eq-box">$$r = i - \pi^e$$</div>
+      <div class="prose"><p>Если $i$ застряла на нуле, а ожидается дефляция ($\pi^e < 0$), то $r > 0$ и растёт → спрос падает → дефляция усиливается → $r$ растёт ещё сильнее → <strong>дефляционная спираль</strong>.</p></div>
+      <div class="pill-row">
+        <span class="pill">Япония с 1990-х</span>
+        <span class="pill">США и Европа после кризиса 2008</span>
+        <span class="pill">Еврозона с отрицательными ставками в 2010-х</span>
+      </div>
+    </section>
+
+    <!-- ============ 08 ============ -->
+    <section class="sec" id="root-cause">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Частая ошибка</p>
+        <h2 class="sec-title">Причина ловушки: низкая ставка — место, а не причина</h2>
+      </div>
+      <div class="prose"><p>Частая ошибка: «ловушка возникает из-за слишком низкой ставки». Это неточно.</p></div>
+      <div class="prose"><p><strong>Что верно:</strong> ловушка возможна <em>только</em> когда ставка у нижней границы (около нуля или у кейнсианского минимума). При высокой ставке ловушки не бывает — лишние деньги пойдут в облигации и ставка снизится.</p></div>
+      <div class="prose"><p><strong>Что неверно:</strong> сама по себе низкая ставка ничего не ломает. Суть ловушки — <strong>сочетание двух условий</strong>:</p></div>
+      <div class="prose">
+        <ol>
+          <li>Ставка упёрлась в пол, и все ждут только её роста → спрос на деньги бесконечно эластичен → лишние деньги оседают на руках, а не идут в облигации.</li>
+          <li>Экономике при этом <strong>нужна ставка ещё ниже</strong>, чтобы выйти на полную занятость: совокупный спрос настолько слаб, что даже нулевой ставки мало. В современных терминах — <strong>естественная (равновесная) реальная ставка стала отрицательной</strong>.</li>
+        </ol>
+      </div>
+      <div class="prose"><p>Если ставка нулевая, но экономика работает на потенциале, это не проблема: стимулировать не нужно.</p></div>
+
+      <h3 class="sub">Реальная причинно-следственная цепочка</h3>
+      <div class="callout warn">
+        <span class="mark">→</span>
+        <p><strong>Сильный шок спроса</strong> (финансовый кризис, лопнувший пузырь, массовое сокращение долгов, пессимизм) → <strong>падение $Y$</strong> → ЦБ снижает ставку для поддержки спроса → <strong>ставка упирается в пол</strong> → спрос всё ещё слишком слаб → дальнейшее вливание денег ставку не снижает → <strong>ловушка</strong>.</p>
+      </div>
+      <div class="prose"><p>Низкая ставка — <strong>результат</strong> борьбы ЦБ со спадом, а первопричина — <strong>провал совокупного спроса</strong> (Япония 1990-х: пузырь недвижимости и акций; США 2008: ипотечный кризис).</p></div>
+    </section>
+
+    <!-- ============ 09 ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>Итог</p>
+        <h2 class="sec-title">Определение для экзамена</h2>
+      </div>
+      <div class="callout result">
+        <span class="mark">Определение</span>
+        <p><strong>Ловушка ликвидности</strong> — ситуация, когда номинальная ставка процента находится на нижней границе, спрос на деньги абсолютно эластичен по ставке, и поэтому рост денежного предложения не снижает ставку и не стимулирует совокупный спрос. Возникает, когда из-за глубокого спада спроса для восстановления экономики требуется ставка ниже достижимого минимума.</p>
+      </div>
+      <h3 class="sub">Дальше по теме</h3>
+      <div class="pill-row">
+        <span class="pill">Фискальная политика</span>
+        <span class="pill">Эффект Пигу</span>
+        <span class="pill">Ставка на инфляционные ожидания (Кругман)</span>
+        <span class="pill">Количественное смягчение (QE)</span>
+        <span class="pill">Forward guidance</span>
+        <span class="pill">Отрицательные ставки</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект · Ловушка ликвидности · Кейнсианская модель IS-LM</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>

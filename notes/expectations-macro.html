@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ожидания в макроэкономике — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#f6f2e9;
+      --surface:#ffffff;
+      --surface-2:#efe7d4;
+      --ink:#232019;
+      --ink-soft:#6b6353;
+      --ink-faint:#9a927e;
+      --accent:#2f5590;
+      --accent-strong:#1f3d66;
+      --accent-soft:#dde9e8;
+      --accent-2:#a8703a;
+      --accent-2-soft:#f3e3cd;
+      --accent-3:#3f7d5c;
+      --accent-3-soft:#e1efe4;
+      --bad:#a5432c;
+      --bad-soft:#f6e2da;
+      --rule:#ddd2b8;
+      --shadow: 0 1px 2px rgba(35,32,25,0.06), 0 6px 20px -8px rgba(35,32,25,0.15);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent-2);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+    h4.subsub{font-family:'Inter',sans-serif; font-size:14.5px; font-weight:700; color:var(--accent); margin:20px 0 8px;}
+
+    strong{color:var(--ink);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.result .mark{ color:var(--accent-2); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.fact .mark{ color:var(--accent-3); }
+    .callout.warn{ border-color:color-mix(in srgb, var(--bad) 40%, transparent); background:var(--bad-soft); }
+    .callout.warn .mark{ color:var(--bad); }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    td.num{font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums;}
+    th.num{text-align:right;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:700px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/economics.html">← Раздел «Экономика»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Макроэкономика · Ожидания</p>
+      <h1 class="title">Ожидания в макроэкономике</h1>
+      <p class="subtitle">От наивной паутинообразной модели до рациональных ожиданий и критики Лукаса: как гипотеза о формировании ожиданий определяет, может ли экономическая политика систематически влиять на выпуск и безработицу.</p>
+      <div class="meta-row">
+        <span>Макроэкономика</span>
+        <span>Кривая Филлипса и политика стабилизации</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#motivation"><span class="n">00</span>Зачем нужны ожидания</a>
+      <a href="#static"><span class="n">01</span>Статические ожидания</a>
+      <a href="#adaptive"><span class="n">02</span>Адаптивные ожидания</a>
+      <a href="#extrapolative"><span class="n">03</span>Экстраполятивные</a>
+      <a href="#rational"><span class="n">04</span>Рациональные ожидания</a>
+      <a href="#perfect-foresight"><span class="n">05</span>Совершенное предвидение</a>
+      <a href="#modern"><span class="n">06</span>Современные расширения</a>
+      <a href="#summary-table"><span class="n">07</span>Сводная таблица</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 00 ============ -->
+    <section class="sec" id="motivation">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">00</span>Мотивация</p>
+        <h2 class="sec-title">Зачем нужны ожидания</h2>
+      </div>
+      <div class="prose"><p>Ключевые экономические решения направлены в будущее:</p></div>
+      <div class="prose">
+        <ul>
+          <li>фирмы устанавливают цены на несколько периодов вперёд;</li>
+          <li>работники заключают контракты с фиксированной номинальной зарплатой;</li>
+          <li>заёмщики и кредиторы ориентируются на реальную ставку $r = i - \pi^e$;</li>
+          <li>инвесторы оценивают будущие доходности активов.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Поэтому в уравнениях моделей стоят <strong>ожидаемые</strong> величины: ожидаемая инфляция $\pi^e$ или ожидаемый уровень цен $P^e$. От гипотезы формирования ожиданий зависит главный вывод модели: <strong>может ли экономическая политика систематически влиять на выпуск и безработицу</strong>.</p>
+      </div>
+    </section>
+
+    <!-- ============ 01 ============ -->
+    <section class="sec" id="static">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Простейшая гипотеза</p>
+        <h2 class="sec-title">Статические (наивные) ожидания</h2>
+      </div>
+      <div class="eq-box">$$\pi^e_t = \pi_{t-1} \qquad \text{или} \qquad P^e_t = P_{t-1}$$</div>
+      <div class="prose"><p>Агенты считают, что будущее значение совпадёт с последним наблюдённым.</p></div>
+
+      <h3 class="sub">Модели</h3>
+      <div class="prose"><p><strong>Паутинообразная модель (cobweb).</strong> Производитель выбирает объём по прошлой цене: $Q^s_t = f(P_{t-1})$. Цена колеблется вокруг равновесия.</p></div>
+
+      <figure class="chart">
+        <p class="chart-title">Паутинообразная модель</p>
+        <svg viewBox="0 0 460 220" role="img" aria-label="На графике спрос и предложение как функции цены. От начальной точки на кривой предложения проводится горизонтальная линия к кривой спроса, затем вертикальная линия обратно к кривой предложения, и так далее по спирали; если кривая спроса круче кривой предложения, спираль сходится к точке равновесия; если предложение круче спроса, спираль расходится">
+          <line x1="40" y1="190" x2="430" y2="190" stroke="var(--rule)"/>
+          <line x1="40" y1="190" x2="40" y2="20" stroke="var(--rule)"/>
+          <path d="M40,40 L410,170" stroke="var(--accent)" stroke-width="2"/>
+          <text x="360" y="165" class="axis-label" fill="var(--accent)">спрос</text>
+          <path d="M70,180 L370,40" stroke="var(--accent-2)" stroke-width="2"/>
+          <text x="330" y="55" class="axis-label" fill="var(--accent-2)">предложение</text>
+          <path d="M120,157 L120,110 L205,110 L205,132 L260,132 L260,120 L290,120 L290,127 L305,127"
+                fill="none" stroke="var(--accent-3)" stroke-width="1.8" marker-end="url(#etArrow)"/>
+          <defs><marker id="etArrow" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--accent-3)"/></marker></defs>
+          <circle cx="270" cy="123" r="3.5" fill="var(--ink)"/>
+          <text x="230" y="145" class="axis-label" fill="var(--accent-3)">сходящаяся паутина</text>
+          <text x="10" y="24" class="axis-label">P</text>
+          <text x="430" y="206" text-anchor="end" class="axis-label">Q</text>
+        </svg>
+        <figcaption>Если спрос по модулю круче предложения, колебания цены затухают (как показано). Если предложение круче спроса — колебания разгоняются.</figcaption>
+      </figure>
+
+      <div class="prose"><p><strong>Акселерационистская кривая Филлипса.</strong> Исходная кривая с ожиданиями:</p></div>
+      <div class="eq-box">$$\pi_t = \pi^e_t - \alpha(u_t - u_n)$$</div>
+      <div class="prose"><p>Подставляем $\pi^e_t = \pi_{t-1}$:</p></div>
+      <div class="eq-box">$$\pi_t - \pi_{t-1} = -\alpha(u_t - u_n)$$</div>
+      <div class="prose">
+        <p>Выводы:</p>
+        <ul>
+          <li>При $u < u_n$ инфляция растёт каждый период, то есть ускоряется.</li>
+          <li><strong>NAIRU</strong> — это уровень безработицы, при котором инфляция не ускоряется: $u = u_n \Rightarrow \pi_t = \pi_{t-1}$.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 02 ============ -->
+    <section class="sec" id="adaptive">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Обучение на ошибках</p>
+        <h2 class="sec-title">Адаптивные ожидания (Каган 1956, Фридман)</h2>
+      </div>
+      <div class="eq-box">
+        $$\pi^e_t = \pi^e_{t-1} + \lambda(\pi_{t-1} - \pi^e_{t-1}), \qquad 0 < \lambda \le 1$$
+        <span class="eq-note">Прогноз корректируется на долю $\lambda$ от прошлой ошибки.</span>
+      </div>
+      <div class="prose"><p>Если развернуть рекурсию, получается распределённый лаг с геометрически убывающими весами:</p></div>
+      <div class="eq-box">$$\pi^e_t = \lambda \sum_{i=0}^{\infty}(1-\lambda)^i \pi_{t-1-i}$$</div>
+      <div class="prose"><p>При $\lambda = 1$ это статические ожидания.</p></div>
+
+      <h3 class="sub">Главный недостаток: систематические ошибки</h3>
+      <div class="prose"><p>Пусть инфляция растёт с постоянным шагом: $\pi_{t+1} = \pi_t + g$. Обозначим ошибку $e_t = \pi_t - \pi^e_t$. Тогда:</p></div>
+      <div class="eq-box">$$e_{t+1} = \pi_t + g - \pi^e_t - \lambda e_t = (1-\lambda)e_t + g$$</div>
+      <div class="prose"><p>Стационарное значение ошибки:</p></div>
+      <div class="formula-box">
+        <div class="eq">e* = g / λ > 0</div>
+        <div class="formula-legend"><div class="item">Агенты постоянно недооценивают инфляцию и при этом не меняют правило прогнозирования. Именно эту иррациональность критиковали сторонники рациональных ожиданий.</div></div>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Систематическая ошибка при растущем тренде</p>
+        <svg viewBox="0 0 460 200" role="img" aria-label="Фактическая инфляция растёт линейно со временем. Адаптивно формируемое ожидание тоже растёт линейно с тем же наклоном, но со сдвигом вниз и с запаздыванием, постоянно оставаясь ниже фактической инфляции на одну и ту же величину e звёздочка">
+          <line x1="40" y1="170" x2="430" y2="170" stroke="var(--rule)"/>
+          <line x1="40" y1="170" x2="40" y2="20" stroke="var(--rule)"/>
+          <path d="M40,150 L420,40" stroke="var(--accent)" stroke-width="2.2"/>
+          <text x="330" y="60" class="axis-label" fill="var(--accent)">π_t (факт)</text>
+          <path d="M40,165 L420,55" stroke="var(--accent-2)" stroke-width="2.2" stroke-dasharray="5 3"/>
+          <text x="300" y="140" class="axis-label" fill="var(--accent-2)">π^e_t (адаптивное)</text>
+          <line x1="300" y1="81" x2="300" y2="102" stroke="var(--bad)" stroke-width="2"/>
+          <text x="308" y="95" class="axis-label" fill="var(--bad)">e* = g/λ</text>
+          <text x="10" y="24" class="axis-label">π</text>
+          <text x="430" y="186" text-anchor="end" class="axis-label">t</text>
+        </svg>
+        <figcaption>При линейно растущей инфляции адаптивное ожидание постоянно «догоняет» факт с постоянным отставанием $e^*=g/\lambda$ — систематическая, не случайная ошибка.</figcaption>
+      </figure>
+
+      <h3 class="sub">Модели</h3>
+      <div class="prose">
+        <ul>
+          <li><strong>Модель гиперинфляции Кагана.</strong> Спрос на деньги $\ln(M/P) = -\alpha \pi^e$, где $\pi^e$ формируется адаптивно.</li>
+          <li><strong>Модель Фридмана–Фелпса (естественный уровень безработицы).</strong>
+            <ul>
+              <li>В краткосрочном периоде $\pi^e$ отстаёт от $\pi$. Работники принимают рост номинальной зарплаты за рост реальной, поэтому кривая Филлипса имеет наклон.</li>
+              <li>В долгосрочном периоде $\pi^e = \pi$, откуда $u = u_n$: кривая Филлипса вертикальна.</li>
+            </ul>
+          </li>
+          <li><strong>AD-AS с ожиданиями.</strong> Совокупное предложение: $P = P^e(1+\mu)F(u, z)$. Экономика возвращается к $Y_n$ постепенно, по мере подстройки $P^e$.</li>
+          <li><strong>Гипотеза перманентного дохода Фридмана.</strong> В исходной версии перманентный доход оценивается адаптивно.</li>
+        </ul>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Кратко- и долгосрочная кривая Филлипса</p>
+        <svg viewBox="0 0 460 220" role="img" aria-label="Краткосрочная кривая Филлипса убывающая, отражающая зависимость инфляции от безработицы при данном ожидаемом уровне инфляции. Долгосрочная кривая Филлипса строго вертикальна на уровне естественной безработицы u в индексе n, показывая, что в долгосрочном периоде безработица не зависит от инфляции">
+          <line x1="40" y1="190" x2="430" y2="190" stroke="var(--rule)"/>
+          <line x1="40" y1="190" x2="40" y2="20" stroke="var(--rule)"/>
+          <path d="M60,60 C150,90 220,120 400,175" fill="none" stroke="var(--accent)" stroke-width="2.2"/>
+          <text x="90" y="75" class="axis-label" fill="var(--accent)">SRPC (при данном πᵉ)</text>
+          <line x1="230" y1="190" x2="230" y2="30" stroke="var(--accent-2)" stroke-width="2.2"/>
+          <text x="238" y="45" class="axis-label" fill="var(--accent-2)">LRPC (вертикальна)</text>
+          <text x="230" y="206" text-anchor="middle" class="axis-label">uₙ (NAIRU)</text>
+          <text x="10" y="24" class="axis-label">π</text>
+          <text x="430" y="206" text-anchor="end" class="axis-label">u</text>
+        </svg>
+        <figcaption>По мере адаптации ожиданий SRPC сдвигается вверх/вниз, но точка долгосрочного равновесия всегда на $u_n$ — попытки удержать $u \lt u_n$ ведут лишь к ускоряющейся инфляции.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 03 ============ -->
+    <section class="sec" id="extrapolative">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Продление тренда</p>
+        <h2 class="sec-title">Экстраполятивные ожидания</h2>
+      </div>
+      <div class="eq-box">$$\pi^e_t = \pi_{t-1} + \beta(\pi_{t-1} - \pi_{t-2})$$</div>
+      <div class="prose"><p>Агенты продлевают текущий тренд. Гипотеза используется в моделях финансовых пузырей и в поведенческих финансах: рост цен порождает ожидание дальнейшего роста.</p></div>
+    </section>
+
+    <!-- ============ 04 ============ -->
+    <section class="sec" id="rational">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Полная информация</p>
+        <h2 class="sec-title">Рациональные ожидания (Мут 1961; Лукас; Сарджент–Уоллес)</h2>
+      </div>
+      <div class="eq-box">$$\pi^e_t = E[\pi_t \mid \Omega_{t-1}]$$</div>
+      <div class="prose"><p>Ожидание равно математическому ожиданию по <strong>истинной модели экономики</strong> с учётом всей доступной информации $\Omega$, включая объявленную политику.</p></div>
+
+      <h3 class="sub">Свойства</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td>1. Несмещённость</td><td>$E[\pi_t - \pi^e_t] = 0$</td></tr>
+            <tr><td>2. Ортогональность</td><td>$E[(\pi_t - \pi^e_t)\cdot x] = 0$ для любого $x \in \Omega$ — систематических ошибок нет</td></tr>
+            <tr><td>3. Не совершенное предвидение</td><td>Агенты ошибаются, но только из-за непредсказуемых шоков</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 class="subsub">4.1. Кривая предложения Лукаса (модель островов)</h4>
+      <div class="eq-box">$$Y_t = Y_n + b(P_t - E_{t-1}P_t)$$</div>
+      <div class="prose"><p>Фирма на «острове» видит только свою цену и не может отличить относительный шок от общего ценового. Задача извлечения сигнала даёт:</p></div>
+      <div class="eq-box">$$b \propto \frac{\sigma^2_{\text{отн}}}{\sigma^2_{\text{отн}} + \sigma^2_{\text{общ}}}$$</div>
+      <div class="prose"><p>Отсюда следует, что в странах с волатильной инфляцией кривая предложения круче, а монетарная политика слабее влияет на выпуск.</p></div>
+
+      <h4 class="subsub">4.2. Тезис о неэффективности политики (Сарджент–Уоллес, 1975)</h4>
+      <div class="prose"><p>Берём матожидание от кривой Филлипса $\pi_t = \pi^e_t - \alpha(u_t - u_n)$ при $\pi^e_t = E_{t-1}\pi_t$:</p></div>
+      <div class="eq-box">$$E_{t-1}[u_t] = u_n \quad\Rightarrow\quad u_t - u_n = -\frac{1}{\alpha}(\pi_t - E_{t-1}\pi_t)$$</div>
+      <div class="callout warn">
+        <span class="mark">!</span>
+        <p><strong>Систематическая (ожидаемая) политика не влияет на безработицу.</strong> Реальные эффекты дают только неожиданные изменения.</p>
+      </div>
+
+      <h4 class="subsub">4.3. Критика Лукаса (1976)</h4>
+      <div class="prose"><p>Параметры эмпирических моделей, например наклон кривой Филлипса, зависят от проводимой политики, потому что от неё зависят ожидания. Модель, оценённую на данных старого режима, нельзя использовать для анализа нового режима политики.</p></div>
+
+      <h4 class="subsub">4.4. Жёсткие контракты: Фишер (1977), Тейлор</h4>
+      <div class="prose"><p>Если номинальные зарплаты зафиксированы контрактами на несколько периодов, центральный банк может реагировать на шоки быстрее, чем пересматриваются контракты. Поэтому даже при рациональных ожиданиях стабилизационная политика эффективна.</p></div>
+      <div class="callout fact">
+        <span class="mark">Синтез</span>
+        <p>Итог — синтез <strong>«рациональные ожидания + номинальные жёсткости»</strong>.</p>
+      </div>
+
+      <h4 class="subsub">4.5. Временная несогласованность (Кидланд–Прескотт, Барро–Гордон)</h4>
+      <div class="prose">
+        <ul>
+          <li>ЦБ хочет снизить безработицу ниже $u_n$, поэтому у него есть стимул к инфляционному сюрпризу.</li>
+          <li>Рациональные агенты это предвидят и закладывают в ожидания.</li>
+          <li>В равновесии $u = u_n$, но инфляция выше оптимальной. Это <strong>инфляционное смещение</strong>.</li>
+        </ul>
+      </div>
+      <div class="prose"><p>Способы решения:</p></div>
+      <div class="pill-row">
+        <span class="pill">правила вместо дискреции</span>
+        <span class="pill">консервативный центральный банкир (Рогофф)</span>
+        <span class="pill">репутация</span>
+        <span class="pill">таргетирование инфляции</span>
+      </div>
+
+      <h4 class="subsub">4.6. Стоимость дезинфляции</h4>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ожидания</th><th>Стоимость снижения инфляции</th></tr></thead>
+          <tbody>
+            <tr><td>Адаптивные</td><td>Коэффициент потерь (sacrifice ratio) больше нуля. Снижение инфляции требует периода высокой безработицы.</td></tr>
+            <tr><td>Рациональные и ЦБ пользуется доверием</td><td>Дезинфляция почти бесплатна. Оправдан «холодный душ» (cold turkey).</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4 class="subsub">4.7. Новая кейнсианская модель (DSGE)</h4>
+      <div class="prose"><p>Новая кейнсианская кривая Филлипса:</p></div>
+      <div class="eq-box">$$\pi_t = \beta E_t \pi_{t+1} + \kappa x_t$$</div>
+      <div class="prose"><p>Динамическая IS-кривая:</p></div>
+      <div class="eq-box">$$x_t = E_t x_{t+1} - \sigma\left(i_t - E_t\pi_{t+1} - r^n_t\right)$$</div>
+      <div class="prose"><p>Здесь $x_t$ — разрыв выпуска. Текущая инфляция зависит от <strong>ожидаемой будущей</strong>, а не от прошлой. Поэтому управление ожиданиями становится главным каналом политики (forward guidance).</p></div>
+
+      <h4 class="subsub">4.8. Другие модели с рациональными ожиданиями</h4>
+      <div class="prose">
+        <ul>
+          <li><strong>Модель Дорнбуша (overshooting).</strong> Валютный курс в краткосрочном периоде «перелетает» свой долгосрочный уровень.</li>
+          <li><strong>Модель потребления Холла (1978).</strong> Потребление следует случайному блужданию: $C_{t+1} = C_t + \varepsilon_{t+1}$. Прошлые переменные не помогают прогнозировать изменение потребления.</li>
+          <li><strong>Гипотеза эффективного рынка.</strong> Цены активов отражают всю доступную информацию.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 05 ============ -->
+    <section class="sec" id="perfect-foresight">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Предельный случай</p>
+        <h2 class="sec-title">Совершенное предвидение</h2>
+      </div>
+      <div class="eq-box">$$\pi^e_t = \pi_t$$</div>
+      <div class="prose"><p>Это частный случай рациональных ожиданий без неопределённости. Используется в детерминированных моделях: модель Рамсея, OLG (Даймонд), модель Сидрауского.</p></div>
+    </section>
+
+    <!-- ============ 06 ============ -->
+    <section class="sec" id="modern">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>За пределами РО</p>
+        <h2 class="sec-title">Современные расширения</h2>
+      </div>
+      <div class="prose">
+        <ul>
+          <li><strong>Адаптивное обучение (Эванс–Хонкапохья).</strong> Агенты оценивают модель МНК и обновляют коэффициенты. Проверяется, сходятся ли такие ожидания к рациональным (E-стабильность).</li>
+          <li><strong>Липкая информация (Мэнкью–Райс).</strong> Только часть агентов обновляет информацию в каждом периоде.</li>
+          <li><strong>Заякоренные ожидания.</strong> Ожидания привязаны к таргету ЦБ и слабо реагируют на текущие шоки.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 07 ============ -->
+    <section class="sec" id="summary-table">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Итог</p>
+        <h2 class="sec-title">Сводная таблица</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Тип</th><th>Формула</th><th>Систематические ошибки</th><th>Ключевые модели</th><th>Вывод для политики</th></tr></thead>
+          <tbody>
+            <tr><td>Статические</td><td>$\pi^e_t = \pi_{t-1}$</td><td>Да</td><td>Cobweb, акселерационистская кривая Филлипса</td><td>Эффект в краткосрочном периоде, инфляция ускоряется</td></tr>
+            <tr><td>Адаптивные</td><td>$\pi^e_t = \pi^e_{t-1} + \lambda(\pi_{t-1} - \pi^e_{t-1})$</td><td>Да, при тренде: $g/\lambda$</td><td>Каган, Фридман–Фелпс, AD-AS</td><td>Эффект в краткосрочном периоде, нейтральность в долгосрочном, дезинфляция дорогая</td></tr>
+            <tr><td>Экстраполятивные</td><td>$\pi^e_t = \pi_{t-1} + \beta(\pi_{t-1} - \pi_{t-2})$</td><td>Да</td><td>Пузыри, поведенческие финансы</td><td>Самоусиливающаяся динамика</td></tr>
+            <tr><td>Рациональные</td><td>$E[\pi_t \mid \Omega_{t-1}]$</td><td>Нет</td><td>Лукас, Сарджент–Уоллес, Барро–Гордон, NK, Дорнбуш, Холл</td><td>Работают только сюрпризы, критичны доверие и репутация ЦБ</td></tr>
+            <tr><td>Совершенное предвидение</td><td>$\pi^e_t = \pi_t$</td><td>Ошибок нет</td><td>Рамсей, OLG, Сидрауский</td><td>Детерминированная динамика</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Литература</h3>
+      <ul class="lit-list">
+        <li><span class="idx">01</span>Muth, J. F. (1961) · <em>Rational Expectations and the Theory of Price Movements</em> · Econometrica</li>
+        <li><span class="idx">02</span>Cagan, P. (1956) · <em>The Monetary Dynamics of Hyperinflation</em></li>
+        <li><span class="idx">03</span>Friedman, M. (1968) · <em>The Role of Monetary Policy</em> · AER; Phelps, E. (1967)</li>
+        <li><span class="idx">04</span>Lucas, R. (1972, 1976) · <em>Expectations and the Neutrality of Money</em>; <em>Econometric Policy Evaluation: A Critique</em></li>
+        <li><span class="idx">05</span>Sargent, T., Wallace, N. (1975) · <em>«Rational» Expectations, the Optimal Monetary Instrument, and the Optimal Money Supply Rule</em> · JPE</li>
+        <li><span class="idx">06</span>Fischer, S. (1977); Taylor, J. (1980) · модели жёстких контрактов</li>
+        <li><span class="idx">07</span>Kydland, F., Prescott, E. (1977) · <em>Rules Rather than Discretion</em>; Barro, R., Gordon, D. (1983)</li>
+        <li><span class="idx">08</span>Rogoff, K. (1985) · <em>The Optimal Degree of Commitment to an Intermediate Monetary Target</em></li>
+        <li><span class="idx">09</span>Hall, R. (1978) · <em>Stochastic Implications of the Life Cycle-Permanent Income Hypothesis</em> · JPE</li>
+        <li><span class="idx">10</span>Dornbusch, R. (1976) · <em>Expectations and Exchange Rate Dynamics</em> · JPE</li>
+        <li><span class="idx">11</span>Evans, G., Honkapohja, S. · адаптивное обучение; Mankiw, G., Reis, R. · липкая информация</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект · Ожидания в макроэкономике · Кривая Филлипса и политика стабилизации</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Инвестиционная ловушка — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#f6f2e9;
+      --surface:#ffffff;
+      --surface-2:#efe7d4;
+      --ink:#232019;
+      --ink-soft:#6b6353;
+      --ink-faint:#9a927e;
+      --accent:#2f5590;
+      --accent-strong:#1f3d66;
+      --accent-soft:#dde9e8;
+      --accent-2:#a8703a;
+      --accent-2-soft:#f3e3cd;
+      --accent-3:#3f7d5c;
+      --accent-3-soft:#e1efe4;
+      --bad:#a5432c;
+      --bad-soft:#f6e2da;
+      --rule:#ddd2b8;
+      --shadow: 0 1px 2px rgba(35,32,25,0.06), 0 6px 20px -8px rgba(35,32,25,0.15);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent-2);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.result .mark{ color:var(--accent-2); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.fact .mark{ color:var(--accent-3); }
+    .callout.warn{ border-color:color-mix(in srgb, var(--bad) 40%, transparent); background:var(--bad-soft); }
+    .callout.warn .mark{ color:var(--bad); }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    td.num{font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums;}
+    th.num{text-align:right;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:700px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/economics.html">← Раздел «Экономика»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Макроэкономика · IS-LM</p>
+      <h1 class="title">Инвестиционная ловушка</h1>
+      <p class="subtitle">Ловушка ликвидности рвёт первое звено трансмиссии «деньги → ставка». Инвестиционная ловушка рвёт второе: «ставка → инвестиции». Итог для политики тот же — денежная политика бессильна, — но механизм и диаграмма другие.</p>
+      <div class="meta-row">
+        <span>Макроэкономика</span>
+        <span>Кейнсианская модель IS-LM</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#what-breaks"><span class="n">01</span>Что ломается</a>
+      <a href="#why"><span class="n">02</span>Почему это возможно</a>
+      <a href="#formal"><span class="n">03</span>Вертикальная IS</a>
+      <a href="#is-lm"><span class="n">04</span>Диаграмма IS-LM</a>
+      <a href="#vs-liquidity"><span class="n">05</span>Vs ловушка ликвидности</a>
+      <a href="#examples"><span class="n">06</span>Примеры</a>
+      <a href="#summary"><span class="n">07</span>Итог и определение</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 ============ -->
+    <section class="sec" id="what-breaks">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Диагноз</p>
+        <h2 class="sec-title">Что ломается</h2>
+      </div>
+      <div class="prose"><p>Стандартная трансмиссия денежной политики — это цепочка из двух звеньев:</p></div>
+      <figure class="chart">
+        <p class="chart-title">Где именно рвётся цепочка</p>
+        <svg viewBox="0 0 480 110" role="img" aria-label="Цепочка из блоков M растёт стрелка i падает стрелка I растёт стрелка Y растёт. Первое звено M в i помечено как рабочее и связано с ловушкой ликвидности. Второе звено i в I помечено красным крестом и подписано инвестиционная ловушка — именно здесь цепочка обрывается">
+          <g font-family="IBM Plex Mono, monospace" font-size="13" text-anchor="middle">
+            <rect x="10" y="35" width="80" height="34" rx="8" fill="var(--accent-3-soft)" stroke="var(--accent-3)"/>
+            <text x="50" y="57" fill="var(--accent-3)">M ↑</text>
+            <path d="M92,52 L112,52" stroke="var(--accent-3)" stroke-width="1.6" marker-end="url(#itArrowOk)"/>
+            <rect x="114" y="35" width="80" height="34" rx="8" fill="var(--accent-3-soft)" stroke="var(--accent-3)"/>
+            <text x="154" y="57" fill="var(--accent-3)">i ↓</text>
+            <path d="M196,52 L224,52" stroke="var(--bad)" stroke-width="2" stroke-dasharray="3 3"/>
+            <text x="210" y="30" text-anchor="middle" class="axis-label" fill="var(--bad)">✕ здесь разрыв</text>
+            <rect x="226" y="35" width="80" height="34" rx="8" fill="var(--bad-soft)" stroke="var(--bad)"/>
+            <text x="266" y="57" fill="var(--bad)">I (не растёт)</text>
+            <path d="M308,52 L328,52" stroke="var(--ink-faint)" stroke-width="1.6" stroke-dasharray="2 2"/>
+            <rect x="330" y="35" width="70" height="34" rx="8" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <text x="365" y="57" fill="var(--ink-faint)">AD →</text>
+            <path d="M402,52 L422,52" stroke="var(--ink-faint)" stroke-width="1.6" stroke-dasharray="2 2"/>
+            <rect x="424" y="35" width="50" height="34" rx="8" fill="var(--surface-2)" stroke="var(--rule)"/>
+            <text x="449" y="57" fill="var(--ink-faint)">Y →</text>
+          </g>
+          <defs><marker id="itArrowOk" markerWidth="7" markerHeight="7" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="var(--accent-3)"/></marker></defs>
+        </svg>
+        <figcaption>Первое звено ($M\to i$) работает нормально — ставка падает. Но снижение ставки не побуждает фирмы больше инвестировать: второе звено ($i \to I$) не работает.</figcaption>
+      </figure>
+      <div class="callout warn">
+        <span class="mark">!</span>
+        <p><strong>Инвестиционная ловушка</strong> — ситуация, когда инвестиции $I$ перестают реагировать на снижение процентной ставки: $I$ не зависит (или почти не зависит) от $i$.</p>
+      </div>
+    </section>
+
+    <!-- ============ 02 ============ -->
+    <section class="sec" id="why">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Экономический смысл</p>
+        <h2 class="sec-title">Почему инвестиции могут игнорировать ставку</h2>
+      </div>
+      <div class="prose"><p>Решение фирмы об инвестициях зависит не только от стоимости заёмных денег, но и от ожидаемой отдачи на капитал. В нормальных условиях снижение $i$ делает больше проектов рентабельными — кривая инвестиций убывает по ставке. Но при определённых условиях эта связь рвётся:</p></div>
+      <div class="prose">
+        <ul>
+          <li><strong>Глубокий пессимизм по поводу будущего спроса.</strong> Если фирмы не верят, что продукцию удастся продать, дешёвый кредит не помогает — заём под 0% на завод, которому некому продавать, всё равно убыточен.</li>
+          <li><strong>Избыток уже установленных мощностей.</strong> После инвестиционного бума заводы и так недозагружены; расширять их при низком спросе бессмысленно, какой бы ни была ставка.</li>
+          <li><strong>Кредитные ограничения (credit crunch).</strong> Банки не хотят кредитовать даже платёжеспособные фирмы из-за собственных проблем с балансом — низкая ставка ЦБ не доходит до конечного заёмщика.</li>
+          <li><strong>Высокая неопределённость.</strong> Когда будущее крайне непредсказуемо, фирмы предпочитают ждать («опцион на ожидание» ценнее немедленных инвестиций), независимо от стоимости капитала.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Формально это означает, что чувствительность инвестиций к ставке $b\to 0$: график инвестиций как функции ставки становится почти вертикальным (инвестиции постоянны при любой $i$).</p>
+      </div>
+    </section>
+
+    <!-- ============ 03 ============ -->
+    <section class="sec" id="formal">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Формально</p>
+        <h2 class="sec-title">Вертикальная IS-кривая</h2>
+      </div>
+      <div class="prose"><p>Та же кейнсианская IS, что и в ловушке ликвидности:</p></div>
+      <div class="eq-box">
+        $$Y = \alpha\,(A_0 - b\,i), \qquad \alpha = \frac{1}{1-c}$$
+        <span class="eq-note">$\alpha$ — простой кейнсианский мультипликатор; $A_0$ — автономные расходы; $b$ — чувствительность инвестиций к ставке.</span>
+      </div>
+      <div class="prose"><p>При $b \to 0$ член $b\,i$ исчезает:</p></div>
+      <div class="formula-box">
+        <div class="eq">Y = αA₀ — не зависит от i</div>
+        <div class="formula-legend"><div class="item">IS-кривая вырождается в вертикальную прямую при $Y=\alpha A_0$: каким бы ни было $i$, выпуск, уравновешивающий товарный рынок, один и тот же.</div></div>
+      </div>
+      <div class="prose"><p>Стандартная LM-кривая при этом не меняется:</p></div>
+      <div class="eq-box">$$i = \frac{kY - M/P}{h}$$</div>
+      <div class="prose"><p>Подставив вертикальную IS, равновесный $Y$ находится сразу — уравнение LM лишь определяет, при какой ставке $i$ денежный рынок будет в равновесии при этом $Y$, но не влияет на сам $Y$:</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td>Мультипликатор денежной политики</td><td>$\dfrac{dY}{d(M/P)} = 0$ при $b=0$ → денежная политика полностью бессильна</td></tr>
+            <tr><td>Мультипликатор фискальной политики</td><td>$\dfrac{dY}{dG} = \alpha$ → фискальная политика работает на полную мощь, вытеснения нет</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 04 ============ -->
+    <section class="sec" id="is-lm">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Графически</p>
+        <h2 class="sec-title">Диаграмма IS-LM</h2>
+      </div>
+      <figure class="chart">
+        <p class="chart-title">Вертикальная IS: монетарная политика не двигает Y</p>
+        <svg viewBox="0 0 460 240" role="img" aria-label="Кривая IS строго вертикальна. Кривая LM восходящая. Сдвиг LM вправо (рост денежной массы) меняет точку пересечения только по вертикали — ставка падает, но выпуск Y остаётся тем же самым, потому что определяется исключительно положением вертикальной IS. Сдвиг IS вправо (фискальная экспансия) двигает выпуск на всю величину сдвига">
+          <line x1="40" y1="210" x2="440" y2="210" stroke="var(--rule)"/>
+          <line x1="40" y1="210" x2="40" y2="20" stroke="var(--rule)"/>
+          <line x1="220" y1="200" x2="220" y2="30" stroke="var(--accent)" stroke-width="2.2"/>
+          <text x="228" y="45" class="axis-label" fill="var(--accent)">IS (b→0)</text>
+          <path d="M60,190 C140,140 200,100 260,55 C300,25 340,15 400,10" fill="none" stroke="var(--accent-2)" stroke-width="2"/>
+          <text x="330" y="55" class="axis-label" fill="var(--accent-2)">LM</text>
+          <path d="M60,140 C140,100 200,70 260,40 C300,20 340,12 400,8" fill="none" stroke="var(--accent-2)" stroke-width="2" stroke-dasharray="4 3" opacity="0.7"/>
+          <text x="300" y="95" class="axis-label" fill="var(--accent-2)">LM' (рост M)</text>
+          <circle cx="220" cy="120" r="4.5" fill="var(--ink)"/>
+          <circle cx="220" cy="80" r="4.5" fill="var(--ink)"/>
+          <path d="M220,110 L220,90" stroke="var(--bad)" stroke-width="2" marker-end="url(#itArrow2)"/>
+          <defs><marker id="itArrow2" markerWidth="8" markerHeight="8" refX="3" refY="6" orient="auto"><path d="M0,0 L6,0 L3,7 Z" fill="var(--bad)"/></marker></defs>
+          <text x="230" y="105" class="axis-label" fill="var(--bad)">ставка падает, Y тот же</text>
+          <text x="10" y="24" class="axis-label">i</text>
+          <text x="440" y="226" text-anchor="end" class="axis-label">Y</text>
+        </svg>
+        <figcaption>Рост $M$ сдвигает LM вправо-вверх по графику (при том же $Y$ ставка ниже), но точка пересечения с вертикальной IS остаётся на той же вертикали — равновесный $Y$ не меняется. Двигать $Y$ может только сдвиг самой IS (например, фискальная экспансия).</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 05 ============ -->
+    <section class="sec" id="vs-liquidity">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Сравнение</p>
+        <h2 class="sec-title">Инвестиционная ловушка vs ловушка ликвидности</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>Ловушка ликвидности</th><th>Инвестиционная ловушка</th></tr></thead>
+          <tbody>
+            <tr><td>Что ломается</td><td>$M\uparrow \to i\downarrow$ (1-е звено)</td><td>$i\downarrow \to I\uparrow$ (2-е звено)</td></tr>
+            <tr><td>Параметр</td><td>$h \to \infty$</td><td>$b \to 0$</td></tr>
+            <tr><td>Какая кривая особая</td><td>LM горизонтальна</td><td>IS вертикальна</td></tr>
+            <tr><td>Ставка при монетарной экспансии</td><td>не падает (застряла)</td><td>падает, но это не помогает</td></tr>
+            <tr><td>Пример</td><td>ставка у нуля, деньги оседают</td><td>кризис, фирмы не инвестируют при любой ставке</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Общее и разное</span>
+        <p>В обоих случаях вывод для политики один: <strong>денежная политика бессильна, фискальная — работает на полную мощь</strong>. Но диагностика разная: в ловушке ликвидности ставка не реагирует на рост $M$; в инвестиционной ловушке ставка реагирует нормально, просто на инвестиции это не влияет. На практике эти два механизма нередко действуют одновременно в глубоких кризисах (Великая депрессия, 2008 год).</p>
+      </div>
+    </section>
+
+    <!-- ============ 06 ============ -->
+    <section class="sec" id="examples">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Эмпирика</p>
+        <h2 class="sec-title">Примеры</h2>
+      </div>
+      <div class="prose">
+        <ul>
+          <li><strong>Великая депрессия (1930-е, США).</strong> Кейнс отмечал, что даже минимальные ставки не могли убедить бизнес инвестировать на фоне краха ожиданий и волны банкротств — «предельная эффективность капитала» рухнула сильнее, чем упала ставка.</li>
+          <li><strong>Мировой финансовый кризис 2008 года.</strong> Несмотря на ставки ЦБ, близкие к нулю, фирмы сокращали инвестиции и наращивали денежные резервы («balance sheet recession» по Ричарду Ку) — приоритетом стало погашение долгов, а не новые проекты.</li>
+          <li><strong>Пандемийный шок 2020 года.</strong> Экстремальная неопределённость по поводу будущего спроса временно парализовала инвестиционные решения независимо от рекордно низких ставок.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 07 ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Итог</p>
+        <h2 class="sec-title">Определение для экзамена</h2>
+      </div>
+      <div class="callout result">
+        <span class="mark">Определение</span>
+        <p><strong>Инвестиционная ловушка</strong> — ситуация, когда инвестиционный спрос теряет чувствительность к процентной ставке ($b\to 0$), из-за чего кривая IS становится вертикальной. Денежная политика в этом случае не может повлиять на выпуск, даже если она успешно снижает ставку: второе звено трансмиссионного механизма («ставка → инвестиции») не работает. Как и в ловушке ликвидности, единственный работающий инструмент стабилизации в этой ситуации — фискальная политика.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект · Инвестиционная ловушка · Кейнсианская модель IS-LM</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>

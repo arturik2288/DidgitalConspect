@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Теория эндогенного роста — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#f6f2e9;
+      --surface:#ffffff;
+      --surface-2:#efe7d4;
+      --ink:#232019;
+      --ink-soft:#6b6353;
+      --ink-faint:#9a927e;
+      --accent:#2f5590;
+      --accent-strong:#1f3d66;
+      --accent-soft:#dde9e8;
+      --accent-2:#a8703a;
+      --accent-2-soft:#f3e3cd;
+      --accent-3:#3f7d5c;
+      --accent-3-soft:#e1efe4;
+      --bad:#a5432c;
+      --bad-soft:#f6e2da;
+      --rule:#ddd2b8;
+      --shadow: 0 1px 2px rgba(35,32,25,0.06), 0 6px 20px -8px rgba(35,32,25,0.15);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent-2);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:900px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:7px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:26px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:68ch;
+    }
+    .callout .mark{
+      font-family:'Fraunces',serif; font-weight:700; font-size:19px; color:var(--accent);
+      line-height:1; flex:none;
+    }
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{ border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft); }
+    .callout.result .mark{ color:var(--accent-2); }
+    .callout.fact{ border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft); }
+    .callout.fact .mark{ color:var(--accent-3); }
+    .callout.warn{ border-color:color-mix(in srgb, var(--bad) 40%, transparent); background:var(--bad-soft); }
+    .callout.warn .mark{ color:var(--bad); }
+
+    .formula-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+      box-shadow:var(--shadow); padding:20px 24px; margin:20px 0;
+      display:flex; flex-wrap:wrap; gap:20px; align-items:center; justify-content:space-between;
+    }
+    .formula-box .eq{font-family:'IBM Plex Mono',monospace; font-size:16px; color:var(--ink); font-weight:500;}
+    .formula-legend{display:flex; gap:16px; flex-wrap:wrap;}
+    .formula-legend .item{font-size:12.5px; color:var(--ink-faint); max-width:16em;}
+    .formula-legend .item b{display:block; color:var(--ink); font-family:'IBM Plex Mono',monospace; font-size:14px;}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0;
+      overflow-x:auto;
+    }
+    .eq-box.system{ font-size:0.94rem; }
+    .eq-note{ display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px; }
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{ padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top; }
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    td.sym{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); white-space:nowrap;}
+    td.num{font-family:'IBM Plex Mono',monospace; text-align:right; font-variant-numeric:tabular-nums;}
+    th.num{text-align:right;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:480px;}
+
+    .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin:16px 0;}
+    .pill{
+      font-size:12.5px; font-family:'IBM Plex Mono',monospace; font-weight:500;
+      padding:5px 11px; border-radius:999px; background:var(--surface); color:var(--ink-soft);
+      border:1px solid var(--rule);
+    }
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow);
+    }
+    figure svg{display:block; max-width:100%; height:auto;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    figcaption b{color:var(--ink-soft);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin-bottom:10px;}
+    .fig-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+    @media (max-width:700px){ .fig-grid{grid-template-columns:1fr;} }
+
+    .axis-label{font-size:12px; fill:var(--ink-faint); font-family:'IBM Plex Mono',monospace;}
+    .curve-label{font-size:12px; font-family:'IBM Plex Mono',monospace; font-weight:700;}
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/economics.html">← Раздел «Экономика»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Теория экономического роста · Продвинутый уровень</p>
+      <h1 class="title">Теория эндогенного роста</h1>
+      <p class="subtitle">Как объяснить сам технический прогресс, а не просто допустить его: модели Ромера первого и второго поколения, горизонтальные инновации и рынок исследователей, шумпетерианское созидательное разрушение, эффект захвата рынка и эмпирика провалов рынка при производстве инноваций.</p>
+      <div class="meta-row">
+        <span>Д.А. Веселов, НИУ ВШЭ</span>
+        <span>Введение в теорию эндогенного роста</span>
+        <span>Моделирование технического прогресса</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#motivation"><span class="n">01</span>От экзогенного к эндогенному</a>
+      <a href="#tech-good"><span class="n">02</span>Технологии как благо</a>
+      <a href="#romer1"><span class="n">03</span>Модель Ромера (I поколение)</a>
+      <a href="#jones"><span class="n">04</span>Критика Джонса</a>
+      <a href="#second-gen"><span class="n">05</span>Модели II поколения</a>
+      <a href="#puzzle"><span class="n">06</span>Загадка роста населения</a>
+      <a href="#simple-summary"><span class="n">07</span>Итоги простой модели</a>
+      <a href="#horizontal"><span class="n">08</span>Горизонтальные инновации</a>
+      <a href="#research-market"><span class="n">09</span>Рынок исследователей</a>
+      <a href="#industrial-rev"><span class="n">10</span>Промышленная революция</a>
+      <a href="#schumpeter"><span class="n">11</span>Шумпетерианский рост</a>
+      <a href="#incumbent"><span class="n">12</span>Укоренившиеся и новички</a>
+      <a href="#empirics"><span class="n">13</span>Эмпирика</a>
+      <a href="#summary"><span class="n">14</span>Итоги</a>
+      <a href="#refs"><span class="n">15</span>Литература</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 МОТИВАЦИЯ ============ -->
+    <section class="sec" id="motivation">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Постановка задачи</p>
+        <h2 class="sec-title">От экзогенного к эндогенному росту</h2>
+      </div>
+      <div class="prose">
+        <p>В модели Солоу темп роста дохода на душу населения на траектории сбалансированного роста совпадает с темпом прироста остатка Солоу $g_A$ — но сама динамика $A(t)$ <strong>не объясняется, а лишь допускается</strong> (экзогенный технический прогресс).</p>
+        <p>Модели эндогенного роста ставят задачу объяснить $g_A(t)=\dot A/A$ <em>внутри</em> модели, интерпретируя $A(t)$ как уровень технологий или уровень накопленных знаний — то есть как результат сознательных решений экономических агентов (фирм, исследователей), а не как внешний параметр.</p>
+      </div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Ключевой вопрос раздела: почему в модели Солоу «остаток» вообще растёт, кто и зачем создаёт новые технологии, и как рыночная структура (стимулы, конкуренция, патенты) влияет на скорость этого процесса.</p>
+      </div>
+    </section>
+
+    <!-- ============ 02 ТЕХНОЛОГИИ КАК БЛАГО ============ -->
+    <section class="sec" id="tech-good">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Природа технологий</p>
+        <h2 class="sec-title">Технологии как экономическое благо</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Инновации продукта и процесса</strong>: новый продукт (<em>product innovation</em>) — против нового, более дешёвого способа производства уже существующего товара (<em>process innovation</em>). Инновация в широком смысле — создание новой технологии.</p>
+        <p>Технологии в существенной степени обладают свойствами <strong>общественного блага</strong>:</p>
+        <ul>
+          <li><strong>неконкурентность в использовании</strong> — применение технологии одним индивидом не мешает другому её использовать (в отличие от обычного капитала: один и тот же станок нельзя использовать в двух местах одновременно, а формулу — можно);</li>
+          <li><strong>неисключаемость из потребления</strong> — как только технология создана, ограничить доступ к ней технически трудно или невозможно (идею легко скопировать, в отличие от физического товара).</li>
+        </ul>
+        <p>Отсюда — ключевая экономическая проблема: если технология неконкурентна и неисключаема, у частных агентов <strong>слабые стимулы</strong> инвестировать в её создание — плоды исследований достаются не только инвестору, но и конкурентам, которые могут её скопировать бесплатно (проблема безбилетника при финансировании R&D).</p>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Пример</span>
+        <p>Новый фильм неконкурентен (просмотр одним не мешает просмотру другим), но исключаем (платный доступ). Алгебраическая формула — и неконкурентна, и неисключаема: классическое общественное благо. Письменный стол — обычный частный товар: и конкурентен, и исключаем.</p>
+      </div>
+
+      <h3 class="sub">Горизонтальные и вертикальные инновации</h3>
+      <div class="prose">
+        <p>Два разных способа, которыми технический прогресс повышает благосостояние:</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Горизонтальные</strong></td><td>увеличение числа разновидностей (разнообразия) производимых благ. Пример: новая марка шоколада — не заменяет старые, а добавляется к ассортименту.</td></tr>
+            <tr><td><strong>Вертикальные</strong></td><td>рост качества товаров либо снижение издержек их производства. Пример: более безопасные АЭС нового поколения вытесняют старые технологии генерации.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Это разделение задаёт структуру всего дальнейшего изложения: раздел 08 строит модель роста на горизонтальных инновациях (Ромер, 1990), раздел 11 — на вертикальных (шумпетерианское созидательное разрушение).</p></div>
+    </section>
+
+    <!-- ============ 03 МОДЕЛЬ РОМЕРА I ПОКОЛЕНИЯ ============ -->
+    <section class="sec" id="romer1">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Первая формализация</p>
+        <h2 class="sec-title">Простейшая модель эндогенного роста Ромера (первое поколение)</h2>
+      </div>
+      <div class="prose"><p>Единственный товар производится по функции:</p></div>
+      <div class="eq-box">$$Y=K(t)^\alpha\big(A(t)\cdot L_Y(t)\big)^{1-\alpha}$$</div>
+      <div class="prose"><p>где $L_Y$ — занятость в производственном секторе. Все занятые делятся между производством и сектором исследований и разработок (R&D):</p></div>
+      <div class="eq-box">$$L(t)=L_R(t)+L_Y(t)$$</div>
+
+      <h3 class="sub">Сектор R&D</h3>
+      <div class="prose"><p>Динамика знаний зависит от текущего уровня знаний и занятости в R&D:</p></div>
+      <div class="eq-box">$$\dot A(t)=A(t)^\theta L_R(t)^\varphi \tag{1}$$</div>
+      <div class="prose"><p>Два ключевых эффекта, заложенных в параметры $\theta$ и $\varphi$:</p></div>
+      <ul class="prose">
+        <li><strong>«Наступание на пятки» (stepping on toes)</strong>: больше исследователей — больше открытий, но и больше дублирования усилий; $0<\varphi\le 1$.</li>
+        <li><strong>«Опора на плечи титанов» (standing on shoulders)</strong>: новые технологии создаются на основе уже существующих; $\theta>0$ — может быть $>1$, $=1$ или $<1$ в зависимости от знака внешнего эффекта накопленных знаний на продуктивность будущих исследований.</li>
+      </ul>
+      <div class="prose"><p>Темп технического прогресса — разделив (1) на $A(t)$:</p></div>
+      <div class="eq-box">$$g_A(t)=A(t)^{\theta-1}L_R(t)^\varphi$$</div>
+
+      <h3 class="sub">Остальные предпосылки</h3>
+      <div class="prose"><p>Совпадают с моделью Солоу: $\dot K(t)=sY(t)-\delta K(t)$; норма сбережений $s$, темп роста населения $n$ и норма амортизации $\delta$ — постоянные во времени.</p></div>
+
+      <h3 class="sub">Динамика в интенсивной форме и BGP</h3>
+      <div class="eq-box">$$\frac{\dot{\tilde k}(t)}{\tilde k(t)}=s\,\tilde k(t)^{\alpha-1}-(\delta+n+g)$$</div>
+      <div class="prose"><p>где $\tilde k=K/(A L_Y)$ — капитал на единицу эффективного труда в производственном секторе. На траектории сбалансированного роста доля занятых в каждом секторе постоянна, и:</p></div>
+      <div class="eq-box">$$g_K=g_Y=g_C=g_A+n$$</div>
+      <div class="callout">
+        <span class="mark">!</span>
+        <p>Для существования BGP темп технического прогресса $g_A$ должен быть постоянным во времени — иначе экономика никогда не выйдет на траекторию с устойчивыми пропорциональными темпами роста всех переменных.</p>
+      </div>
+
+      <h3 class="sub">Условие существования BGP</h3>
+      <div class="prose"><p>Рассмотрим случай $n=0$ (постоянное население, $L=\text{const}$). Прологарифмировав $g_A(t)=A(t)^{\theta-1}L_R(t)^\varphi$ и продифференцировав по времени:</p></div>
+      <div class="eq-box">$$\dot g_A/g_A=(\theta-1)g_A+\varphi g_{L_R}=0 \tag{2}$$</div>
+      <div class="prose"><p>Так как в стационарной по составу занятости экономике $L_R=\text{const}\Rightarrow g_{L_R}=0$, условие постоянных и положительных темпов роста в (2) выполняется <strong>только при</strong>:</p></div>
+      <div class="formula-box">
+        <div class="eq">θ = 1</div>
+        <div class="formula-legend"><div class="item">Ровно единичная эластичность продуктивности исследований по накопленному запасу знаний — «нейтральная» опора на плечи титанов, без усиления или ослабления во времени.</div></div>
+      </div>
+
+      <h3 class="sub">Свойства моделей первого поколения</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td>1. Влияние политики на рост</td><td><strong>Экономическая политика влияет на долгосрочные темпы роста</strong>: увеличение числа исследователей $L_R$ (например, субсидиями на R&D) повышает $g_A^*$ на BGP навсегда — в отличие от модели Солоу, где рост $s$ даёт лишь временный эффект.</td></tr>
+            <tr><td>2. Эффект масштаба</td><td>Численность рабочей силы напрямую влияет на долгосрочный темп роста. Правдоподобно для доиндустриальной эпохи в целом по миру (Kremer, 1993), но, как показано ниже, эмпирически <strong>не подтверждается</strong> для второй половины XX века.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 04 КРИТИКА ДЖОНСА ============ -->
+    <section class="sec" id="jones">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Проверка эффекта масштаба</p>
+        <h2 class="sec-title">Критика Джонса (Jones, 1995, QJE)</h2>
+      </div>
+      <div class="prose">
+        <p>Число исследователей в развитых странах <strong>выросло втрое</strong> с 1960 по 1990 год — устойчивый рост наблюдался во Франции, Германии, Японии, США. Модель первого поколения (при $\theta=1$) однозначно предсказывает: рост числа исследователей $\Rightarrow$ рост долгосрочного темпа $g_A^*$.</p>
+        <p>Однако фактические темпы роста остатка Солоу (TFP) за тот же период <strong>не показали устойчивого роста</strong> — колебались вокруг постоянного среднего значения без выраженного тренда.</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Число исследователей vs темп роста TFP, развитые страны, 1960–1990</p>
+        <svg viewBox="0 0 460 210" role="img" aria-label="Две линии на одном графике: число исследователей устойчиво растёт по прямой линии втрое за тридцать лет, тогда как темп роста совокупной факторной производительности колеблется волнообразно вокруг постоянного среднего уровня без явного тренда роста или падения">
+          <line x1="40" y1="180" x2="440" y2="180" stroke="var(--rule)"/>
+          <line x1="40" y1="180" x2="40" y2="20" stroke="var(--rule)"/>
+          <path d="M40,165 C140,135 260,90 430,35" fill="none" stroke="var(--accent)" stroke-width="2.2"/>
+          <path d="M40,110 C90,95 120,130 160,115 C200,100 230,125 270,108 C310,92 340,118 380,105 C405,96 420,112 430,108" fill="none" stroke="var(--accent-2)" stroke-width="2.2"/>
+          <line x1="40" y1="108" x2="430" y2="108" stroke="var(--accent-2)" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+          <text x="330" y="55" class="axis-label" fill="var(--accent)">число исследователей (×3)</text>
+          <text x="270" y="145" class="axis-label" fill="var(--accent-2)">темп роста TFP (без тренда)</text>
+          <text x="40" y="196" class="axis-label">1960</text>
+          <text x="415" y="196" class="axis-label">1990</text>
+        </svg>
+        <figcaption>Предсказание модели первого поколения (рост $L_R$ $\Rightarrow$ рост $g_A^*$) не подтверждается: рост числа исследователей не сопровождался ростом темпов TFP.</figcaption>
+      </figure>
+
+      <div class="callout warn">
+        <span class="mark">Вывод Джонса</span>
+        <p>Эффект масштаба, предсказываемый моделью первого поколения при $\theta=1$, <strong>противоречит эмпирическим данным</strong> для второй половины XX века. Это заставляет пересмотреть предпосылку $\theta=1$ — что и приводит к моделям второго поколения (раздел 05).</p>
+      </div>
+    </section>
+
+    <!-- ============ 05 МОДЕЛИ ВТОРОГО ПОКОЛЕНИЯ ============ -->
+    <section class="sec" id="second-gen">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Ответ на критику</p>
+        <h2 class="sec-title">Модели эндогенного роста второго поколения (semi-endogenous growth)</h2>
+      </div>
+      <div class="prose"><p>Если снять требование $\theta=1$ и допустить положительный рост населения $n>0$, на BGP $g_{L_R}=g_{L_Y}=g_L=n$, и из (2):</p></div>
+      <div class="eq-box">$$\dot g_A/g_A=(\theta-1)g_A+\varphi n$$</div>
+      <div class="prose"><p>При $\theta<1$ это уравнение имеет единственное глобально устойчивое стационарное состояние:</p></div>
+      <div class="formula-box">
+        <div class="eq">g_A* = φn / (1−θ)</div>
+        <div class="formula-legend"><div class="item">Долгосрочный темп технического прогресса определяется <strong>экзогенным</strong> темпом роста населения $n$, а не выбором политики.</div></div>
+      </div>
+      <div class="callout">
+        <span class="mark">Упражнение из лекции</span>
+        <p>Показать, что при $\theta\ge 1$ и $n>0$ BGP не существует: при $\theta\ge1$ положительная обратная связь знаний на прирост знаний не даёт темпу $g_A$ стабилизироваться — траектория либо расходится, либо никогда не выходит на постоянный темп.</p>
+      </div>
+
+      <h3 class="sub">Свойства моделей второго поколения</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td>1. Влияние политики</td><td><strong>Экономическая политика не влияет</strong> на долгосрочные темпы роста (кроме случая, когда она влияет на сам темп роста населения $n$).</td></tr>
+            <tr><td>2. Детерминанта роста</td><td>Долгосрочный темп роста ВВП на душу населения определяется темпом роста населения $n$ (через $g_A^*$, а на BGP $g_{Y/L}=g_A$).</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Эти модели называют также <strong>полу-эндогенными</strong>: долгосрочный рост снова определяется экзогенным параметром ($n$), как и в модели Солоу, — эндогенизирован лишь <em>механизм</em> роста, а не его конечная детерминанта.</p></div>
+    </section>
+
+    <!-- ============ 06 ЗАГАДКА ============ -->
+    <section class="sec" id="puzzle">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Проверка модели II поколения</p>
+        <h2 class="sec-title">Загадка взаимосвязи $g_L$ и $g_{Y/L}$</h2>
+      </div>
+      <h3 class="sub">Историческая корреляция</h3>
+      <div class="prose">
+        <p>Для всей доиндустриальной эпохи и в XIX веке (страны в процессе индустриализации) $\text{corr}(g_A,g_L)>0$:</p>
+        <ul>
+          <li>более высокая производительность труда вела к росту численности семьи в доиндустриальном обществе (Ashraf, Galor, 2011);</li>
+          <li>большая численность населения увеличивала число «созидающих мыслителей и изобретателей» (Kremer, 1993).</li>
+        </ul>
+      </div>
+
+      <h3 class="sub">Эмпирическая аномалия 1950–2000</h3>
+      <div class="prose"><p>Strulik, Prettner, Prskawetz (2013, <em>Journal of Economic Growth</em>): диаграмма «темп роста населения — темп роста TFP» по странам мира за 1950–2000 показывает <strong>отрицательную</strong> корреляцию. Страны G7 лежат в области умеренного роста населения и положительного, часто высокого, роста TFP; страны с самым высоким ростом населения показывают низкий, вплоть до отрицательного, рост TFP.</p></div>
+      <div class="callout warn">
+        <span class="mark">Противоречие</span>
+        <p>Это прямо противоречит предсказанию модели второго поколения: $g_A^*$ должен расти вместе с $n$, а эмпирически связь обратная.</p>
+      </div>
+
+      <h3 class="sub">Разрешение загадки: человеческий капитал</h3>
+      <div class="prose"><p>Важна не численность населения сама по себе, а численность <em>квалифицированного</em> населения — человеческий капитал:</p></div>
+      <div class="eq-box">$$g_A^*=\frac{\varphi(n+g_h)}{\theta-1}$$</div>
+      <div class="prose"><p>где $g_h$ — темп роста человеческого капитала. В развитых странах темп роста населения в XX веке замедлился, но с поправкой на уровень образования эффективный темп роста (человеческого) капитала труда <strong>ускорился</strong> — это восстанавливает согласованность модели с данными: снижение $n$ компенсируется ростом $g_h$.</p></div>
+    </section>
+
+    <!-- ============ 07 ИТОГИ ПРОСТОЙ МОДЕЛИ ============ -->
+    <section class="sec" id="simple-summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Промежуточный итог</p>
+        <h2 class="sec-title">Ограничения простейшей модели</h2>
+      </div>
+      <div class="prose">
+        <ul>
+          <li>Модель определяет динамику $A$ как функцию параметров (число исследователей, темп роста рабочей силы), но <strong>не описывает рыночную структуру</strong> — нет явных цен, конкуренции, стимулов к инновациям как таковых; уравнение (1) постулирует производственную функцию знаний «сверху», не выводя её из решений максимизирующих прибыль фирм.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <span class="mark">Открытые вопросы</span>
+        <p>Может ли технический прогресс существовать в <em>рыночной</em> экономике? Как рыночная структура влияет на технический прогресс? Выполняется ли аналог первой теоремы экономики благосостояния в динамическом контексте? Разделы 08–12 отвечают на эти вопросы, явно моделируя рынок технологий.</p>
+      </div>
+    </section>
+
+    <!-- ============ 08 ГОРИЗОНТАЛЬНЫЕ ИННОВАЦИИ ============ -->
+    <section class="sec" id="horizontal">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Явная рыночная структура</p>
+        <h2 class="sec-title">Модель горизонтальных инноваций (монополистическая конкуренция, Ромер 1990)</h2>
+      </div>
+
+      <h3 class="sub">Производственная функция конечного блага</h3>
+      <div class="eq-box">$$Y=L_Y^{1-\alpha}\sum_{i=1}^{N}x_i^{\alpha} \tag{3}$$</div>
+      <div class="prose"><p>где $Y$ — конечный продукт, $L_Y$ — занятость в его производстве, $N$ — число разновидностей промежуточных продуктов («видов капитала»), $x_i$ — количество промежуточного продукта $i$. Конечный продукт используется и для производства промежуточных товаров, и для потребления. Рынок конечного продукта и рынок труда — конкурентные; каждая разновидность промежуточного товара производится фирмой-монополистом (это её вознаграждение за создание новой разновидности).</p></div>
+
+      <h3 class="sub">Задача фирмы — производителя конечного продукта</h3>
+      <div class="eq-box">$$\max_{x_i,L_Y}\Big\{Y-wL_Y-\sum_i p_{x,i}x_i\Big\}$$</div>
+      <div class="prose"><p>Условия первого порядка:</p></div>
+      <div class="eq-box system">
+        $$w=F'_L=(1-\alpha)L_Y^{-\alpha}\sum_{i=1}^N x_i^\alpha \tag{4}$$
+        $$p_{x,i}=F'_{x_i}=\alpha x_i^{\alpha-1}L_Y^{1-\alpha} \tag{5}$$
+      </div>
+      <div class="callout">
+        <span class="mark">Упражнение из лекции</span>
+        <p>Показать, что $wL_Y=(1-\alpha)Y$ — прямое следствие теоремы Эйлера для однородной первой степени $Y$ по $(x_1,\dots,x_N,L_Y)$: умножив (4) на $L_Y$ и просуммировав $x_i\cdot(5)$ по $i$, получаем $wL_Y+\alpha Y=Y$, откуда $wL_Y=(1-\alpha)Y$.</p>
+      </div>
+
+      <h3 class="sub">Задача фирмы — производителя промежуточного продукта</h3>
+      <div class="prose"><p>Каждый товар $i$ производит фирма-монополист; одна единица $x_i$ требует одной единицы конечного продукта (аналог капитала в модели Солоу):</p></div>
+      <div class="eq-box">$$\max_{x_i}\{p_{x,i}x_i-x_i\}$$</div>
+      <div class="prose"><p>при функции спроса (5). Условие первого порядка даёт:</p></div>
+      <div class="eq-box">$$x_i^*=\alpha^{2/(1-\alpha)}L_Y \tag{6}$$</div>
+      <div class="prose"><p>Подставив в (5): $p_{x,i}=1/\alpha$ — постоянная монопольная наценка над предельными издержками (равными 1). Все производители симметричны: $x_i^*=x^*$.</p></div>
+
+      <h3 class="sub">Общеэкономическое равновесие</h3>
+      <div class="prose"><p>Подставив (6) в (3):</p></div>
+      <div class="eq-box">$$Y^*=\alpha^{2\alpha/(1-\alpha)}L_Y N \tag{7}$$</div>
+      <div class="prose"><p>Отсюда темп роста выпуска:</p></div>
+      <div class="eq-box">$$g_Y=g_{L_Y}+g_N$$</div>
+      <div class="callout fact">
+        <span class="mark">Аналогия с моделью Солоу</span>
+        <p>Сравните с BGP модели Солоу, где $g_Y=g_A+n$: здесь роль технического прогресса $g_A$ играет темп роста разнообразия товаров $g_N$ — горизонтальные инновации формально эквивалентны труд-дополняющему техническому прогрессу.</p>
+      </div>
+
+      <div class="prose"><p>Прибыль каждого монополиста:</p></div>
+      <div class="eq-box">$$\pi=(1-\alpha)\alpha^{(1+\alpha)/(1-\alpha)}L_Y \tag{8}$$</div>
+      <div class="callout result">
+        <span class="mark">Эффект размера рынка</span>
+        <p>Чем больше занятость (и выпуск) в конечном секторе, тем выше прибыль каждого производителя промежуточного товара — большой рынок увеличивает отдачу от инновации и, следовательно, стимулы к её созданию.</p>
+      </div>
+
+      <div class="prose"><p>Из условия (4):</p></div>
+      <div class="eq-box">$$w=(1-\alpha)\alpha^{2\alpha/(1-\alpha)}N \tag{9}$$</div>
+      <div class="prose"><p>Заработная плата пропорциональна разнообразию товаров $N$ — прямой аналог роли технического прогресса в модели Солоу. Весь выпуск представим как $Y=wL+xN+\pi N$ (распределение дохода между трудом, издержками на промежуточные товары и прибылью монополистов).</p></div>
+
+      <h3 class="sub">Потери общества от монополизации</h3>
+      <div class="prose"><p>ВВП (в отличие от валового выпуска $Y$, включающего промежуточный оборот) равен:</p></div>
+      <div class="eq-box">$$GDP=Y-\sum_{i=1}^N x_i=Y-xN$$</div>
+      <div class="callout">
+        <span class="mark">Задания из лекции</span>
+        <p>(а) Доказать, что при $\alpha=1/2$ доля труда в ВВП равна $2/3$. (б) Оценить выпуск, ВВП и зарплату при гипотетически конкурентных (а не монопольных) рынках промежуточных товаров и найти потери общества от монополизации (deadweight loss) при $\alpha=1/2$ — стандартное сравнение равновесия при $P=MC=1$ против монопольной цены $p_{x,i}=1/\alpha$.</p>
+      </div>
+      <div class="callout result">
+        <span class="mark">Вывод раздела</span>
+        <p>Рост дохода на душу населения определяется темпом прироста разнообразия товаров: $g_{Y/L}=g_w=g_N$. Задача модели эндогенного роста — объяснить динамику $N$ <em>внутри</em> модели, а не постулировать её (что и делает раздел 09).</p>
+      </div>
+    </section>
+
+    <!-- ============ 09 РЫНОК ИССЛЕДОВАТЕЛЕЙ ============ -->
+    <section class="sec" id="research-market">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>Откуда берётся $N$</p>
+        <h2 class="sec-title">Полная модель горизонтальных инноваций: рынок исследователей</h2>
+      </div>
+      <h3 class="sub">Предпосылки</h3>
+      <div class="prose">
+        <ul>
+          <li>Экономика описывается моделью монополистической конкуренции из раздела 08.</li>
+          <li>Число агентов $L(t)$, темп роста $\dot L/L=n\ge 0$, каждый обладает единицей труда.</li>
+          <li>Каждый агент выбирает сектор: $L_R(t)+L_Y(t)=L(t)$; труд однороден и свободно перетекает между секторами.</li>
+          <li>Ставка процента $r$ постоянна (малая открытая экономика с абсолютной мобильностью капитала).</li>
+        </ul>
+      </div>
+
+      <h3 class="sub">Сектор инноваций и условие равенства доходов</h3>
+      <div class="prose"><p>Исследователь создаёт новую разновидность товара с (пуассоновской) интенсивностью $\lambda$, получает на неё вечный патент и продаёт монополисту по цене $V(t)$. Ожидаемый доход исследователя — $\lambda V(t)$. В равновесии с $L_R>0$ доходы в обоих секторах равны:</p></div>
+      <div class="eq-box">$$w(t)=\lambda V(t) \tag{10}$$</div>
+      <div class="prose"><p>Если $w>\lambda V$ — никто не идёт в исследователи, $L_R=0$; если $w<\lambda V$ — работники мгновенно переквалифицируются, пока доходы не сравняются.</p></div>
+
+      <h3 class="sub">Стоимость патента: условие отсутствия арбитража</h3>
+      <div class="prose"><p>Доходности идентичных активов равны. Доход от вложения в патент за момент времени — текущая прибыль плюс изменение его стоимости $\pi(t)+\dot V(t)$ — должен равняться альтернативному доходу $rV(t)$:</p></div>
+      <div class="eq-box">$$\pi(t)+\dot V(t)=rV(t) \tag{11}$$</div>
+      <div class="prose">
+        <ul>
+          <li>$\pi(t)$ — прибыль от монопольного положения на рынке товара;</li>
+          <li>$\dot V(t)$ — доход от переоценки стоимости патента (capital gain).</li>
+        </ul>
+        <p><strong>Арбитражная логика</strong>: если $\pi+\dot V \lt rV$ — выгодно продавать патенты, вкладывая средства в альтернативный актив, что толкает $V$ вниз, восстанавливая равенство. Если $\pi+\dot V \gt rV$ — выгодно занимать под $r$ и скупать патенты, что толкает $V$ вверх.</p>
+      </div>
+
+      <h3 class="sub">Решение для стоимости патента на BGP</h3>
+      <div class="prose"><p>Из (8) $g_\pi=g_{L_Y}$; на BGP $g_\pi=g_{L_Y}=n$. Предполагая $V(t)=V(0)e^{nt}$, получаем $\dot V(t)=nV(0)e^{nt}$; подставляя в (11):</p></div>
+      <div class="eq-box">$$rV(0)e^{nt}=nV(0)e^{nt}+\pi(0)e^{nt}\;\Rightarrow\; V(0)=\frac{\pi(0)}{r-n}$$</div>
+      <div class="prose"><p>В общем виде для любого $t$:</p></div>
+      <div class="eq-box">
+        $$V(t)=\frac{\pi(t)}{r-n} \tag{12}$$
+        <span class="eq-note">Требуется $r>n$ для конечной, положительной стоимости патента — условие динамической эффективности, применённое к рынку инноваций.</span>
+      </div>
+
+      <h3 class="sub">Равновесная занятость по секторам</h3>
+      <div class="prose"><p>Подставив (12) в (10):</p></div>
+      <div class="eq-box">$$w(t)=\frac{\lambda\pi(t)}{r-n} \tag{13}$$</div>
+      <div class="prose"><p>Из (9) и (13):</p></div>
+      <div class="eq-box system">
+        $$L_Y(t)=\frac{N(t)(r-n)}{\alpha\lambda}$$
+        $$L_R(t)=L(t)-\frac{N(t)(r-n)}{\alpha\lambda} \tag{14}$$
+      </div>
+
+      <h3 class="sub">Сравнительная статика</h3>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td>Рост процентной ставки $r$</td><td>↓ стоимость патента $V$ → ↓ число исследователей $L_R$ → ↓ темп технического прогресса</td></tr>
+            <tr><td>Рост темпа населения $n$</td><td>↑ стоимость патента $V$ (через $1/(r-n)$) → ↑ число исследователей → ↑ темп технического прогресса</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="mark">Вопрос лекции</span>
+        <p>Какой из эффектов определяет <strong>долгосрочный</strong> темп роста? На BGP $g_{L_Y}=g_{L_R}=g_N=n$ — оба эффекта действуют на <strong>уровень</strong> переменных ($L_R$, $N$ в моменте времени), но не на долгосрочный темп роста, который на BGP жёстко равен $n$. Экономическая политика (через $r$, $\lambda$) сдвигает уровень технологического развития, но не долгосрочный темп его прироста.</p>
+      </div>
+
+      <h3 class="sub">Свойства модели как модели второго поколения</h3>
+      <div class="prose"><p>На BGP: $g_{L_Y}=g_{L_R}=g_N=n$. Экономическая политика влияет на <strong>текущие</strong> (переходные) темпы роста, но <strong>не на долгосрочные</strong> — модель, несмотря на явное описание рыночной структуры и стимулов к инновациям, остаётся моделью второго поколения (semi-endogenous).</p></div>
+
+      <h3 class="sub">Патентная система и её дизайн</h3>
+      <div class="prose">
+        <ul>
+          <li>Патент на один период vs патент бессрочный, отсутствие патентной системы — каждый вариант меняет стимулы к инновациям и равновесный темп роста.</li>
+          <li>В условиях эндогенного технического прогресса рыночная система <strong>не способна достичь «первого наилучшего»</strong>, достижимого лишь в статике без технического прогресса — аналог первой теоремы экономики благосостояния здесь не выполняется.</li>
+          <li>Патентная система создаёт монополии и связанные с ними потери общества, но решает проблему безбилетника при создании новых технологий.</li>
+          <li>Оптимальный дизайн патентной системы — компромисс между издержками монополии и необходимостью монопольной прибыли как стимула к инновациям.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 10 ПРОМЫШЛЕННАЯ РЕВОЛЮЦИЯ ============ -->
+    <section class="sec" id="industrial-rev">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">10</span>Приложение: размер рынка</p>
+        <h2 class="sec-title">Промышленная революция в Англии</h2>
+      </div>
+      <div class="prose"><p>Что объясняет первую промышленную революцию — конкурирующие гипотезы:</p></div>
+      <div class="pill-row">
+        <span class="pill">Дешёвая энергия (Pomeranz, 2000)</span>
+        <span class="pill">Терпение и образование (Galor, Moav, 2000; Clark, 2007)</span>
+        <span class="pill">Качество институтов (North, 1981; Mokyr, 1990)</span>
+        <span class="pill">Размер и интеграция рынков (Voigtländer, Voth, 2006; Desmet, Parente, 2012)</span>
+        <span class="pill">Квалификация ремесленников и гильдии (De la Croix, 2018)</span>
+      </div>
+
+      <div class="callout warn">
+        <span class="mark">Загадка размера рынка</span>
+        <p>В 1700 году население Англии — 5 млн, Китая — 138 млн (городское население — 1.5 млн против 20 млн соответственно). По простой логике эффекта размера рынка (раздел 08) больший рынок Китая должен был давать больше стимулов к горизонтальным инновациям. Однако именно в Англии произошла промышленная революция.</p>
+      </div>
+      <div class="prose"><p>Desmet et al. (2020) предлагают модель, объясняющую Great Divergence между Китаем и Англией: ключевую роль играет не общий размер рынка страны, а <strong>наличие соседних крупных городов</strong>, создающих возможности для конкуренции — важна плотность и связность рынков, а не просто их совокупный размер.</p></div>
+    </section>
+
+    <!-- ============ 11 ШУМПЕТЕРИАНСКИЙ РОСТ ============ -->
+    <section class="sec" id="schumpeter">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">11</span>Вертикальные инновации</p>
+        <h2 class="sec-title">Шумпетерианский рост: созидательное разрушение</h2>
+      </div>
+      <div class="prose"><p>В реальности новые технологии часто <strong>вытесняют</strong> старые, а не просто добавляют разнообразие — возникает процесс <strong>созидательного разрушения</strong> (<em>creative destruction</em>): новые фирмы вытесняют старые с рынка; угроза со стороны новичков также стимулирует действующие компании к инновациям.</p></div>
+
+      <h3 class="sub">Предпосылки базовой модели</h3>
+      <div class="prose">
+        <ul>
+          <li>Рынок одного товара со спросом $Q(P)$.</li>
+          <li>$n$ фирм с одинаковыми предельными издержками $c_0$; постоянных издержек нет.</li>
+          <li>При совершенной конкуренции по Бертрану цена устанавливается на уровне предельных издержек $P=c_0$, прибыль каждой фирмы — ноль.</li>
+        </ul>
+      </div>
+
+      <h3 class="sub">Радикальные и нерадикальные инновации</h3>
+      <div class="prose"><p>Любая фирма может инвестировать $\psi$ в проект, снижающий издержки до $c_1 \lt c_0$; технология защищена патентом (монопольное право использования).</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Радикальная (drastic)</strong></td><td>использование новой технологии создаёт монополиста, <strong>не ограниченного</strong> конкурентным окружением: $P_m \lt c_0$ — у монополиста нет даже потенциальных конкурентов, он может назначить безусловно оптимальную монопольную цену.</td></tr>
+            <tr><td><strong>Нерадикальная (non-drastic)</strong></td><td>монопольная власть инноватора <strong>ограничена</strong> конкурентным окружением (competitive fringe), которое может производить по цене $c_0$: неограниченная монопольная цена оказалась бы $P_m \gt c_0$, поэтому фактическая (лимитирующая) цена — $c_0$.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Общественное благосостояние: $SW=\pi+CS$ (сумма прибыли фирм и потребительского излишка).</p></div>
+
+      <div class="fig-grid">
+        <figure class="chart">
+          <p class="chart-title">Радикальная инновация</p>
+          <svg viewBox="0 0 260 210" role="img" aria-label="Нисходящая кривая спроса от цены; горизонтальная линия предельных издержек c0 выше горизонтальной линии новых издержек c1; монополист свободно выбирает цену Pm ниже c0, соответствующую пересечению предельной выручки с c1; заштрихованы прибыль монополиста между c1 и Pm и треугольник безвозвратных потерь справа от объёма при Pm">
+            <line x1="30" y1="20" x2="30" y2="180" stroke="var(--rule)"/>
+            <line x1="30" y1="180" x2="240" y2="180" stroke="var(--rule)"/>
+            <path d="M30,35 L220,180" stroke="var(--ink-faint)" stroke-width="1.6" fill="none"/>
+            <path d="M30,35 L150,180" stroke="var(--accent)" stroke-width="1.3" stroke-dasharray="3 2" fill="none"/>
+            <line x1="30" y1="150" x2="185" y2="150" stroke="var(--accent-2)" stroke-width="1.6"/>
+            <line x1="30" y1="95" x2="130" y2="95" stroke="var(--bad)" stroke-width="1.6"/>
+            <rect x="30" y="95" width="100" height="55" fill="var(--accent-3)" opacity="0.28"/>
+            <path d="M130,95 L155,150 L130,150 Z" fill="var(--bad)" opacity="0.3"/>
+            <text x="238" y="184" text-anchor="end" class="axis-label">Q</text>
+            <text x="34" y="30" class="axis-label">P</text>
+            <text x="190" y="147" class="axis-label" fill="var(--accent-2)">c₀</text>
+            <text x="135" y="90" class="axis-label" fill="var(--bad)">Pₘ</text>
+            <text x="65" y="118" class="axis-label" fill="var(--accent-3)">π</text>
+            <text x="138" y="128" class="axis-label" fill="var(--bad)">DWL</text>
+          </svg>
+          <figcaption>Монополист свободно выбирает $P_m \lt c_0$: крупная прибыль $\pi$, но и заметные потери $DWL$ относительно первого наилучшего ($P=c_1$).</figcaption>
+        </figure>
+        <figure class="chart">
+          <p class="chart-title">Нерадикальная инновация</p>
+          <svg viewBox="0 0 260 210" role="img" aria-label="Та же кривая спроса; инноватор ограничен конкурентным окружением и вынужден лимитировать цену на уровне c0, а не своей безусловно оптимальной, более высокой монопольной ценой; прибыль-прямоугольник между c1 и c0 меньше, чем в радикальном случае, и треугольник безвозвратных потерь тоже меньше">
+            <line x1="30" y1="20" x2="30" y2="180" stroke="var(--rule)"/>
+            <line x1="30" y1="180" x2="240" y2="180" stroke="var(--rule)"/>
+            <path d="M30,35 L220,180" stroke="var(--ink-faint)" stroke-width="1.6" fill="none"/>
+            <line x1="30" y1="150" x2="185" y2="150" stroke="var(--accent-2)" stroke-width="1.6"/>
+            <line x1="30" y1="118" x2="158" y2="118" stroke="var(--bad)" stroke-width="1.6"/>
+            <rect x="30" y="118" width="128" height="32" fill="var(--accent-3)" opacity="0.28"/>
+            <path d="M158,118 L185,150 L158,150 Z" fill="var(--bad)" opacity="0.25"/>
+            <text x="238" y="184" text-anchor="end" class="axis-label">Q</text>
+            <text x="34" y="30" class="axis-label">P</text>
+            <text x="190" y="147" class="axis-label" fill="var(--accent-2)">c₀ = лимит-цена</text>
+            <text x="85" y="112" class="axis-label" fill="var(--accent-3)">π (меньше)</text>
+            <text x="165" y="140" class="axis-label" fill="var(--bad)">DWL (меньше)</text>
+          </svg>
+          <figcaption>Инноватор ограничен конкурентным окружением и вынужден лимитировать цену на уровне $c_0$ — меньшая прибыль, но и меньший $DWL$, чем при свободном монопольном ценообразовании.</figcaption>
+        </figure>
+      </div>
+
+      <h3 class="sub">Патентная система и объём инноваций</h3>
+      <div class="prose">
+        <ul>
+          <li><strong>Без патентной системы</strong>: любая фирма может скопировать технологию → цена снова падает до $c_1$ (конкуренция по Бертрану на новом уровне издержек) → ожидаемый выигрыш инноватора $=-\psi<0$ → <strong>никто не инвестирует в инновацию</strong>, даже если она общественно выгодна.</li>
+          <li><strong>С патентной системой</strong>: инновации становятся возможны, но патент создаёт монопольную власть и связанные с ней потери $DWL$; кроме того, объём инноваций в равновесии, вообще говоря, <strong>не оптимален</strong> (см. ниже).</li>
+        </ul>
+        <p>Как следствие, «<strong>первое наилучшее</strong>» (состояние максимума общественного благосостояния) становится <strong>недостижимым</strong> ни с патентной системой, ни без неё.</p>
+      </div>
+
+      <h3 class="sub">Равновесный vs общественно оптимальный объём инвестиций в инновацию</h3>
+      <div class="prose"><p>Фирма инвестирует, если частный выигрыш положителен:</p></div>
+      <div class="eq-box">$$V_m=\pi-\psi\ge 0$$</div>
+      <div class="prose"><p>Общественный выигрыш от инновации:</p></div>
+      <div class="eq-box">$$\Delta SW=\Delta CS+\pi-\psi$$</div>
+      <div class="prose"><p>Поскольку</p></div>
+      <div class="eq-box">$$V_m \lt SW$$</div>
+      <div class="prose"><p>фирма может <strong>недоинвестировать</strong> в инновацию относительно общественного оптимума.</p></div>
+      <div class="callout warn">
+        <span class="mark">Эффект присвоения ренты (appropriability effect)</span>
+        <p>Принимая решение об инновации, фирма учитывает только влияние на собственную прибыль, но не на выигрыш общества в целом (потребительский излишек). В динамическом контексте инновация повышает вероятность будущих инноваций (эффект «опоры на плечи титанов») — этот положительный внешний эффект тоже не учитывается частной фирмой.</p>
+      </div>
+
+      <h3 class="sub">Первое наилучшее и провалы рынка</h3>
+      <div class="prose"><p>Максимально возможный выигрыш общества от инновации:</p></div>
+      <div class="eq-box">$$\Delta SW_{max}=\Delta CS+\pi+DWL$$</div>
+      <div class="prose"><p>Он <strong>недостижим</strong> в рамках рыночного равновесия ни с патентной системой, ни без неё — в обоих случаях возникают «провалы рынка» при производстве инноваций. Возможные инструменты вмешательства государства:</p></div>
+      <div class="pill-row">
+        <span class="pill">субсидии и налоговые льготы</span>
+        <span class="pill">прямые государственные затраты на R&D</span>
+        <span class="pill">выкуп патентов государством</span>
+      </div>
+    </section>
+
+    <!-- ============ 12 УКОРЕНИВШИЕСЯ И НОВИЧКИ ============ -->
+    <section class="sec" id="incumbent">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">12</span>Кто инновирует сильнее</p>
+        <h2 class="sec-title">Взаимодействие укоренившихся фирм и новичков</h2>
+      </div>
+      <div class="prose"><p>Пусть на рынке уже есть укоренившаяся фирма (incumbent) с рыночной властью и высокой ценой.</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td><strong>Случай 1</strong>: только укоренившаяся фирма может осуществить инновацию</td><td>Пример: только Apple может сделать iPhone 7 после iPhone 6S. Критерий инновации для монополиста: $V_{monop}=\pi-\psi-\pi_0$ (сравнение с <em>текущей</em> прибылью $\pi_0$, которую монополист теряет при отказе от инновации в пользу конкурента, либо сохраняет статус-кво).</td></tr>
+            <tr><td><strong>Случай 2</strong>: другая фирма может войти на рынок, осуществив инновацию</td><td>Критерий для новичка: $V_{new}=\pi_1-\psi>0$.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Эффект захвата рынка (business-stealing)</p>
+        <svg viewBox="0 0 460 190" role="img" aria-label="Столбчатая диаграмма сравнивает выигрыш укоренившейся фирмы и новичка от одной и той же инновации: у укоренившейся фирмы столбец текущей прибыли пи-ноль почти достигает высоты новой прибыли пи-один, поэтому чистый прирос выигрыша от инновации мал; у новичка текущей прибыли нет вовсе, поэтому весь столбец пи-один целиком становится его выигрышем от инновации">
+          <line x1="30" y1="160" x2="440" y2="160" stroke="var(--rule)"/>
+          <g>
+            <rect x="80" y="90" width="55" height="70" fill="var(--ink-faint)" opacity="0.35"/>
+            <rect x="80" y="72" width="55" height="18" fill="var(--accent-3)"/>
+            <text x="107" y="200" text-anchor="middle" class="axis-label">Укоренившийся: π₀ → π₁</text>
+            <text x="107" y="66" text-anchor="middle" class="axis-label" fill="var(--accent-3)">выигрыш π₁−π₀</text>
+            <text x="107" y="128" text-anchor="middle" class="axis-label" fill="var(--ink-soft)">π₀ (теряется при отказе)</text>
+          </g>
+          <g>
+            <rect x="290" y="72" width="55" height="88" fill="var(--accent)"/>
+            <text x="317" y="200" text-anchor="middle" class="axis-label">Новичок: 0 → π₁</text>
+            <text x="317" y="66" text-anchor="middle" class="axis-label" fill="var(--accent)">весь π₁ — выигрыш</text>
+          </g>
+        </svg>
+        <figcaption>У новичка стимул к инновации выше: в случае успеха он получает <strong>весь</strong> рынок ($\pi_1$), тогда как выигрыш укоренившейся фирмы — лишь разница $\pi_1-\pi_0$ (она заменяет свою же текущую прибыль на новую).</figcaption>
+      </figure>
+
+      <div class="callout fact">
+        <span class="mark">Эффект захвата рынка (business-stealing / replacement effect, Arrow)</span>
+        <p>Фирме-новичку инновация выгоднее, чем укоренившейся фирме, потому что в случае успеха новичок получает <em>весь</em> рынок, включая долю укоренившейся фирмы. У новичка, соответственно, <strong>больше стимулов</strong> к инновациям, чем у монополиста, защищающего статус-кво.</p>
+      </div>
+      <div class="prose"><p>В контексте стратегического взаимодействия (игры) укоренившейся фирмы и новичка угроза входа новичка на рынок <strong>повышает</strong> стимулы укоренившейся фирмы к инновациям (эффект конкурентного давления, «escape-entry» / «escape-competition» эффект).</p></div>
+    </section>
+
+    <!-- ============ 13 ЭМПИРИКА ============ -->
+    <section class="sec" id="empirics">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">13</span>Проверка теории данными</p>
+        <h2 class="sec-title">Эмпирика шумпетерианских моделей роста</h2>
+      </div>
+
+      <h3 class="sub">Неоднородные инновации (Akcigit, Kerr, 2018, JPE)</h3>
+      <div class="prose"><p>Используя патенты и их цитирование как меру успеха инновации, в США:</p></div>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            <tr><td class="num">19.8%</td><td>инновации укоренившихся фирм в своей же отрасли</td></tr>
+            <tr><td class="num">54.5%</td><td>«внешние» инновации укоренившихся фирм (в других секторах/отраслях, диверсификация R&D)</td></tr>
+            <tr><td class="num">25.7%</td><td>инновации новичков (entrants)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Конкуренция и рост: инвертированная U-образная зависимость</h3>
+      <div class="prose"><p>Aghion, Bloom, Blundell, Griffith, Howitt (2005, <em>QJE</em>): эмпирическая зависимость числа взвешенных по цитированию патентов от уровня конкуренции на рынке имеет форму <strong>перевёрнутой U</strong>: инновационная активность растёт с усилением конкуренции до определённого уровня, затем снижается.</p></div>
+      <figure class="chart">
+        <p class="chart-title">Инновационная активность vs уровень конкуренции</p>
+        <svg viewBox="0 0 420 180" role="img" aria-label="Кривая в форме перевёрнутой буквы U: инновационная активность по вертикальной оси растёт по мере увеличения конкуренции по горизонтальной оси до промежуточного уровня, достигает максимума, а затем снижается при дальнейшем росте конкуренции; более крутая пунктирная кривая показывает более сильный эффект в отраслях neck-and-neck">
+          <line x1="30" y1="150" x2="400" y2="150" stroke="var(--rule)"/>
+          <line x1="30" y1="150" x2="30" y2="20" stroke="var(--rule)"/>
+          <path d="M30,135 C110,60 180,35 215,32 C250,35 320,60 400,140" fill="none" stroke="var(--accent)" stroke-width="2.2"/>
+          <path d="M30,142 C100,90 175,25 215,20 C255,25 300,85 380,148" fill="none" stroke="var(--accent-2)" stroke-width="1.8" stroke-dasharray="4 3"/>
+          <text x="215" y="166" text-anchor="middle" class="axis-label">конкуренция</text>
+          <text x="20" y="90" text-anchor="middle" class="axis-label" transform="rotate(-90 20 90)">инновации</text>
+          <text x="260" y="45" class="axis-label" fill="var(--accent-2)">neck-and-neck отрасли</text>
+          <text x="270" y="100" class="axis-label" fill="var(--accent)">в среднем по фирмам</text>
+        </svg>
+        <figcaption>Эффект сильнее выражен в отраслях «neck-and-neck» (фирмы с близким технологическим уровнем, где конкуренция особенно стимулирует «убегание» от соперника) по сравнению со средним по всем фирмам.</figcaption>
+      </figure>
+
+      <h3 class="sub">«$A$» как эффективность размещения ресурсов (Hsieh, Klenow, 2014, QJE)</h3>
+      <div class="prose"><p>Различия в том, как размер предприятий растёт с возрастом (<em>plant life cycle</em>), объясняют <strong>до 25%</strong> различий в совокупной факторной производительности между Индией и США. В США средняя занятость предприятия растёт с возрастом значительно сильнее, чем в Мексике и особенно в Индии (где размер фирм почти не растёт со временем) — признак худшего отбора эффективных фирм и худшего перераспределения ресурсов от менее к более продуктивным фирмам.</p></div>
+
+      <h3 class="sub">Мизаллокация и рост</h3>
+      <div class="prose"><p>Оценки потенциального прироста производительности труда при устранении неэффективного распределения ресурсов между фирмами (intensive margin):</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Страна</th><th class="num">Потенциальный прирост производительности</th><th>Источник</th></tr></thead>
+          <tbody>
+            <tr><td>Китай</td><td class="num">30–50%</td><td>Hsieh, Klenow (2009)</td></tr>
+            <tr><td>Индия</td><td class="num">40–60%</td><td>Hsieh, Klenow (2009)</td></tr>
+            <tr><td>Мексика</td><td class="num">120%</td><td>Busso et al. (2013)</td></tr>
+            <tr><td>Индонезия</td><td class="num">145%</td><td>Yang (2021), intensive + extensive margin</td></tr>
+            <tr><td>Россия</td><td class="num">43–60%</td><td>Жемкова, Каукин (2023), данные 2015, 2018</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Интерпретация</span>
+        <p>В реальных экономиках высокоэффективные фирмы нередко сталкиваются с искажениями (implicit tax), сдерживающими их рост («shadows» — эффективные, но искусственно малые фирмы), тогда как низкоэффективные фирмы иногда субсидируются и выживают («zombies») — в отличие от «эффективного равновесия без трений» (frictionless efficient equilibrium), где распределение ресурсов определялось бы исключительно производительностью.</p>
+      </div>
+    </section>
+
+    <!-- ============ 14 ИТОГИ ============ -->
+    <section class="sec" id="summary">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">14</span>Итоги</p>
+        <h2 class="sec-title">Итоговые выводы</h2>
+      </div>
+      <div class="prose">
+        <ul>
+          <li>Технический прогресс, будучи эндогенизирован, приводит к <strong>созидательному разрушению</strong> — вытеснению менее совершенных технологий/товаров/отраслей более совершенными.</li>
+          <li>В частной рыночной экономике неизбежно возникают <strong>провалы рынка</strong> при производстве инноваций (проблема безбилетника из-за неконкурентности/неисключаемости знаний).</li>
+          <li><strong>Патентная система</strong> позволяет достичь «второго наилучшего», но <strong>не гарантирует</strong> общественно оптимальный объём инноваций: необходимо государственное вмешательство (субсидии, прямое финансирование R&D, выкуп патентов), которое, впрочем, также не обеспечивает «первого наилучшего».</li>
+          <li>В условиях угрозы входа новичков на рынок темпы инноваций <strong>выше</strong>, чем при закрытом входе (эффект конкурентного давления на укоренившиеся фирмы).</li>
+        </ul>
+      </div>
+
+      <h3 class="sub">Классификация моделей эндогенного роста</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>Первое поколение (Ромер, простейшая)</th><th>Второе поколение (semi-endogenous)</th></tr></thead>
+          <tbody>
+            <tr><td>Условие BGP</td><td>$\theta=1$</td><td>$\theta<1$, любое $n\ge0$</td></tr>
+            <tr><td>Влияние политики на долгосрочный рост</td><td>Да</td><td>Нет (кроме влияния через $n$)</td></tr>
+            <tr><td>Эффект масштаба</td><td>Есть</td><td>Нет на долгосрочный темп (только на уровень)</td></tr>
+            <tr><td>Долгосрочный темп роста $g_{Y/L}$</td><td>Эндогенно определяется числом исследователей</td><td>$=g_A^*=\varphi n/(1-\theta)$ — определяется экзогенным $n$</td></tr>
+            <tr><td>Согласованность с данными Jones (1995)</td><td>Нет (эффект масштаба не подтверждается)</td><td>Да</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 15 ЛИТЕРАТУРА ============ -->
+    <section class="sec" id="refs">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">15</span>Литература</p>
+        <h2 class="sec-title">Источники</h2>
+      </div>
+      <ul class="lit-list">
+        <li><span class="idx">01</span>Jones, C. (1995) · <em>Time series tests of Endogenous Growth Models</em> · The Quarterly Journal of Economics, 110(2), 495–525</li>
+        <li><span class="idx">02</span>Strulik, H., Prettner, K., Prskawetz, A. (2013) · <em>The past and future of knowledge-based growth</em> · Journal of Economic Growth, 18(4), 411–437</li>
+        <li><span class="idx">03</span>Akcigit, U., Kerr, W. R. (2018) · <em>Growth through heterogeneous innovations</em> · Journal of Political Economy, 126(4), 1374–1443</li>
+        <li><span class="idx">04</span>Aghion, P., Bloom, N., Blundell, R., Griffith, R., Howitt, P. (2005) · <em>Competition and innovation: An inverted-U relationship</em> · The Quarterly Journal of Economics, 120(2), 701–728</li>
+        <li><span class="idx">05</span>Hsieh, C. T., Klenow, P. J. (2014) · <em>The life cycle of plants in India and Mexico</em> · The Quarterly Journal of Economics, 129(3), 1035–1084</li>
+        <li><span class="idx">06</span>Jones, C., Vollrath, D. · <em>Introduction to Economic Growth</em> · гл. 5 (основная литература)</li>
+        <li><span class="idx">07</span>Ромер, Д. · <em>Высшая макроэкономика</em> · гл. 3, «Новая теория роста» (дополнительная литература)</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект лекции · Теория эндогенного роста · По материалам лекции Д.А. Веселова, НИУ ВШЭ, Департамент теоретической экономики</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>
