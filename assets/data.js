@@ -15,6 +15,18 @@
 
 const NOTES = [
   {
+    id: "macro2-quiz2",
+    title: "Макроэкономика 2 Квиз 2",
+    division: "economics",
+    category: "Макроэкономика",
+    date: "2026-10-03",
+    displayDate: "3 окт 2026",
+    description: "Интерактивная самопроверка: 40 утверждений в двух частях (модель перекрывающихся поколений; гипотезы жизненного цикла и перманентного дохода) — отметьте да/нет и откройте разбор с обоснованием.",
+    tags: ["квиз", "самопроверка"],
+    file: "../notes/macro2-quiz2.html",
+    example: false
+  },
+  {
     id: "expectations-macro",
     title: "Ожидания в макроэкономике",
     division: "economics",
