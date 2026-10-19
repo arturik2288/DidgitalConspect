@@ -15,6 +15,18 @@
 
 const NOTES = [
   {
+    id: "macro2-q-model-rate-hike",
+    title: "Задача: ключевая ставка и q-модель Тобина",
+    division: "economics",
+    category: "Макроэкономика",
+    date: "2026-10-20",
+    displayDate: "20 окт 2026",
+    description: "Разбор задачи про повышение ключевой ставки до 19% и ожидание дальнейшего повышения: локусы и седло, вероятностный шок, который не произошёл, фазовая и временные диаграммы, рассчитанные по модели.",
+    tags: ["q Тобина", "разбор задачи"],
+    file: "../notes/macro2-q-model-rate-hike.html",
+    example: false
+  },
+  {
     id: "macro2-investment-q-model",
     title: "Макроэкономика 2. Лекции 8–9: инвестиции и q-модель Тобина",
     division: "economics",
