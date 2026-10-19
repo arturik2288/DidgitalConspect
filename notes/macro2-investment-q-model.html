@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Инвестиции и q-модель Тобина — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#f6f2e9;
+      --surface:#ffffff;
+      --surface-2:#efe7d4;
+      --ink:#232019;
+      --ink-soft:#6b6353;
+      --ink-faint:#9a927e;
+      --accent:#2f5590;
+      --accent-strong:#1f3d66;
+      --accent-soft:#dde9e8;
+      --accent-2:#a8703a;
+      --accent-2-soft:#f3e3cd;
+      --accent-3:#3f7d5c;
+      --accent-3-soft:#e1efe4;
+      --accent-4:#6b5aa6;
+      --bad:#a5432c;
+      --bad-soft:#f6e2da;
+      --rule:#ddd2b8;
+      --shadow: 0 1px 2px rgba(35,32,25,0.06), 0 6px 20px -8px rgba(35,32,25,0.15);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent-2);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex; align-items:center; gap:6px;
+      font-family:'IBM Plex Mono',monospace; font-size:0.85rem;
+      color:var(--accent); text-decoration:none;
+      padding:18px 24px 0; max-width:900px; margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative; overflow:hidden;
+    }
+    header.hero::before{
+      content:""; position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:.09em;
+      text-transform:uppercase; color:var(--accent); font-weight:700; margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto; scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none; display:flex; align-items:center; gap:7px; padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint); text-decoration:none;
+      border-bottom:2.5px solid transparent; white-space:nowrap;
+    }
+    nav.toc a .n{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); font-weight:500;}
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px; height:24px; border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .lecture-divider{
+      margin:56px 0 0; padding:14px 18px; border-radius:10px;
+      background:var(--ink); color:#f6f2e9;
+      font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:.08em; text-transform:uppercase;
+    }
+    .lecture-divider b{color:#f3e3cd;}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:8px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:28px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:72ch;
+    }
+    .callout .mark{font-family:'Fraunces',serif; font-weight:700; font-size:17px; color:var(--accent); line-height:1.3; flex:none;}
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft);}
+    .callout.result .mark{color:var(--accent-2);}
+    .callout.fact{border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft);}
+    .callout.fact .mark{color:var(--accent-3);}
+    .callout.warn{border-color:color-mix(in srgb, var(--bad) 40%, transparent); background:var(--bad-soft);}
+    .callout.warn .mark{color:var(--bad);}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0; overflow-x:auto;
+    }
+    .eq-note{display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px;}
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top;}
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:520px;}
+
+    .bt{
+      display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700;
+      padding:1px 7px; border-radius:5px; margin-left:4px; white-space:nowrap; vertical-align:1px;
+    }
+    .bt.y{background:var(--accent-3-soft); color:var(--accent-3); border:1px solid color-mix(in srgb, var(--accent-3) 45%, transparent);}
+    .bt.n{background:var(--bad-soft); color:var(--bad); border:1px solid color-mix(in srgb, var(--bad) 45%, transparent);}
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow); overflow-x:auto;
+    }
+    figure.chart svg{display:block; width:100%; min-width:520px; height:auto;}
+    figure.chart svg text{fill:var(--ink-soft); font-family:'Inter',sans-serif; font-size:13px;}
+    figure.chart svg text.m{fill:var(--ink-faint);}
+    figure.chart svg text.b{font-weight:700; fill:var(--ink);}
+    figure.chart svg .ax{stroke:var(--ink-faint); stroke-width:1;}
+    figure.chart svg .gd{stroke:var(--ink-faint); stroke-width:.6; stroke-dasharray:4 4;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin:0 0 10px;}
+
+    .steps{counter-reset:step; list-style:none; padding:0; margin:16px 0; max-width:72ch;}
+    .steps li{counter-increment:step; position:relative; padding:12px 14px 12px 50px; margin-bottom:10px; background:var(--surface); border:1px solid var(--rule); border-radius:10px;}
+    .steps li::before{
+      content:counter(step); position:absolute; left:14px; top:12px;
+      width:24px; height:24px; border-radius:50%; background:var(--accent-4); color:#fff;
+      font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700;
+      display:flex; align-items:center; justify-content:center;
+    }
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+
+    footer.page-foot{padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;}
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/economics.html">← Раздел «Экономика»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Макроэкономика 2 · Лекции 8–9 · Инвестиции</p>
+      <h1 class="title">Инвестиции и q-модель Тобина</h1>
+      <p class="subtitle">От желаемого капитала и акселератора к стоимости фирмы, q Тобина и неоклассической q-модели с издержками регулирования: фазовая диаграмма, реакция на ожидаемые и неожиданные шоки, зона бездействия и необратимость инвестиций.</p>
+      <div class="meta-row">
+        <span>Лекция 8 — базовые концепции</span>
+        <span>Лекция 9 — неоклассическая q-модель</span>
+        <span>Плашки <span class="bt y">№1 — да</span> — утверждения банка тестов 3, часть 2</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#desired-capital"><span class="n">01</span>Желаемый капитал</a>
+      <a href="#rigid-accelerator"><span class="n">02</span>Жёсткий акселератор</a>
+      <a href="#flexible-accelerator"><span class="n">03</span>Гибкий акселератор</a>
+      <a href="#firm-value"><span class="n">04</span>Стоимость фирмы и ММ</a>
+      <a href="#tobin-q"><span class="n">05</span>q Тобина</a>
+      <a href="#q-setup"><span class="n">06</span>q-модель: постановка</a>
+      <a href="#q-optimality"><span class="n">07</span>Оптимальные инвестиции</a>
+      <a href="#q-dynamics"><span class="n">08</span>Динамика q</a>
+      <a href="#phase"><span class="n">09</span>Фазовая диаграмма</a>
+      <a href="#permanent-shocks"><span class="n">10</span>Перманентные шоки</a>
+      <a href="#temporary-shock"><span class="n">11</span>Временный шок</a>
+      <a href="#extensions"><span class="n">12</span>Расширения</a>
+      <a href="#cheatsheet"><span class="n">13</span>Шпаргалка</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <div class="lecture-divider"><b>Лекция 8</b> · Базовые концепции инвестиций</div>
+
+    <!-- ============ 01 ============ -->
+    <section class="sec" id="desired-capital">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Сколько капитала нужно фирме</p>
+        <h2 class="sec-title">Желаемый капитал и издержки использования капитала</h2>
+      </div>
+      <div class="prose">
+        <p>Фирма наращивает капитал до тех пор, пока последняя единица окупает свою стоимость. Если капитал арендуется по ставке $r_K$, желаемый запас $K^{*}$ задаётся условием:</p>
+      </div>
+      <div class="eq-box">
+        $$MRPK(K^{*}) = r_K, \qquad MRPK = p\cdot MPK$$
+        <span class="eq-note">Предельная денежная доходность капитала равна стоимости его аренды <span class="bt y">№1 — да</span>. Поскольку $MPK$ убывает, при $K \lt K^{*}$ капитал выгодно наращивать, при $K \gt K^{*}$ — сокращать.</span>
+      </div>
+
+      <h3 class="sub">Если капитал свой: издержки использования капитала</h3>
+      <div class="prose">
+        <p>Когда фирма владеет капиталом, она не платит аренду, но несёт <strong>альтернативные издержки</strong> (user cost of capital, Jorgenson, 1963). Владение единицей капитала стоимостью $p_K$ в течение года обходится так:</p>
+        <ul>
+          <li><strong>упущенный процент</strong> $r\,p_K$ — эти деньги можно было вложить под ставку $r$;</li>
+          <li><strong>износ</strong> $\delta\,p_K$ — доля капитала выбывает за год;</li>
+          <li><strong>минус доход от переоценки</strong> $\dot p_K$ — если капитальные блага дорожают, оставшийся станок через год стоит дороже.</li>
+        </ul>
+      </div>
+      <div class="eq-box">$$r_K = p_K\left(r + \delta - \frac{\dot p_K}{p_K}\right)$$</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Изменение</th><th>Влияние на $r_K$</th><th>Почему</th></tr></thead>
+          <tbody>
+            <tr><td>$r\uparrow$</td><td>$r_K\uparrow$ <span class="bt y">№2 — да</span></td><td>дороже альтернативное вложение денег</td></tr>
+            <tr><td>$\delta\uparrow$</td><td>$r_K\uparrow$ <span class="bt y">№3 — да</span></td><td>быстрее изнашивается капитал</td></tr>
+            <tr><td>$\dot p_K \gt 0$ (капитал дорожает)</td><td>$r_K\downarrow$ <span class="bt y">№4 — да</span></td><td>доход от переоценки частично покрывает издержки</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Пример</span>
+        <p>Станок стоит $p_K = 100$, ставка $r = 5\%$, износ $\delta = 10\%$, цены станков растут на $3\%$ в год. Тогда $r_K = 100\cdot(0{,}05 + 0{,}10 - 0{,}03) = 12$ в год. Фирма покупает станки, пока предельная выручка от ещё одного станка больше 12.</p>
+      </div>
+      <div class="prose"><p>В расширенных версиях в $r_K$ добавляют налог на прибыль, амортизационные вычеты и инвестиционные льготы (Hall, Jorgenson, 1967): налоговая политика влияет на инвестиции именно через издержки использования капитала.</p></div>
+    </section>
+
+    <!-- ============ 02 ============ -->
+    <section class="sec" id="rigid-accelerator">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Первая модель инвестиций</p>
+        <h2 class="sec-title">Жёсткий акселератор</h2>
+      </div>
+      <div class="prose">
+        <p><strong>Предпосылки:</strong> $Y = AK^{\alpha}$, цена капитала равна цене продукции и постоянна ($p_K = p = \text{const}$, значит $\dot p_K = 0$), износа нет ($\delta = 0$). Тогда $r_K = rp$, а $MRPK = p\cdot \alpha Y/K$. Из условия $MRPK = r_K$:</p>
+      </div>
+      <div class="eq-box">
+        $$p\,\frac{\alpha Y}{K^{*}} = rp \quad\Rightarrow\quad K^{*} = \frac{\alpha}{r}\,Y$$
+        <span class="eq-note">Желаемый капитал пропорционален выпуску <span class="bt y">№6 — да</span>.</span>
+      </div>
+      <div class="prose"><p>Если капитал мгновенно подстраивается к желаемому уровню, инвестиции равны приросту желаемого капитала:</p></div>
+      <div class="eq-box">
+        $$I = \Delta K^{*} = \frac{\alpha}{r}\,\Delta Y, \qquad \frac{I}{Y} = \frac{\alpha}{r}\,g_Y$$
+        <span class="eq-note">Инвестиции пропорциональны <strong>приросту</strong> выпуска, а не его уровню <span class="bt n">№5 «I пропорциональны Y» — нет</span>.</span>
+      </div>
+      <div class="callout result">
+        <span class="mark">Почему инвестиции волатильнее выпуска</span>
+        <p>При $\alpha = 0{,}3$ и $r = 0{,}1$ коэффициент акселерации $\alpha/r = 3$ <span class="bt y">№7 — да</span>. Если рост выпуска замедлится с $3\%$ до $1\%$, доля инвестиций упадёт с $9\%$ до $3\%$ ВВП: небольшое замедление роста выпуска обрушивает инвестиции втрое. В данных инвестиции действительно в несколько раз волатильнее ВВП.</p>
+      </div>
+      <div class="callout warn">
+        <span class="mark">Недостатки</span>
+        <p>Капитал прыгает к $K^{*}$ мгновенно — так не бывает: заводы строятся годами. Модель статическая: фирма реагирует только на текущий выпуск и не смотрит в будущее.</p>
+      </div>
+    </section>
+
+    <!-- ============ 03 ============ -->
+    <section class="sec" id="flexible-accelerator">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Постепенная подстройка</p>
+        <h2 class="sec-title">Гибкий акселератор</h2>
+      </div>
+      <div class="eq-box">$$I_t = \lambda\,(K^{*} - K_t), \qquad 0 \lt \lambda \lt 1$$</div>
+      <div class="prose">
+        <p>Откуда берётся $\lambda$. Фирма выбирает капитал следующего периода, минимизируя сумму двух квадратичных потерь:</p>
+      </div>
+      <div class="eq-box">
+        $$\min_{K_{t+1}}\; c_1\,(K_{t+1} - K^{*})^2 + c_2\,(K_{t+1} - K_t)^2$$
+        <span class="eq-note">$c_1$ — потеря прибыли от неоптимального капитала, $c_2$ — издержки быстрой подстройки.</span>
+      </div>
+      <div class="prose"><p>Условие первого порядка: $c_1(K_{t+1}-K^{*}) + c_2(K_{t+1}-K_t) = 0$. Отсюда $K_{t+1}(c_1+c_2) = c_1K^{*} + c_2K_t$, и после вычитания $K_t$ из обеих частей:</p></div>
+      <div class="eq-box">$$K_{t+1} - K_t = \frac{c_1}{c_1+c_2}\,(K^{*} - K_t) \quad\Rightarrow\quad \lambda = \frac{c_1}{c_1 + c_2}$$</div>
+      <div class="prose">
+        <ul>
+          <li>Подстройка постепенная, а не мгновенная <span class="bt n">№8 «мгновенно» — нет</span>. Чем дороже быстрая подстройка ($c_2\uparrow$), тем меньше $\lambda$.</li>
+          <li>Если $K \gt K^{*}$, то $I \lt 0$: капитал снижается <span class="bt n">№9 «I &gt; 0» — нет</span>.</li>
+          <li>Разрыв сокращается геометрически: $K^{*} - K_t = (1-\lambda)^t (K^{*} - K_0)$. При $\lambda = 0{,}25$ половина разрыва закрывается примерно за $\ln 0{,}5/\ln 0{,}75 \approx 2{,}4$ периода.</li>
+        </ul>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Жёсткий и гибкий акселератор после роста выпуска</p>
+        <svg viewBox="0 0 680 330" role="img" aria-label="После роста выпуска желаемый капитал K* повышается. При жёстком акселераторе капитал скачком прыгает к новому K*. При гибком он приближается постепенно: быстрее при большой лямбде и медленнее при малой">
+          <defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <line class="ax" x1="80" y1="260" x2="640" y2="260" marker-end="url(#a1)"/>
+          <line class="ax" x1="80" y1="260" x2="80" y2="30" marker-end="url(#a1)"/>
+          <text x="646" y="265">t</text><text x="72" y="32" text-anchor="end">K</text>
+          <line x1="80" y1="210" x2="200" y2="210" stroke="var(--ink)" stroke-width="2"/>
+          <text class="m" x="72" y="214" text-anchor="end">K₀</text>
+          <line x1="200" y1="80" x2="630" y2="80" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <text class="m" x="72" y="84" text-anchor="end">K*</text>
+          <line x1="200" y1="210" x2="200" y2="80" stroke="var(--bad)" stroke-width="2"/>
+          <path d="M200 210 C 250 140, 300 100, 420 86 C 500 81, 580 80, 630 80" fill="none" stroke="var(--accent-3)" stroke-width="2.5"/>
+          <path d="M200 210 C 300 170, 400 130, 500 108 C 560 96, 600 91, 630 89" fill="none" stroke="var(--accent-4)" stroke-width="2.5" stroke-dasharray="8 4"/>
+          <text class="m" x="200" y="282" text-anchor="middle">рост Y ⇒ K*↑</text>
+          <line x1="100" y1="305" x2="130" y2="305" stroke="var(--bad)" stroke-width="2"/><text class="m" x="136" y="309">жёсткий: скачок</text>
+          <line x1="270" y1="305" x2="300" y2="305" stroke="var(--accent-3)" stroke-width="2.5"/><text class="m" x="306" y="309">гибкий, λ большая</text>
+          <line x1="450" y1="305" x2="480" y2="305" stroke="var(--accent-4)" stroke-width="2.5" stroke-dasharray="8 4"/><text class="m" x="486" y="309">гибкий, λ малая</text>
+        </svg>
+        <figcaption>Жёсткий акселератор: капитал прыгает к $K^{*}$. Гибкий: подходит постепенно, тем быстрее, чем больше $\lambda$.</figcaption>
+      </figure>
+      <div class="callout warn">
+        <span class="mark">Недостаток</span>
+        <p>Модель всё ещё не смотрит в будущее: $K^{*}$ зависит от текущего $Y$, а ожидания о будущей отдаче капитала в неё не входят. Нужен показатель, который агрегирует ожидания, — стоимость фирмы $V$ и q Тобина.</p>
+      </div>
+    </section>
+
+    <!-- ============ 04 ============ -->
+    <section class="sec" id="firm-value">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Взгляд в будущее</p>
+        <h2 class="sec-title">Стоимость фирмы и теорема Модильяни–Миллера</h2>
+      </div>
+      <div class="eq-box">
+        $$V = \sum_{\tau} \frac{\pi(K, I)}{(1+r)^{\tau}}$$
+        <span class="eq-note">Стоимость фирмы — приведённая стоимость будущего потока прибыли <span class="bt y">№10 — да</span>. Она связана с ценой акций <span class="bt n">№11 «не связана» — нет</span>.</span>
+      </div>
+      <div class="prose">
+        <p>Прибыль делится между двумя группами владельцев требований:</p>
+      </div>
+      <div class="eq-box">$$\pi = \pi_E + \pi_B \quad\Rightarrow\quad V = V_E + V_B$$</div>
+      <div class="prose">
+        <ul>
+          <li>$\pi_E$ (equity) — часть прибыли акционерам: дивиденды и реинвестированная прибыль.</li>
+          <li>$\pi_B$ (bonds) — часть прибыли кредиторам: проценты по облигациям и кредитам.</li>
+        </ul>
+      </div>
+      <div class="callout result">
+        <span class="mark">Теорема ММ</span>
+        <p>Если суммарная прибыль $\pi$ не зависит от способа финансирования, структура капитала меняет только пропорцию деления, но не $V$. Фирме безразлично, финансироваться внутренне или внешне <span class="bt y">№14 — да</span>.</p>
+      </div>
+      <div class="prose">
+        <ul>
+          <li><strong>Пример.</strong> $\pi = 100$. Без долга все 100 получают акционеры. С кредитом 30 идёт кредиторам, 70 — акционерам. Пирог тот же, $V$ одинакова.</li>
+          <li><strong>Дивидендная политика тоже иррелевантна</strong> (Miller, Modigliani, 1961). Высокие дивиденды сейчас — явный доход акционера; реинвестирование прибыли — рост цены акций, то есть доход от переоценки <span class="bt y">№15 — да</span>.</li>
+          <li><strong>Почему это верно (арбитраж).</strong> Инвестор может сам создать любой «домашний леверидж»: занять под личный счёт и купить акции нелевериджированной фирмы. Значит, фирма не может создать стоимость, просто поменяв соотношение долга и акций, — инвестор воспроизведёт это сам.</li>
+        </ul>
+      </div>
+      <div class="callout warn">
+        <span class="mark">Оговорка</span>
+        <p>Это теорема вида «если…, то…» (Modigliani, Miller, 1958). Налоги, издержки банкротства и асимметрия информации её нарушают: внешнее финансирование становится дороже внутреннего (лекции 13–15).</p>
+      </div>
+    </section>
+
+    <!-- ============ 05 ============ -->
+    <section class="sec" id="tobin-q">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Tobin, 1969</p>
+        <h2 class="sec-title">Средний и предельный q Тобина</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th>Средний $Q$</th><th>Предельный $q$</th></tr></thead>
+          <tbody>
+            <tr><td>Определение</td><td>$Q = V/K$ — рыночная стоимость фирмы к восстановительной стоимости капитала <span class="bt y">№12 — да</span></td><td>$q = \dfrac{dV}{dK} = \displaystyle\sum_\tau \frac{MRPK}{(1+r)^\tau}$ — ценность дополнительной единицы капитала</td></tr>
+            <tr><td>Как получить</td><td>легко посчитать по цене акций</td><td>не наблюдается напрямую</td></tr>
+            <tr><td>Роль</td><td>эмпирический ориентир</td><td>именно по нему принимается оптимальное решение</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="eq-box">
+        $$I = I(Q - 1), \quad I' \gt 0: \qquad Q \gt 1 \Rightarrow I \gt 0, \qquad Q \lt 1 \Rightarrow I \lt 0$$
+        <span class="eq-note">При $V \lt K$ (то есть $Q \lt 1$) инвестиции отрицательны <span class="bt n">№13 «I &gt; 0 при V &lt; K» — нет</span>.</span>
+      </div>
+      <div class="prose">
+        <ul>
+          <li><strong>Интуиция $Q \gt 1$:</strong> выгодно заплатить $K$ за капитал и получить актив, который рынок оценивает в $V \gt K$. Например, капитализация 150 при восстановительной стоимости 100 даёт $Q = 1{,}5$ — расширяться выгодно.</li>
+          <li><strong>Предельный q</strong> — фундаментальная цена «акции» на единицу капитала, где «дивиденд» — это $MRPK$. Та же логика, что и у цены финансового актива (лекции 10–11).</li>
+          <li>Средний и предельный q совпадают, если $V$ линейно однородна по капиталу: совершенная конкуренция и постоянная отдача от масштаба в производстве и в издержках регулирования (Hayashi, 1982). Тогда наблюдаемый $Q$ можно использовать вместо ненаблюдаемого $q$.</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="lecture-divider"><b>Лекция 9</b> · Неоклассическая q-модель с издержками регулирования</div>
+
+    <!-- ============ 06 ============ -->
+    <section class="sec" id="q-setup">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Постановка</p>
+        <h2 class="sec-title">Неоклассическая q-модель</h2>
+      </div>
+      <div class="prose"><p>В отрасли $N$ одинаковых фирм, у каждой капитал $k$, у отрасли $K = N\cdot k$. Износа нет, поэтому инвестиции фирмы — это просто прирост её капитала:</p></div>
+      <div class="eq-box">
+        $$\delta = 0 \;\Rightarrow\; I = k_{t+1} - k_t, \qquad \dot K = N\cdot I$$
+        $$\pi = TR(K, k) - I - C(I), \qquad C(0) = 0,\;\; C'(0) = 0,\;\; C'' \gt 0$$
+      </div>
+      <div class="prose">
+        <ul>
+          <li>Выручка $TR(K,k)$ зависит и от своего капитала $k$, и от капитала всей отрасли $K$: чем больше отрасль, тем ниже цена продукции и тем меньше $MRPK$. Поэтому в модели $MRPK$ убывает по $K$, например $MRPK = a - bK$.</li>
+          <li>$C(I)$ — <strong>внутренние издержки регулирования</strong> (adjustment costs): монтаж оборудования, обучение персонала, транспорт, сбои в работе. Они выпуклые и при $I \gt 0$, и при $I \lt 0$: быстро наращивать и быстро сокращать капитал одинаково дорого.</li>
+          <li>Цена единицы капитала нормирована к 1, поэтому в прибыли стоит $-I$ (покупка капитала) и $-C(I)$ (издержки его установки).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 07 ============ -->
+    <section class="sec" id="q-optimality">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Решение фирмы</p>
+        <h2 class="sec-title">Что максимизирует фирма и условие оптимальности</h2>
+      </div>
+      <div class="prose">
+        <ul>
+          <li>Фирма максимизирует стоимость $V$, то есть приведённую стоимость потока прибыли, а не текущую прибыль <span class="bt n">№16 — нет</span> <span class="bt y">№17 — да</span> <span class="bt y">№18 — да</span>.</li>
+          <li>Выбирая $I$, фирма оптимально распределяет прибыль во времени: сейчас меньше (платит за капитал и его установку), в будущем больше (капитал приносит отдачу) <span class="bt y">№19 — да</span> <span class="bt y">№20 — да</span> <span class="bt y">№21 — да</span>.</li>
+        </ul>
+      </div>
+
+      <h3 class="sub">Арбитраж двух стратегий</h3>
+      <div class="prose"><p>Владелец фирмы может продать её и получать $rV$, а может вести бизнес и получать прибыль плюс прирост стоимости $\pi + dV$, где $dV = q\cdot I$ (новая единица капитала стоит $q$). В оптимуме:</p></div>
+      <div class="eq-box">
+        $$rV = \max_I\,(\pi + qI) = \max_I\,\bigl(TR - I - C(I) + qI\bigr) \quad\Rightarrow\quad -1 - C'(I) + q = 0$$
+        $$\boxed{\,q = 1 + C'(I)\,}$$
+        <span class="eq-note">Предельные издержки единицы инвестиций $1 + C'(I)$ равны её теневой цене $q$ <span class="bt y">№22 — да</span>.</span>
+      </div>
+      <div class="eq-box">
+        $$I = f(q) = C'^{-1}(q - 1), \qquad f' \gt 0, \qquad f(1) = 0$$
+        $$C(I) = \tfrac{1}{2}\,m I^2 \;\Rightarrow\; I = \frac{q-1}{m}, \qquad \dot K = N\,\frac{q-1}{m}$$
+      </div>
+      <div class="callout fact">
+        <span class="mark">Пример</span>
+        <p>$m = 2$, $q = 1{,}2$: каждая фирма инвестирует $I = 0{,}2/2 = 0{,}1$; при $N = 100$ фирм капитал отрасли растёт на $\dot K = 10$ в единицу времени. Если $q$ упадёт до $0{,}9$, инвестиции станут отрицательными: $I = -0{,}05$.</p>
+      </div>
+      <div class="callout warn">
+        <span class="mark">Зачем нужны издержки регулирования</span>
+        <p>Без них $C'(I) \equiv 0$, и условие даёт $q \equiv 1$: капитал прыгает мгновенно, а связи между $I$ и $q$ вне равновесия нет (как в жёстком акселераторе). Именно выпуклые издержки регулирования делают инвестиции постепенными и связывают их с $q$.</p>
+      </div>
+
+      <h3 class="sub">Откуда это формально: гамильтониан</h3>
+      <div class="prose"><p>Задача фирмы в непрерывном времени: $\max \int_0^\infty e^{-rt}\bigl[TR(K,k) - I - C(I)\bigr]dt$ при $\dot k = I$. Гамильтониан в текущих значениях:</p></div>
+      <div class="eq-box">
+        $$H = TR(K,k) - I - C(I) + q\,I$$
+        $$\frac{\partial H}{\partial I} = 0:\;\; q = 1 + C'(I); \qquad \dot q = rq - \frac{\partial H}{\partial k} = rq - MRPK; \qquad \lim_{t\to\infty} e^{-rt} q\,k = 0$$
+        <span class="eq-note">Сопряжённая переменная $q$ и есть теневая цена капитала, а условие трансверсальности исключает «пузырь» в цене капитала. Второе условие — динамика $q$ из следующего раздела.</span>
+      </div>
+    </section>
+
+    <!-- ============ 08 ============ -->
+    <section class="sec" id="q-dynamics">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Цена капитала как цена актива</p>
+        <h2 class="sec-title">Динамика q</h2>
+      </div>
+      <div class="prose"><p>Предельный q — приведённая стоимость будущих предельных доходов от единицы капитала. Записав $q_t(1+r) = MRPK_{t+1} + q_{t+1}$, получаем условие отсутствия арбитража:</p></div>
+      <div class="eq-box">
+        $$q_t = \sum_\tau \frac{MRPK}{(1+r)^\tau} \quad\Rightarrow\quad \frac{q_{t+1} - q_t}{q_t} + \frac{MRPK}{q_t} = r$$
+        <span class="eq-note"><span class="bt y">№23 — да</span>. Непрерывное время: $\dot q = rq - MRPK(K)$.</span>
+      </div>
+      <div class="prose">
+        <ul>
+          <li><strong>Смысл:</strong> доход от единицы капитала ($MRPK$, «дивиденд») плюс рост её стоимости ($\dot q$, «переоценка») равны альтернативной доходности $r$. Это ровно то же условие, что и для акции: $\dot q + d = rq$.</li>
+          <li>Теневая цена капитала — это <strong>предельный</strong> q <span class="bt y">№24 — да</span>, а не средний. Утверждение «предельный q $= V/K$» неверно <span class="bt n">№25 — нет</span>: $V/K$ — это средний q.</li>
+          <li>Средний q равен предельному, если $V$ линейно однородна по $k$ (см. раздел 05).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 09 ============ -->
+    <section class="sec" id="phase">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">09</span>Система двух уравнений</p>
+        <h2 class="sec-title">Фазовая диаграмма и седловая траектория</h2>
+      </div>
+      <div class="eq-box">
+        $$\dot K = N\,\frac{q-1}{m}, \qquad \dot q = rq - (a - bK)$$
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Локус</th><th>Уравнение</th><th>Выше локуса</th><th>Ниже локуса</th></tr></thead>
+          <tbody>
+            <tr><td>$\dot K = 0$</td><td>$q = 1$ (горизонталь)</td><td>$K\uparrow$</td><td>$K\downarrow$</td></tr>
+            <tr><td>$\dot q = 0$</td><td>$q = \dfrac{MRPK}{r} = \dfrac{a - bK}{r}$ (убывает, пересекает ось q в $a/r$)</td><td>$q\uparrow$</td><td>$q\downarrow$</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="eq-box">
+        $$\text{SS:}\quad q^{*} = 1, \qquad MRPK(K^{*}) = r, \qquad K^{*} = \frac{a - r}{b}$$
+        <span class="eq-note">Нужно $a/r \gt 1$, иначе $K^{*} \le 0$. Пример: $a = 0{,}3$, $b = 0{,}001$, $r = 0{,}05$ дают $K^{*} = 250$.</span>
+      </div>
+      <div class="prose">
+        <ul>
+          <li>$\dot q \gt 0 \Leftrightarrow q \gt MRPK/r$; $\dot q \lt 0 \Leftrightarrow q \lt MRPK/r$ <span class="bt y">№29 — да</span> <span class="bt y">№30 — да</span>.</li>
+          <li>При $1 \lt q \lt MRPK/r$ капитал растёт, но q падает <span class="bt n">№31 «оба растут» — нет</span>.</li>
+          <li>$K$ — медленная (предопределённая) переменная, $q$ и $I$ — скачущие <span class="bt n">№27 «ничего не прыгает» — нет</span> <span class="bt n">№28 «I только плавно» — нет</span>.</li>
+          <li>На седловую траекторию выходят скачком $q$, а не подстройкой $K$ <span class="bt n">№26 — нет</span>.</li>
+          <li>Неустойчивые траектории — это пузыри (q уходит в бесконечность) или перенакопление, они нарушают условие трансверсальности. Рынок задаёт теневую цену капитала без пузырей, то есть ровно на седловой.</li>
+        </ul>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Фазовая диаграмма q-модели</p>
+        <svg viewBox="0 0 680 450" role="img" aria-label="Горизонтальный локус K с точкой равно нулю на уровне q равно 1 и убывающий локус q с точкой равно нулю пересекаются в точке E при K звёздочка. Через E проходит убывающая седловая траектория. В четырёх областях стрелки показывают направление движения; пунктиром — расходящиеся траектории">
+          <defs><marker id="a2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <line class="ax" x1="80" y1="400" x2="640" y2="400" marker-end="url(#a2)"/>
+          <line class="ax" x1="80" y1="400" x2="80" y2="40" marker-end="url(#a2)"/>
+          <text x="648" y="405">K</text><text x="74" y="34" text-anchor="end">q</text>
+          <line x1="80" y1="280" x2="610" y2="280" stroke="var(--accent)" stroke-width="2"/>
+          <text class="m" x="74" y="284" text-anchor="end">1</text><text class="m" x="560" y="270">K̇ = 0</text>
+          <line x1="80" y1="100" x2="560" y2="370" stroke="var(--bad)" stroke-width="2"/>
+          <text class="m" x="74" y="104" text-anchor="end">a/r</text><text class="m" x="568" y="374">q̇ = 0</text>
+          <line x1="160" y1="208" x2="384" y2="275" stroke="var(--accent-3)" stroke-width="2.5" marker-end="url(#a2)"/>
+          <line x1="600" y1="340" x2="416" y2="285" stroke="var(--accent-3)" stroke-width="2.5" marker-end="url(#a2)"/>
+          <text class="m" x="606" y="350">седло</text>
+          <circle cx="400" cy="280" r="5" fill="var(--ink)"/>
+          <line class="gd" x1="400" y1="285" x2="400" y2="400"/>
+          <text class="m" x="400" y="420" text-anchor="middle">K*</text><text x="410" y="300">E</text>
+          <path d="M118 172 C 230 225, 320 225, 370 110" fill="none" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#a2)"/>
+          <path d="M118 236 C 230 280, 300 300, 260 385" fill="none" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#a2)"/>
+          <g stroke="var(--ink-faint)" stroke-width="1.2">
+            <line x1="500" y1="170" x2="528" y2="170" marker-end="url(#a2)"/><line x1="500" y1="170" x2="500" y2="142" marker-end="url(#a2)"/>
+            <line x1="200" y1="240" x2="228" y2="240" marker-end="url(#a2)"/><line x1="200" y1="240" x2="200" y2="268" marker-end="url(#a2)"/>
+            <line x1="200" y1="340" x2="172" y2="340" marker-end="url(#a2)"/><line x1="200" y1="340" x2="200" y2="368" marker-end="url(#a2)"/>
+            <line x1="590" y1="310" x2="562" y2="310" marker-end="url(#a2)"/><line x1="590" y1="310" x2="590" y2="290" marker-end="url(#a2)"/>
+          </g>
+        </svg>
+        <figcaption>Локусы, стрелки в четырёх областях, седловая траектория (зелёная) и расходящиеся траектории (пунктир). Слева от $K^{*}$ капитала мало: $q \gt 1$, фирмы инвестируют, q снижается к 1. Справа — наоборот.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 10 ============ -->
+    <section class="sec" id="permanent-shocks">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">10</span>Сравнительная динамика</p>
+        <h2 class="sec-title">Перманентные шоки: неожиданный и объявленный</h2>
+      </div>
+      <div class="prose">
+        <p>Пусть $a$ (уровень $MRPK$: спрос на продукцию, производительность) перманентно растёт с $a_0$ до $a_1$. Локус $\dot q = 0$ параллельно поднимается: $q = (a_1 - bK)/r$. Локус $\dot K = 0$ не двигается. Новое равновесие $E'$: $q^{*} = 1$, $K^{*\prime} = (a_1 - r)/b \gt K^{*}$.</p>
+      </div>
+
+      <h3 class="sub">Неожиданный перманентный шок</h3>
+      <div class="prose">
+        <p>Капитал в момент шока изменить нельзя, поэтому $q$ скачком переходит на <strong>новую</strong> седловую при старом $K^{*}$. Дальше экономика движется по новой седловой: $q \gt 1$, фирмы инвестируют, $K$ растёт, $q$ постепенно снижается к 1.</p>
+      </div>
+      <figure class="chart">
+        <p class="chart-title">Неожиданный перманентный рост a</p>
+        <svg viewBox="0 0 680 440" role="img" aria-label="Локус q с точкой равно нулю поднимается параллельно. Точка из старого равновесия E скачком поднимается вертикально на новую седловую траекторию, а затем движется по ней вправо вниз к новому равновесию E штрих при большем капитале">
+          <defs><marker id="a3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <line class="ax" x1="80" y1="390" x2="640" y2="390" marker-end="url(#a3)"/>
+          <line class="ax" x1="80" y1="390" x2="80" y2="30" marker-end="url(#a3)"/>
+          <text x="648" y="395">K</text><text x="74" y="26" text-anchor="end">q</text>
+          <line x1="80" y1="280" x2="620" y2="280" stroke="var(--accent)" stroke-width="2"/>
+          <text class="m" x="74" y="284" text-anchor="end">1</text><text class="m" x="590" y="272">K̇ = 0</text>
+          <line x1="80" y1="100" x2="560" y2="370" stroke="var(--bad)" stroke-width="2"/>
+          <text class="m" x="568" y="376">q̇ = 0 (a₀)</text>
+          <line x1="80" y1="40" x2="560" y2="310" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="7 5"/>
+          <text class="m" x="140" y="58">q̇ = 0 (a₁)</text>
+          <line x1="200" y1="220" x2="560" y2="328" stroke="var(--accent-3)" stroke-width="1.2" opacity=".45"/>
+          <line x1="300" y1="218" x2="620" y2="314" stroke="var(--accent-3)" stroke-width="2.2"/>
+          <circle cx="400" cy="280" r="5" fill="var(--ink)"/>
+          <circle cx="507" cy="280" r="5" fill="var(--ink)"/>
+          <text x="388" y="300" text-anchor="end">E</text><text x="515" y="300">E′</text>
+          <line class="gd" x1="400" y1="285" x2="400" y2="390"/><line class="gd" x1="507" y1="285" x2="507" y2="390"/>
+          <text class="m" x="400" y="410" text-anchor="middle">K*</text><text class="m" x="507" y="410" text-anchor="middle">K*′</text>
+          <line x1="400" y1="275" x2="400" y2="253" stroke="var(--accent-4)" stroke-width="2.6" marker-end="url(#a3)"/>
+          <line x1="404" y1="250" x2="496" y2="277" stroke="var(--accent-4)" stroke-width="2.6" marker-end="url(#a3)"/>
+          <text x="440" y="196" text-anchor="middle">скачок q</text>
+          <text class="m" x="300" y="210">новая седловая</text>
+          <text class="m" x="150" y="212">старая</text>
+        </svg>
+        <figcaption>В момент шока скачок только у q (и у $I$). Затем капитал растёт к $K^{*\prime}$, а q монотонно снижается обратно к 1.</figcaption>
+      </figure>
+
+      <h3 class="sub">Объявленный перманентный шок</h3>
+      <div class="prose">
+        <p>В момент $t_0$ объявляют, что $a$ вырастет навсегда начиная с $t_1 \gt t_0$.</p>
+        <ul>
+          <li><strong>$t_0$:</strong> q скачком растёт — будущая отдача капитала выше. Скачок меньше, чем при неожиданном шоке: высокие $MRPK$ начнутся только через время.</li>
+          <li><strong>$(t_0, t_1)$:</strong> действует старая система. Точка выше $q = 1$ ⇒ $K\uparrow$; выше старого $\dot q = 0$ ⇒ $q\uparrow$. Капитал начинают наращивать заранее.</li>
+          <li><strong>$t_1$:</strong> скачка нет (событие ожидаемое) — точка должна оказаться <strong>ровно на новой седловой</strong>. Величина скачка в $t_0$ подбирается именно так.</li>
+          <li><strong>После $t_1$:</strong> движение по новой седловой к $E'$.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 11 ============ -->
+    <section class="sec" id="temporary-shock">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">11</span>Разбор задачи</p>
+        <h2 class="sec-title">Временный объявленный шок в q-модели</h2>
+      </div>
+      <h3 class="sub">Модель</h3>
+      <div class="eq-box">
+        $$q = 1 + C'(I) \;\Rightarrow\; I = \frac{N(q-1)}{m} \;\text{ при }\; C(I) = 0{,}5mI^2$$
+        $$\dot q = rq - MRPK(K) \;\Leftrightarrow\; \frac{MRPK + \dot q}{q} = r \quad\text{(NAC для капитала)}, \qquad MRPK = a - bK,\;\; a/r \gt 1$$
+      </div>
+      <div class="prose">
+        <ul>
+          <li>$\dot K = 0 \Leftrightarrow I = 0 \Leftrightarrow q = 1$, горизонталь. Выше неё $K$ растёт, ниже падает.</li>
+          <li>$\dot q = 0 \Leftrightarrow q = (a - bK)/r$, убывает, пересекает ось $q$ в $a/r$. Выше неё $q$ растёт, ниже падает.</li>
+          <li>Стационарное состояние: $q^{*} = 1$, $MRPK(K^{*}) = r$, $K^{*} = (a - r)/b$.</li>
+          <li>$K$ медленная, $q$ и $I$ скачущие. К равновесию ведёт только убывающая седловая траектория.</li>
+        </ul>
+      </div>
+
+      <h3 class="sub">Условие</h3>
+      <div class="callout">
+        <span class="mark">Задача</span>
+        <p>Экономика в стационарном состоянии. В момент $t_0$ приходит новость: на отрезке $[t_1, t_2]$ параметр $a$ временно вырастет с $a_0$ до $a_1$, а в $t_2$ вернётся к $a_0$.</p>
+      </div>
+      <div class="prose"><p><strong>Что сдвигается:</strong> $a\uparrow$ ⇒ $MRPK\uparrow$ ⇒ локус $\dot q = 0$ параллельно поднимается: $q = (a_1 - bK)/r$. Локус $\dot K = 0$ не двигается.</p></div>
+
+      <h3 class="sub">Динамика по этапам</h3>
+      <ol class="steps">
+        <li><strong>$t_0$, новость.</strong> Будущая отдача временно выше ⇒ приведённая стоимость будущих $MRPK$ выше ⇒ q скачком вверх. $K$ не меняется. Скачок меньше, чем при перманентном шоке.</li>
+        <li><strong>$(t_0, t_1)$, старая система ($a_0$).</strong> Точка выше $q = 1$ ⇒ $I \gt 0$, $K\uparrow$. Точка выше старого $\dot q = 0$ ⇒ $q\uparrow$. Движение вправо-вверх.</li>
+        <li><strong>$t_1$, $a$ выросло.</strong> Скачка нет: событие ожидаемое. Точка теперь ниже нового $\dot q = 0$ ⇒ q начинает падать. В $t_1$ у q максимум.</li>
+        <li><strong>$(t_1, t_2)$, новая система ($a_1$).</strong> q падает; пока $q \gt 1$, $K$ ещё растёт. При $q = 1$ — максимум $K$. Дальше $q \lt 1$ ⇒ $I \lt 0$ ⇒ $K\downarrow$.</li>
+        <li><strong>$t_2$, $a$ вернулось.</strong> Точка ровно на старой седловой справа от $E$, где $q \lt 1$. Значит, к $t_2$ q уже ниже 1.</li>
+        <li><strong>$(t_2, \infty)$.</strong> По старой седловой обратно в $E$: $K$ снижается к $K^{*}$, q растёт к 1 снизу.</li>
+      </ol>
+
+      <figure class="chart">
+        <p class="chart-title">Фазовая диаграмма временного объявленного роста a</p>
+        <svg viewBox="0 0 680 500" role="img" aria-label="Из равновесия E точка скачком поднимается вверх в момент t0, затем движется вправо вверх до t1, после разворачивается вниз, пересекает уровень q равно 1 в точке максимума капитала и к моменту t2 оказывается на старой седловой справа от E, по которой возвращается в E">
+          <defs><marker id="a4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <line class="ax" x1="60" y1="420" x2="650" y2="420" marker-end="url(#a4)"/>
+          <line class="ax" x1="60" y1="420" x2="60" y2="20" marker-end="url(#a4)"/>
+          <text x="656" y="425">K</text><text x="52" y="22" text-anchor="end">q</text>
+          <line x1="60" y1="260" x2="640" y2="260" stroke="var(--accent)" stroke-width="2"/>
+          <text class="m" x="52" y="264" text-anchor="end">1</text>
+          <line x1="60" y1="60" x2="640" y2="350" stroke="var(--bad)" stroke-width="2"/>
+          <text class="m" x="52" y="64" text-anchor="end">a₀/r</text>
+          <line x1="140" y1="20" x2="640" y2="270" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="7 5"/>
+          <line x1="200" y1="195" x2="640" y2="305" stroke="var(--accent-3)" stroke-width="2"/>
+          <circle cx="460" cy="260" r="5" fill="var(--ink)"/>
+          <line class="gd" x1="460" y1="265" x2="460" y2="420"/>
+          <text class="m" x="460" y="438" text-anchor="middle">K*</text>
+          <text x="425" y="282">E</text>
+          <line x1="460" y1="256" x2="460" y2="229" stroke="var(--accent-4)" stroke-width="2.5" marker-end="url(#a4)"/>
+          <path d="M460 225 C 475 220, 490 215, 505 212" fill="none" stroke="var(--accent-4)" stroke-width="2.5" marker-end="url(#a4)"/>
+          <path d="M505 212 C 530 222, 545 245, 545 262 C 545 272, 535 276, 522 276" fill="none" stroke="var(--accent-4)" stroke-width="2.5" marker-end="url(#a4)"/>
+          <line x1="515" y1="273.5" x2="470" y2="262.5" stroke="var(--accent-4)" stroke-width="2.5" marker-end="url(#a4)"/>
+          <text x="452" y="240" text-anchor="end">t₀</text><text x="500" y="200">t₁</text><text x="512" y="296">t₂</text>
+          <line x1="80" y1="465" x2="110" y2="465" stroke="var(--bad)" stroke-width="2"/><text class="m" x="116" y="469">q̇ = 0 при a₀</text>
+          <line x1="240" y1="465" x2="270" y2="465" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="7 5"/><text class="m" x="276" y="469">q̇ = 0 при a₁</text>
+          <line x1="400" y1="465" x2="430" y2="465" stroke="var(--accent-3)" stroke-width="2"/><text class="m" x="436" y="469">старая седловая</text>
+          <line x1="80" y1="488" x2="110" y2="488" stroke="var(--accent)" stroke-width="2"/><text class="m" x="116" y="492">K̇ = 0</text>
+          <line x1="240" y1="488" x2="270" y2="488" stroke="var(--accent-4)" stroke-width="2.5"/><text class="m" x="276" y="492">траектория</text>
+        </svg>
+        <figcaption>Скачок в $t_0$, изломы в $t_1$ и $t_2$, возврат по старой седловой.</figcaption>
+      </figure>
+
+      <figure class="chart">
+        <p class="chart-title">Временные диаграммы a, q, I, K</p>
+        <svg viewBox="0 0 680 480" role="img" aria-label="Четыре графика во времени. a ступенькой растёт на отрезке от t1 до t2. q скачком растёт в t0, плавно растёт до максимума в t1, падает ниже единицы к t2 и затем снизу возвращается к единице. I повторяет форму q. K растёт с t0, достигает максимума между t1 и t2 там, где q равно 1, затем снижается обратно к K звёздочка">
+          <defs><marker id="a5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <line class="gd" x1="220" y1="20" x2="220" y2="440"/><line class="gd" x1="340" y1="20" x2="340" y2="440"/><line class="gd" x1="460" y1="20" x2="460" y2="440"/>
+          <text class="m" x="220" y="460" text-anchor="middle">t₀</text><text class="m" x="340" y="460" text-anchor="middle">t₁</text><text class="m" x="460" y="460" text-anchor="middle">t₂</text>
+          <text class="b" x="40" y="70">a</text>
+          <line class="ax" x1="100" y1="110" x2="640" y2="110" marker-end="url(#a5)"/>
+          <polyline points="100,90 340,90 340,50 460,50 460,90 630,90" fill="none" stroke="var(--bad)" stroke-width="2"/>
+          <text class="m" x="94" y="94" text-anchor="end">a₀</text><text class="m" x="94" y="54" text-anchor="end">a₁</text>
+          <text class="b" x="40" y="170">q</text>
+          <line class="ax" x1="100" y1="220" x2="640" y2="220" marker-end="url(#a5)"/>
+          <line x1="100" y1="180" x2="630" y2="180" stroke="var(--ink-faint)" stroke-width=".6" stroke-dasharray="2 3"/>
+          <text class="m" x="94" y="184" text-anchor="end">1</text>
+          <path d="M100 180 L220 180" fill="none" stroke="var(--accent-4)" stroke-width="2"/>
+          <line x1="220" y1="180" x2="220" y2="158" stroke="var(--accent-4)" stroke-width="2" stroke-dasharray="3 3"/>
+          <path d="M220 158 C 270 156, 310 150, 340 142 C 380 160, 420 190, 460 204 C 520 196, 570 185, 630 182" fill="none" stroke="var(--accent-4)" stroke-width="2"/>
+          <text class="b" x="40" y="275">I</text>
+          <line class="ax" x1="100" y1="320" x2="640" y2="320" marker-end="url(#a5)"/>
+          <line x1="100" y1="285" x2="630" y2="285" stroke="var(--ink-faint)" stroke-width=".6" stroke-dasharray="2 3"/>
+          <text class="m" x="94" y="289" text-anchor="end">0</text>
+          <path d="M100 285 L220 285" fill="none" stroke="var(--accent-3)" stroke-width="2"/>
+          <line x1="220" y1="285" x2="220" y2="263" stroke="var(--accent-3)" stroke-width="2" stroke-dasharray="3 3"/>
+          <path d="M220 263 C 270 261, 310 255, 340 247 C 380 265, 420 295, 460 309 C 520 301, 570 290, 630 287" fill="none" stroke="var(--accent-3)" stroke-width="2"/>
+          <text class="b" x="40" y="380">K</text>
+          <line class="ax" x1="100" y1="430" x2="640" y2="430" marker-end="url(#a5)"/>
+          <line x1="100" y1="410" x2="630" y2="410" stroke="var(--ink-faint)" stroke-width=".6" stroke-dasharray="2 3"/>
+          <text class="m" x="94" y="414" text-anchor="end">K*</text>
+          <path d="M100 410 L220 410 C 280 400, 340 380, 410 365 C 440 368, 460 374, 490 384 C 540 400, 590 407, 630 409" fill="none" stroke="var(--accent)" stroke-width="2"/>
+          <line x1="410" y1="365" x2="410" y2="345" stroke="var(--ink-faint)" stroke-width=".6"/>
+          <text class="m" x="410" y="340" text-anchor="middle">max K, q = 1</text>
+        </svg>
+        <figcaption>$I = N(q-1)/m$ повторяет форму q. Максимум $K$ — в момент, когда q пересекает 1.</figcaption>
+      </figure>
+
+      <div class="callout result">
+        <span class="mark">Ключевое</span>
+        <p><strong>Скачок только в $t_0$</strong>, в момент новости. В $t_1$ и $t_2$ — изломы, но не скачки: событие ожидаемое.</p>
+        <p><strong>Максимум q в $t_1$:</strong> до $t_1$ q растёт по старой системе, после падает по новой.</p>
+        <p><strong>Максимум $K$ раньше $t_2$</strong>, когда q пересекает 1: фирмы заранее сокращают капитал, зная, что высокая отдача закончится.</p>
+        <p><strong>К $t_2$ q $\lt 1$</strong>, потому что точка должна лечь на старую седловую справа от $E$.</p>
+        <p><strong>Интерпретация:</strong> инвестиции реагируют на ожидания будущей отдачи, а не на текущую. Капитал наращивается до роста спроса и сокращается до его окончания.</p>
+      </div>
+
+      <h3 class="sub">Общий рецепт для шоков</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Тип шока</th><th>Что происходит</th></tr></thead>
+          <tbody>
+            <tr><td>Неожиданный перманентный</td><td>q сразу скачком на новую седловую</td></tr>
+            <tr><td>Объявленный перманентный</td><td>скачок в $t_0$, движение по старой системе, в $t_1$ — ровно на новой седловой</td></tr>
+            <tr><td>Временный (объявленный)</td><td>скачок в $t_0$, в $t_1$ смена системы, к моменту отмены $t_2$ — ровно на старой седловой</td></tr>
+            <tr><td>Вероятностный</td><td>к $t_1$ точка между двумя седловыми; в $t_1$ скачок на седловую реализовавшегося сценария</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose"><p>Общий принцип: <strong>скачки q возможны только в моменты поступления новой информации</strong>. Ожидаемые события не вызывают скачков — иначе существовала бы предсказуемая сверхприбыль (та же логика, что для цены акции в лекциях 10–11).</p></div>
+    </section>
+
+    <!-- ============ 12 ============ -->
+    <section class="sec" id="extensions">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">12</span>За пределами базовой модели</p>
+        <h2 class="sec-title">Неопределённость, бездействие, необратимость</h2>
+      </div>
+      <div class="prose">
+        <ul>
+          <li><strong>Неопределённость при только выпуклых издержках</strong> ничего не меняет: $q = E\sum MRPK/(1+r)^\tau$, нет зоны бездействия и стимула откладывать инвестиции <span class="bt y">№37 — да</span>.</li>
+          <li><strong>Зона бездействия.</strong> Если $C'(0) \ne 0$ и издержки асимметричны (разукомплектовать и продать капитал дороже, чем купить), появляются два порога:
+            $$q_L = \lim_{I\to 0^-}\bigl(1 + C'(I)\bigr) \;\lt\; 1 \;\lt\; q_U = \lim_{I\to 0^+}\bigl(1 + C'(I)\bigr)$$
+            При $q \in [q_L, q_U]$ инвестиций нет. Это объясняет, почему на микроуровне фирмы инвестируют редко.</li>
+          <li><strong>Lumpy-инвестиции.</strong> Фиксированные издержки дают инвестиции редкие и крупные, а не регулярные <span class="bt n">№32 «регулярно» — нет</span>. Это не просто следствие необратимости <span class="bt n">№33 — нет</span>.</li>
+          <li><strong>Необратимость.</strong> Одни только выпуклые издержки дают лишь частичную необратимость <span class="bt y">№34 — да</span>. Полная необратимость — при $q_L = 0$ <span class="bt y">№35 — да</span>. Её причина — большие, но не обязательно бесконечные предельные издержки отрицательных инвестиций <span class="bt y">№36 — да</span>. Неопределённость не является причиной полной необратимости <span class="bt n">№38 — нет</span>.</li>
+          <li><strong>Неопределённость + невыпуклые издержки</strong> расширяют зону бездействия ⇒ совокупные инвестиции падают. Альтернативный подход — реальные опционы (Dixit, Pindyck, 1994).</li>
+        </ul>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Функция инвестиций I(q) в трёх случаях</p>
+        <svg viewBox="0 0 680 270" role="img" aria-label="Три графика функции инвестиций от q. В базовой модели гладкая возрастающая кривая проходит через ноль при q равно 1. При зоне бездействия на отрезке от qL до qU инвестиции равны нулю. При фиксированных издержках на концах зоны бездействия инвестиции скачком становятся крупными">
+          <defs><marker id="a6" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <line class="ax" x1="50" y1="210" x2="50" y2="25" marker-end="url(#a6)"/><line class="ax" x1="50" y1="120" x2="225" y2="120" marker-end="url(#a6)"/>
+          <text class="m" x="44" y="28" text-anchor="end">I</text><text class="m" x="226" y="137">q</text>
+          <text class="m" x="140" y="137" text-anchor="middle">1</text>
+          <path d="M70 200 C 105 165, 128 132, 140 120 C 152 108, 178 75, 212 40" fill="none" stroke="var(--accent-4)" stroke-width="2.5"/>
+          <text class="b" x="135" y="240" text-anchor="middle">Базовая модель</text><text class="m" x="135" y="258" text-anchor="middle">C′(0) = 0</text>
+          <line class="ax" x1="270" y1="210" x2="270" y2="25" marker-end="url(#a6)"/><line class="ax" x1="270" y1="120" x2="445" y2="120" marker-end="url(#a6)"/>
+          <text class="m" x="264" y="28" text-anchor="end">I</text><text class="m" x="446" y="137">q</text>
+          <path d="M290 200 C 310 168, 325 138, 333 120" fill="none" stroke="var(--accent-4)" stroke-width="2.5"/>
+          <line x1="333" y1="120" x2="387" y2="120" stroke="var(--accent-4)" stroke-width="4"/>
+          <path d="M387 120 C 397 102, 412 75, 432 40" fill="none" stroke="var(--accent-4)" stroke-width="2.5"/>
+          <text class="m" x="333" y="137" text-anchor="middle">qL</text><text class="m" x="360" y="137" text-anchor="middle">1</text><text class="m" x="387" y="137" text-anchor="middle">qU</text>
+          <text class="b" x="355" y="240" text-anchor="middle">Зона бездействия</text><text class="m" x="355" y="258" text-anchor="middle">C′(0) ≠ 0, асимметрия</text>
+          <line class="ax" x1="490" y1="210" x2="490" y2="25" marker-end="url(#a6)"/><line class="ax" x1="490" y1="120" x2="665" y2="120" marker-end="url(#a6)"/>
+          <text class="m" x="484" y="28" text-anchor="end">I</text><text class="m" x="666" y="137">q</text>
+          <path d="M505 205 C 520 190, 532 178, 540 170" fill="none" stroke="var(--accent-4)" stroke-width="2.5"/>
+          <circle cx="540" cy="170" r="3.5" fill="var(--accent-4)"/>
+          <line x1="540" y1="166" x2="540" y2="124" stroke="var(--ink-faint)" stroke-width=".8" stroke-dasharray="3 3"/>
+          <line x1="540" y1="120" x2="620" y2="120" stroke="var(--accent-4)" stroke-width="4"/>
+          <line x1="620" y1="116" x2="620" y2="74" stroke="var(--ink-faint)" stroke-width=".8" stroke-dasharray="3 3"/>
+          <circle cx="620" cy="70" r="3.5" fill="var(--accent-4)"/>
+          <path d="M620 70 C 630 60, 642 48, 655 38" fill="none" stroke="var(--accent-4)" stroke-width="2.5"/>
+          <text class="m" x="540" y="137" text-anchor="middle">qL</text><text class="m" x="580" y="137" text-anchor="middle">1</text><text class="m" x="620" y="137" text-anchor="middle">qU</text>
+          <text class="b" x="575" y="240" text-anchor="middle">Фиксированные издержки</text><text class="m" x="575" y="258" text-anchor="middle">скачки I (lumpy)</text>
+        </svg>
+        <figcaption>Базовая модель: инвестиции гладко зависят от q. Зона бездействия: при $q_L \le q \le q_U$ фирма ничего не делает. Фиксированные издержки: выйдя из зоны, фирма инвестирует сразу много.</figcaption>
+      </figure>
+
+      <h3 class="sub">Пример: ценность ожидания (реальный опцион)</h3>
+      <div class="callout fact">
+        <span class="mark">Пример</span>
+        <p>Проект стоит 100 и необратим. Сегодня его ожидаемая ценность 110, но через год станет ясно: 160 или 60 с вероятностью ½. Ставка 10%.</p>
+        <p><strong>Инвестировать сейчас:</strong> $NPV = 110 - 100 = 10 \gt 0$.</p>
+        <p><strong>Подождать год и вложиться только в хорошем случае:</strong> $NPV = \tfrac12\cdot\dfrac{160 - 100}{1{,}1} \approx 27$.</p>
+        <p>Ожидание выгоднее, хотя NPV сейчас положителен. При необратимости и неопределённости правило «инвестируй, если NPV &gt; 0» не работает: нужно, чтобы выигрыш покрывал ещё и потерянную ценность опциона подождать. Отсюда более высокий порог $q_U$ и более широкая зона бездействия.</p>
+      </div>
+    </section>
+
+    <!-- ============ 13 ============ -->
+    <section class="sec" id="cheatsheet">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">13</span>Итог</p>
+        <h2 class="sec-title">Шпаргалка к контрольной</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Что</th><th>Формула</th></tr></thead>
+          <tbody>
+            <tr><td>Издержки использования капитала</td><td>$r_K = p_K(r + \delta - \dot p_K/p_K)$</td></tr>
+            <tr><td>Жёсткий акселератор</td><td>$K^{*} = (\alpha/r)Y$, $I = (\alpha/r)\Delta Y$</td></tr>
+            <tr><td>Гибкий акселератор</td><td>$I = \lambda(K^{*} - K)$, $\lambda = c_1/(c_1 + c_2)$</td></tr>
+            <tr><td>Средний и предельный q</td><td>$Q = V/K$; $q = dV/dK = \sum MRPK/(1+r)^\tau$</td></tr>
+            <tr><td>Оптимальные инвестиции</td><td>$q = 1 + C'(I)$; при $C = 0{,}5mI^2$: $I = (q-1)/m$</td></tr>
+            <tr><td>Динамика q</td><td>$\dot q = rq - MRPK(K)$</td></tr>
+            <tr><td>Локусы</td><td>$\dot K = 0$: $q = 1$; $\dot q = 0$: $q = (a - bK)/r$</td></tr>
+            <tr><td>Стационар</td><td>$q^{*} = 1$, $K^{*} = (a - r)/b$</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout result">
+        <span class="mark">Для задачи</span>
+        <p>$q = 1 + C'(I) \Rightarrow I = (q-1)/m$; локусы $q = 1$ и $q = (a - bK)/r$; седловая траектория и правила шоков (раздел 11).</p>
+      </div>
+      <div class="callout">
+        <span class="mark">Для утверждений</span>
+        <p>Весь материал разделов 01–12: все плашки с номерами — утверждения банка тестов 3 (часть 2) с правильным ответом.</p>
+      </div>
+
+      <h3 class="sub">Литература</h3>
+      <ul class="lit-list">
+        <li><span class="idx">01</span><span>Jorgenson, D. (1963) · <em>Capital Theory and Investment Behavior</em> · AER</span></li>
+        <li><span class="idx">02</span><span>Modigliani, F., Miller, M. (1958) · <em>The Cost of Capital, Corporation Finance and the Theory of Investment</em> · AER</span></li>
+        <li><span class="idx">03</span><span>Tobin, J. (1969) · <em>A General Equilibrium Approach to Monetary Theory</em> · JMCB</span></li>
+        <li><span class="idx">04</span><span>Hayashi, F. (1982) · <em>Tobin's Marginal q and Average q: A Neoclassical Interpretation</em> · Econometrica</span></li>
+        <li><span class="idx">05</span><span>Dixit, A., Pindyck, R. (1994) · <em>Investment under Uncertainty</em></span></li>
+        <li><span class="idx">06</span><span>Ромер, Д. · <em>Высшая макроэкономика</em> · глава об инвестициях</span></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект · Макроэкономика 2 · Лекции 8–9: инвестиции и q-модель Тобина</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>

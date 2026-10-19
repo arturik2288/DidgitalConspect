@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Финансовые рынки: арбитраж, пузыри, облигации, валютный курс — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams'
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#f6f2e9;
+      --surface:#ffffff;
+      --surface-2:#efe7d4;
+      --ink:#232019;
+      --ink-soft:#6b6353;
+      --ink-faint:#9a927e;
+      --accent:#2f5590;
+      --accent-strong:#1f3d66;
+      --accent-soft:#dde9e8;
+      --accent-2:#a8703a;
+      --accent-2-soft:#f3e3cd;
+      --accent-3:#3f7d5c;
+      --accent-3-soft:#e1efe4;
+      --accent-4:#6b5aa6;
+      --bad:#a5432c;
+      --bad-soft:#f6e2da;
+      --rule:#ddd2b8;
+      --shadow: 0 1px 2px rgba(35,32,25,0.06), 0 6px 20px -8px rgba(35,32,25,0.15);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent-2);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:900px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex; align-items:center; gap:6px;
+      font-family:'IBM Plex Mono',monospace; font-size:0.85rem;
+      color:var(--accent); text-decoration:none;
+      padding:18px 24px 0; max-width:900px; margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative; overflow:hidden;
+    }
+    header.hero::before{
+      content:""; position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:900px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:.09em;
+      text-transform:uppercase; color:var(--accent); font-weight:700; margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:66ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:900px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto; scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none; display:flex; align-items:center; gap:7px; padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint); text-decoration:none;
+      border-bottom:2.5px solid transparent; white-space:nowrap;
+    }
+    nav.toc a .n{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-faint); font-weight:500;}
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    main{padding-bottom:40px;}
+    section.sec{padding:48px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:26px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px; height:24px; border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(21px,3vw,27px);}
+
+    .prose{max-width:72ch;}
+    .prose p{margin:0 0 15px;}
+    .prose ul, .prose ol{margin:0 0 15px; padding-left:1.3em;}
+    .prose li{margin-bottom:8px;}
+    .prose li::marker{color:var(--accent); font-weight:700;}
+    h3.sub{font-family:'Inter',sans-serif; font-size:16.5px; font-weight:700; color:var(--ink); margin:28px 0 10px;}
+
+    strong{color:var(--ink);}
+
+    .callout{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+      border-radius:10px; padding:14px 18px; margin:20px 0; max-width:72ch;
+    }
+    .callout .mark{font-family:'Fraunces',serif; font-weight:700; font-size:17px; color:var(--accent); line-height:1.3; flex:none;}
+    .callout p{margin:0; font-size:14.5px; color:var(--ink);}
+    .callout p + p{margin-top:8px;}
+    .callout.result{border-color:color-mix(in srgb, var(--accent-2) 40%, transparent); background:var(--accent-2-soft);}
+    .callout.result .mark{color:var(--accent-2);}
+    .callout.fact{border-color:color-mix(in srgb, var(--accent-3) 40%, transparent); background:var(--accent-3-soft);}
+    .callout.fact .mark{color:var(--accent-3);}
+    .callout.warn{border-color:color-mix(in srgb, var(--bad) 40%, transparent); background:var(--bad-soft);}
+    .callout.warn .mark{color:var(--bad);}
+
+    .eq-box{
+      background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+      box-shadow:var(--shadow); padding:16px 20px; margin:16px 0; overflow-x:auto;
+    }
+    .eq-note{display:block; font-family:'Inter',sans-serif; font-size:13px; color:var(--ink-faint); margin-top:6px;}
+
+    table{
+      width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px;
+      background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;
+    }
+    th,td{padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule); vertical-align:top;}
+    th{
+      font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em;
+      text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);
+    }
+    tr:last-child td{border-bottom:none;}
+    .table-wrap{overflow-x:auto; margin:16px 0;}
+    .table-wrap table{margin:0; min-width:560px;}
+
+    .bt{
+      display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700;
+      padding:1px 7px; border-radius:5px; margin-left:4px; white-space:nowrap; vertical-align:1px;
+    }
+    .bt.y{background:var(--accent-3-soft); color:var(--accent-3); border:1px solid color-mix(in srgb, var(--accent-3) 45%, transparent);}
+    .bt.n{background:var(--bad-soft); color:var(--bad); border:1px solid color-mix(in srgb, var(--bad) 45%, transparent);}
+
+    figure{margin:24px 0; padding:0;}
+    figure.chart{
+      background:var(--surface); border:1px solid var(--rule);
+      border-radius:12px; padding:18px 18px 14px; box-shadow:var(--shadow); overflow-x:auto;
+    }
+    figure.chart svg{display:block; width:100%; min-width:520px; height:auto;}
+    figure.chart svg text{fill:var(--ink-soft); font-family:'Inter',sans-serif; font-size:13px;}
+    figure.chart svg text.m{fill:var(--ink-faint);}
+    figure.chart svg text.b{font-weight:700; fill:var(--ink);}
+    figure.chart svg .ax{stroke:var(--ink-faint); stroke-width:1;}
+    figure.chart svg .gd{stroke:var(--ink-faint); stroke-width:.6; stroke-dasharray:4 4;}
+    figcaption{font-size:13px; color:var(--ink-faint); margin-top:10px; padding-top:10px; border-top:1px solid var(--rule);}
+    .chart-title{font-family:'Inter',sans-serif; font-weight:700; font-size:13.5px; color:var(--ink); margin:0 0 10px;}
+
+    .lit-list{list-style:none; margin:16px 0; padding:0; font-size:13.5px; color:var(--ink-faint); max-width:72ch;}
+    .lit-list li{padding:9px 0; border-bottom:1px solid var(--rule); display:flex; gap:10px;}
+    .lit-list li .idx{font-family:'IBM Plex Mono',monospace; color:var(--accent); flex:none;}
+
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+
+    footer.page-foot{padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;}
+
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/economics.html">← Раздел «Экономика»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Макроэкономика 2 · Лекции 10–11 · Финансовые рынки</p>
+      <h1 class="title">Арбитраж, пузыри, облигации, паритеты и валютный курс</h1>
+      <p class="subtitle">Логика та же, что в q-модели: цена актива — приведённая стоимость будущих выплат, и она прыгает только на новостях. Гипотеза эффективного рынка, условие отсутствия арбитража, фундаментальная цена и рациональные пузыри, кривая доходности, паритеты процентных ставок и фундаментальный валютный курс.</p>
+      <div class="meta-row">
+        <span>Лекции 10–11</span>
+        <span>Продолжение темы <a href="macro2-investment-q-model.html">«Инвестиции и q-модель Тобина»</a></span>
+        <span>Плашки <span class="bt y">№1 — да</span> — утверждения банка тестов 4, часть 1</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#emh"><span class="n">01</span>Эффективный рынок</a>
+      <a href="#nac"><span class="n">02</span>Арбитраж и фундаментал</a>
+      <a href="#bubbles"><span class="n">03</span>Пузыри</a>
+      <a href="#continuous"><span class="n">04</span>Новости и цена</a>
+      <a href="#bonds"><span class="n">05</span>Облигации</a>
+      <a href="#parity"><span class="n">06</span>Паритеты ставок</a>
+      <a href="#exchange-rate"><span class="n">07</span>Валютный курс</a>
+      <a href="#cheatsheet"><span class="n">08</span>Шпаргалка</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- ============ 01 ============ -->
+    <section class="sec" id="emh">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Fama, 1970</p>
+        <h2 class="sec-title">Гипотеза эффективного рынка (EMH)</h2>
+      </div>
+      <div class="callout result">
+        <span class="mark">Определение</span>
+        <p>Рынок эффективен, если цены <strong>мгновенно</strong> и полностью отражают всю релевантную информацию <span class="bt n">№1 «рано или поздно» — нет</span>. Полная информация у каждого агента для этого не нужна — нужны рациональные ожидания <span class="bt n">№2 — нет</span>.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Форма</th><th>Цены отражают</th><th>Что не даёт сверхдоходности</th><th>Банк тестов</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Слабая</strong></td><td>всю информацию о прошлой динамике цен</td><td>технический анализ (графики, тренды) — но это не «полная бесполезность»</td><td><span class="bt y">№3 — да</span> <span class="bt n">№4 — нет</span></td></tr>
+            <tr><td><strong>Умеренная</strong> (полусильная)</td><td>плюс всю публичную информацию</td><td>фундаментальный анализ публичных данных (отчётность, новости)</td><td><span class="bt y">№5 — да</span> <span class="bt n">№6 — нет</span></td></tr>
+            <tr><td><strong>Сильная</strong></td><td>плюс инсайдерскую информацию</td><td>даже торговля на инсайде</td><td><span class="bt y">№7 — да</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose">
+        <ul>
+          <li>Сильная форма требует, чтобы рынок <strong>агрегировал</strong> частную информацию разных агентов; слабой достаточно <strong>усреднения</strong> общедоступной <span class="bt y">№8 — да</span>.</li>
+          <li>Эмпирические тесты в целом подтверждают слабую и умеренную формы <span class="bt y">№9 — да</span>; активно управляемые фонды в среднем часто проигрывают индексам <span class="bt y">№10 — да</span>.</li>
+          <li>EMH исключает арбитраж — безрисковую прибыль без вложений <span class="bt y">№11 — да</span>.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <span class="mark">Интуиция</span>
+        <p>Если бы прибыль была предсказуема (все знают, что завтра акция подорожает на 10%), все купили бы её сегодня — и цена выросла бы уже сегодня. Предсказуемая прибыль «съедается» мгновенно. Поэтому изменения цены на эффективном рынке непредсказуемы: цена реагирует только на новости, а новости по определению неожиданны (Samuelson, 1965).</p>
+      </div>
+      <h3 class="sub">Дополнительно: ограничения EMH</h3>
+      <div class="prose">
+        <ul>
+          <li><strong>Парадокс Гроссмана–Стиглица (1980).</strong> Если бы цены полностью отражали всю информацию, никто не стал бы тратить ресурсы на её сбор, — и тогда цены перестали бы её отражать. Значит, рынок не может быть абсолютно эффективным: небольшая неэффективность — плата аналитикам за сбор информации.</li>
+          <li><strong>Проблема совместной гипотезы.</strong> Проверить EMH можно только вместе с моделью «нормальной» доходности. Если тест отвергнут, неясно, неэффективен рынок или неверна модель доходности.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 02 ============ -->
+    <section class="sec" id="nac">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>No-arbitrage condition</p>
+        <h2 class="sec-title">Условие отсутствия арбитража и фундаментальная цена</h2>
+      </div>
+      <div class="prose"><p>Пусть $q_t$ — цена акции, $d_{t+1}$ — дивиденд. Ожидаемая доходность акции (прирост цены плюс дивиденд) должна равняться безрисковой ставке $r$:</p></div>
+      <div class="eq-box">
+        $$\frac{E q_{t+1} - q_t}{q_t} + \frac{E d_{t+1}}{q_t} = r \quad\Leftrightarrow\quad q_t = \frac{E q_{t+1} + E d_{t+1}}{1+r}$$
+        <span class="eq-note">Та же логика, что в q-модели: $MRPK + \dot q = rq$. Капитал — это тоже актив, приносящий «дивиденд» $MRPK$.</span>
+      </div>
+      <div class="prose"><p>Подставим то же условие для $q_{t+1}$, $q_{t+2}$ и т.д. («итерация вперёд»). После $T$ шагов:</p></div>
+      <div class="eq-box">
+        $$q_t = E\sum_{\tau=1}^{T} \frac{d_{t+\tau}}{(1+r)^\tau} + \frac{E q_{t+T}}{(1+r)^T}$$
+        $$T\to\infty:\qquad q_t = \underbrace{E\sum_{\tau=1}^{\infty}\frac{d_{t+\tau}}{(1+r)^\tau}}_{\text{фундаментал}} \;+\; \underbrace{\lim_{T\to\infty}\frac{E q_{t+T}}{(1+r)^T}}_{\text{пузырь}}$$
+      </div>
+      <div class="prose">
+        <ul>
+          <li><strong>Фундаментальная цена</strong> — приведённая стоимость ожидаемых будущих выплат. Она есть у любого актива с потоком выплат <span class="bt n">№22 «только у потока» — нет</span>.</li>
+          <li>Цена прыгает, только когда меняются ожидания будущих дивидендов, то есть на новостях.</li>
+        </ul>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Пример</span>
+        <p>Акция платит постоянный дивиденд $d = 5$ в год, $r = 5\%$. Фундаментальная цена — бессрочная рента: $q = d/r = 100$. Если рынок узнаёт, что дивиденд навсегда вырастет до 6, цена сразу прыгает до 120.</p>
+      </div>
+    </section>
+
+    <!-- ============ 03 ============ -->
+    <section class="sec" id="bubbles">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Отклонения от фундаментала</p>
+        <h2 class="sec-title">Условие отсутствия пузырей и рациональные пузыри</h2>
+      </div>
+      <div class="eq-box">
+        $$\text{NBC:}\qquad \lim_{T\to\infty}\frac{E q_{t+T}}{(1+r)^T} = 0$$
+        <span class="eq-note">No-bubble condition — аналог условия отсутствия игр Понци (NPG) для домохозяйства.</span>
+      </div>
+      <div class="prose">
+        <ul>
+          <li>К нулю стремится <strong>приведённая стоимость</strong> цены, а не сама цена <span class="bt n">№17 — нет</span>. Рост цены не исключается <span class="bt n">№19 — нет</span>; нужно лишь, чтобы темп её роста не превышал $r$ систематически <span class="bt y">№18 — да</span>.</li>
+        </ul>
+      </div>
+      <h3 class="sub">Рациональный пузырь</h3>
+      <div class="prose"><p>Общее решение условия арбитража: $q_t = q^F_t + B_t$, где $q^F$ — фундаментал, а $B_t$ — любой процесс, для которого</p></div>
+      <div class="eq-box">
+        $$E\,B_{t+1} = (1+r)\,B_t, \qquad \text{например } B_t = \xi_t\,(1+r)^t$$
+        <span class="eq-note">Здесь $\xi_t$ — случайная величина, которая в среднем не меняется ($E\xi_{t+1} = \xi_t$). Покупатель актива с пузырём получает ровно $r$: часть доходности — дивиденды, часть — ожидаемый рост пузыря.</span>
+      </div>
+      <div class="prose">
+        <ul>
+          <li>Пузырь растёт в среднем со ставкой $r$ <span class="bt y">№20 — да</span>.</li>
+          <li>Пузырь — отклонение от фундаментала, не противоречащее условию отсутствия арбитража <span class="bt y">№21 — да</span>: держатели «рационально» ждут, что цена будет расти дальше.</li>
+          <li>Высокие цены — не обязательно пузырь <span class="bt n">№23 — нет</span>; обвал цен — не обязательно лопнувший пузырь <span class="bt n">№24 — нет</span>. Это может быть переоценка самого фундаментала: изменились ожидания дивидендов или ставка $r$.</li>
+        </ul>
+      </div>
+      <h3 class="sub">Дополнительно: стохастический пузырь и где пузырей быть не может</h3>
+      <div class="prose">
+        <ul>
+          <li><strong>Пузырь, который может лопнуть</strong> (Blanchard, Watson, 1982). С вероятностью $\pi$ пузырь продолжается и растёт до $B_{t+1} = (1+r)B_t/\pi$, с вероятностью $1-\pi$ лопается до нуля. Тогда $E B_{t+1} = \pi\cdot(1+r)B_t/\pi = (1+r)B_t$ — условие арбитража выполнено. Чем выше риск схлопывания, тем быстрее пузырь должен расти, пока жив.</li>
+          <li><strong>У облигации с погашением пузыря нет:</strong> в дату погашения её цена равна номиналу, и итерация вперёд упирается в фиксированную величину.</li>
+          <li><strong>Отрицательного пузыря нет:</strong> он рос бы по модулю со ставкой $r$ и рано или поздно сделал бы цену отрицательной.</li>
+          <li><strong>Пузырь не может «появиться» посреди торгов</strong> (Diba, Grossman, 1988): если сегодня $B = 0$ и пузырь не может быть отрицательным, из $E B_{t+1} = 0$ следует $B_{t+1} = 0$. Рациональный пузырь должен существовать с самого начала обращения актива.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 04 ============ -->
+    <section class="sec" id="continuous">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Формулы для задачи</p>
+        <h2 class="sec-title">Непрерывное время: как цена реагирует на новости</h2>
+      </div>
+      <div class="eq-box">
+        $$\dot q = rq - d \qquad\text{(NAC)}$$
+        $$q(t) = \int_t^\infty d(\tau)\,e^{-r(\tau - t)}\,d\tau \qquad\text{(фундаментал)}$$
+        $$d = \text{const}\;\Rightarrow\; q = \frac{d}{r}; \qquad d \text{ растёт с темпом } g \lt r \;\Rightarrow\; q = \frac{d}{r - g}$$
+        $$\text{Кусок:}\qquad \int_a^b d\,e^{-r(\tau - t)}\,d\tau = \frac{d}{r}\Bigl[e^{-r(a - t)} - e^{-r(b - t)}\Bigr]$$
+        <span class="eq-note">Формула $q = d/(r-g)$ — модель Гордона: цена растущего потока дивидендов.</span>
+      </div>
+
+      <h3 class="sub">Неожиданный и объявленный перманентный рост дивиденда</h3>
+      <div class="prose">
+        <ul>
+          <li><strong>Неожиданный</strong> перманентный рост $d_0 \to d_1$ в момент $t_S$: цена скачком переходит с $d_0/r$ на $d_1/r$ в момент $t_S$.</li>
+          <li><strong>Объявленный в $t_A$</strong> рост, который начнётся в $t_S$. На отрезке $(t_A, t_S)$ цена складывается из старого дивиденда до $t_S$ и нового после:
+            $$q(t) = \frac{d_0}{r} + \frac{d_1 - d_0}{r}\,e^{-r(t_S - t)}, \qquad t_A \lt t \lt t_S$$
+            Скачок в $t_A$ равен $\dfrac{d_1 - d_0}{r}\,e^{-r(t_S - t_A)}$; дальше $q' \gt 0$ и $q'' = r\,q' \gt 0$ — выпуклый рост. В $t_S$ скачка нет.</li>
+          <li>Скачки цены — только на новостях <span class="bt y">№25 — да</span>; ожидаемые скачки противоречили бы EMH <span class="bt y">№26 — да</span>: если все знают, что в $t_S$ цена прыгнет вверх, акцию купят заранее.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <span class="mark">Приём</span>
+        <p>Знак $q'$ на отрезке до первого изменения дивиденда совпадает со знаком скачка в момент новости, а $q'' = r\,q'$. Проверка: на отрезке $\dot q = rq - d_0$, и после положительного скачка $q \gt d_0/r$, значит $\dot q \gt 0$.</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Цена акции при неожиданном и объявленном росте дивидендов</p>
+        <svg viewBox="0 0 680 440" role="img" aria-label="Сверху дивиденд ступенькой растёт с d0 до d1 в момент tS. Снизу цена: при неожиданном росте пунктиром — скачок в tS с d0 делить на r до d1 делить на r. При объявленном в tA — скачок вверх в tA, затем плавный выпуклый рост до d1 делить на r к моменту tS без скачка">
+          <defs><marker id="b1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <line class="gd" x1="230" y1="20" x2="230" y2="370"/><line class="gd" x1="420" y1="20" x2="420" y2="370"/>
+          <text class="m" x="230" y="390" text-anchor="middle">t_A</text><text class="m" x="420" y="390" text-anchor="middle">t_S</text>
+          <text class="b" x="30" y="85">d</text>
+          <line class="ax" x1="90" y1="150" x2="640" y2="150" marker-end="url(#b1)"/>
+          <polyline points="90,120 420,120 420,60 630,60" fill="none" stroke="var(--bad)" stroke-width="2"/>
+          <text class="m" x="84" y="124" text-anchor="end">d₀</text><text class="m" x="84" y="64" text-anchor="end">d₁</text>
+          <text class="b" x="30" y="270">q</text>
+          <line class="ax" x1="90" y1="365" x2="640" y2="365" marker-end="url(#b1)"/>
+          <text class="m" x="84" y="324" text-anchor="end">d₀/r</text><text class="m" x="84" y="224" text-anchor="end">d₁/r</text>
+          <line x1="90" y1="220" x2="630" y2="220" stroke="var(--ink-faint)" stroke-width=".5" stroke-dasharray="2 3"/>
+          <polyline points="90,320 420,320 420,220 630,220" fill="none" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <path d="M90 320 L230 320" fill="none" stroke="var(--accent-4)" stroke-width="2.5"/>
+          <line x1="230" y1="320" x2="230" y2="292" stroke="var(--accent-4)" stroke-width="2.5" stroke-dasharray="3 3"/>
+          <path d="M230 290 C 300 286, 370 262, 420 220 L 630 220" fill="none" stroke="var(--accent-4)" stroke-width="2.5"/>
+          <line x1="100" y1="420" x2="130" y2="420" stroke="var(--accent-4)" stroke-width="2.5"/><text class="m" x="136" y="424">объявлено в t_A: скачок в t_A, плавно до t_S</text>
+          <line x1="420" y1="420" x2="450" y2="420" stroke="var(--ink-faint)" stroke-width="1.5" stroke-dasharray="6 4"/><text class="m" x="456" y="424">неожиданно: скачок в t_S</text>
+        </svg>
+        <figcaption>Новость в $t_A$ сразу закладывает в цену будущий рост дивидендов (дисконтированный). В $t_S$ новостей нет — скачка нет.</figcaption>
+      </figure>
+
+      <div class="callout fact">
+        <span class="mark">Числовой пример</span>
+        <p>$d_0 = 4$, $d_1 = 6$, $r = 0{,}1$, рост объявлен за 5 лет: $t_S - t_A = 5$. До новости $q = 40$. Скачок в $t_A$: $\dfrac{6-4}{0{,}1}\,e^{-0{,}5} = 20\cdot 0{,}607 \approx 12{,}1$, то есть цена прыгает до $\approx 52{,}1$ и затем плавно растёт до $60$ к моменту $t_S$.</p>
+        <p>Проверка условия арбитража: на отрезке $q = 40 + 20e^{-0{,}1(t_S - t)}$, $\dot q = 2e^{-0{,}1(t_S-t)}$, и $rq - d_0 = 4 + 2e^{-0{,}1(t_S - t)} - 4$ — совпадает.</p>
+      </div>
+
+      <h3 class="sub">Дополнительно: временный объявленный рост дивиденда</h3>
+      <div class="prose">
+        <p>В $t_A$ объявляют, что дивиденд будет $d_1$ только на отрезке $[t_S, t_E]$, а потом вернётся к $d_0$. Это прямой аналог временного шока в q-модели.</p>
+      </div>
+      <div class="eq-box">
+        $$t_A \lt t \lt t_S:\quad q(t) = \frac{d_0}{r} + \frac{d_1 - d_0}{r}\Bigl[e^{-r(t_S - t)} - e^{-r(t_E - t)}\Bigr]$$
+        $$t_S \le t \lt t_E:\quad q(t) = \frac{d_0}{r} + \frac{d_1 - d_0}{r}\Bigl[1 - e^{-r(t_E - t)}\Bigr]$$
+        <span class="eq-note">Скачок только в $t_A$. До $t_S$ цена растёт, в $t_S$ достигает максимума, затем снижается и в $t_E$ ровно возвращается к $d_0/r$ — без скачков в $t_S$ и $t_E$.</span>
+      </div>
+      <figure class="chart">
+        <p class="chart-title">Цена при временном объявленном росте дивиденда</p>
+        <svg viewBox="0 0 680 400" role="img" aria-label="Дивиденд растёт на отрезке от tS до tE. Цена в момент объявления tA прыгает вверх, растёт до максимума в tS, затем снижается и к моменту tE возвращается к d0 делить на r">
+          <defs><marker id="b2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <line class="gd" x1="200" y1="20" x2="200" y2="340"/><line class="gd" x1="360" y1="20" x2="360" y2="340"/><line class="gd" x1="500" y1="20" x2="500" y2="340"/>
+          <text class="m" x="200" y="360" text-anchor="middle">t_A</text><text class="m" x="360" y="360" text-anchor="middle">t_S</text><text class="m" x="500" y="360" text-anchor="middle">t_E</text>
+          <text class="b" x="30" y="80">d</text>
+          <line class="ax" x1="90" y1="130" x2="640" y2="130" marker-end="url(#b2)"/>
+          <polyline points="90,105 360,105 360,55 500,55 500,105 630,105" fill="none" stroke="var(--bad)" stroke-width="2"/>
+          <text class="m" x="84" y="109" text-anchor="end">d₀</text><text class="m" x="84" y="59" text-anchor="end">d₁</text>
+          <text class="b" x="30" y="240">q</text>
+          <line class="ax" x1="90" y1="335" x2="640" y2="335" marker-end="url(#b2)"/>
+          <line x1="90" y1="290" x2="630" y2="290" stroke="var(--ink-faint)" stroke-width=".6" stroke-dasharray="2 3"/>
+          <text class="m" x="84" y="294" text-anchor="end">d₀/r</text>
+          <path d="M90 290 L200 290" fill="none" stroke="var(--accent-4)" stroke-width="2.5"/>
+          <line x1="200" y1="290" x2="200" y2="262" stroke="var(--accent-4)" stroke-width="2.5" stroke-dasharray="3 3"/>
+          <path d="M200 260 C 260 256, 320 240, 360 222 C 400 228, 460 252, 500 290 L 630 290" fill="none" stroke="var(--accent-4)" stroke-width="2.5"/>
+          <circle cx="360" cy="222" r="4" fill="var(--accent-4)"/>
+          <text class="m" x="360" y="210" text-anchor="middle">максимум q</text>
+        </svg>
+        <figcaption>Рынок «отыгрывает» временный рост дивидендов заранее: цена максимальна в момент начала высоких выплат и снижается, пока они идут.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ============ 05 ============ -->
+    <section class="sec" id="bonds">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">05</span>Временная структура ставок</p>
+        <h2 class="sec-title">Облигации и кривая доходности</h2>
+      </div>
+      <div class="prose"><p>Цена бескупонной облигации номиналом $FV$ со сроком $T$ — номинал, дисконтированный по ожидаемым краткосрочным ставкам каждого года:</p></div>
+      <div class="eq-box">
+        $$B = \frac{FV}{(1 + r^e_1)(1 + r^e_2)\cdots(1 + r^e_T)}$$
+        $$(1 + YTM)^T = (1 + r^e_1)\cdots(1 + r^e_T) \quad\Rightarrow\quad YTM \approx \frac{r^e_1 + \dots + r^e_T}{T}$$
+        <span class="eq-note">Доходность к погашению (YTM) — одна постоянная ставка, дающая тот же фактор дисконтирования <span class="bt y">№12 — да</span>. Она приблизительно равна среднему ожидаемых краткосрочных ставок.</span>
+      </div>
+      <div class="prose">
+        <ul>
+          <li><strong>Кривая доходности</strong> — зависимость YTM от срока облигации <span class="bt y">№13 — да</span>.</li>
+          <li><strong>Растущая</strong> кривая: рынок ожидает роста краткосрочных ставок <span class="bt y">№14 — да</span>.</li>
+          <li>Небольшой положительный наклон — норма: долгосрочные облигации несут <strong>премию за ликвидность</strong> (и за процентный риск) <span class="bt y">№15 — да</span>.</li>
+          <li>Сильно <strong>отрицательный</strong> наклон (инверсия) предвещает спад: рынок ждёт, что ЦБ будет снижать ставки из-за рецессии <span class="bt y">№16 — да</span>.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <span class="mark">Интуиция</span>
+        <p>Занять на 2 года — то же самое, что занять на год и потом перезанять ещё на год. Поэтому долгосрочная ставка — среднее текущей и ожидаемой будущей краткосрочной ставки (гипотеза ожиданий), плюс премия за срок: $i_{n,t} \approx \dfrac{i_t + i^e_{t+1} + \dots + i^e_{t+n-1}}{n} + l_n$.</p>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Пример</span>
+        <p>Годовая ставка сейчас $4\%$, через год ожидается $6\%$. Тогда $(1+YTM)^2 = 1{,}04\cdot1{,}06 = 1{,}1024$, $YTM \approx 4{,}99\% \approx 5\%$ — среднее двух ставок. Если бы ожидалось снижение до $2\%$, двухлетняя доходность была бы около $3\%$ — ниже годовой, кривая «перевёрнута».</p>
+      </div>
+
+      <figure class="chart">
+        <p class="chart-title">Формы кривой доходности</p>
+        <svg viewBox="0 0 680 280" role="img" aria-label="Три кривые доходности от срока до погашения: нормальная — слегка растущая; плоская — горизонтальная; инвертированная — убывающая, предвещает спад">
+          <defs><marker id="b3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <line class="ax" x1="70" y1="230" x2="640" y2="230" marker-end="url(#b3)"/>
+          <line class="ax" x1="70" y1="230" x2="70" y2="20" marker-end="url(#b3)"/>
+          <text x="646" y="235">срок</text><text x="62" y="20" text-anchor="end">YTM</text>
+          <path d="M80 150 C 180 110, 330 85, 620 70" fill="none" stroke="var(--accent-3)" stroke-width="2.5"/>
+          <path d="M80 130 L 620 130" fill="none" stroke="var(--accent-2)" stroke-width="2.5" stroke-dasharray="7 4"/>
+          <path d="M80 70 C 180 110, 330 160, 620 180" fill="none" stroke="var(--bad)" stroke-width="2.5"/>
+          <text class="m" x="630" y="56" text-anchor="end">нормальная: ждут роста ставок / премия</text>
+          <text class="m" x="630" y="121" text-anchor="end">плоская</text>
+          <text class="m" x="630" y="205" text-anchor="end">инвертированная: ждут снижения ставок (спад)</text>
+          <text class="m" x="80" y="252">1 год</text><text class="m" x="600" y="252">30 лет</text>
+        </svg>
+        <figcaption>Наклон кривой — это рыночный прогноз будущих краткосрочных ставок плюс премия за срок.</figcaption>
+      </figure>
+      <div class="prose"><p>Для купонной облигации: $B = \sum_{\tau=1}^{T} \dfrac{C}{(1+YTM)^\tau} + \dfrac{FV}{(1+YTM)^T}$. Цена и доходность движутся в противоположные стороны: рост ставок удешевляет уже выпущенные облигации, и тем сильнее, чем длиннее срок.</p></div>
+    </section>
+
+    <!-- ============ 06 ============ -->
+    <section class="sec" id="parity">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">06</span>Арбитраж между валютами</p>
+        <h2 class="sec-title">Паритеты процентных ставок</h2>
+      </div>
+      <div class="prose"><p>$\varepsilon$ — цена иностранной валюты в рублях (рост $\varepsilon$ — ослабление рубля), $i$ — рублёвая ставка, $i^{*}$ — иностранная, $F$ — форвардный курс на следующий период.</p></div>
+      <div class="eq-box">
+        $$\text{UIP (непокрытый):}\qquad i = i^{*} + \frac{E\varepsilon_{t+1} - \varepsilon_t}{\varepsilon_t} \;\;(+\text{ премия за риск})$$
+        $$\text{CIP (покрытый):}\qquad i = i^{*} + \frac{F_{t+1} - \varepsilon_t}{\varepsilon_t} \;\;(+\,\zeta \text{ — премия за риск контроля капитала})$$
+        <span class="eq-note">Вложение в рубли под $i$ должно давать столько же, сколько вложение в валюту под $i^{*}$ плюс ожидаемое (UIP) или зафиксированное форвардом (CIP) удорожание валюты.</span>
+      </div>
+      <div class="prose">
+        <ul>
+          <li>UIP не требует достоверного знания будущего курса — в нём стоит ожидание $E\varepsilon_{t+1}$ <span class="bt n">№27 — нет</span>.</li>
+          <li>При несклонности к риску разница ставок не «однозначно выше» ожидаемого обесценения: знак премии за риск зависит от того, где риск выше — во вложениях в рубли или в валюту <span class="bt n">№28 — нет</span>.</li>
+          <li>CIP не предполагает, что форвардный курс совпадёт с будущим спотом <span class="bt n">№29 — нет</span>: форвард — это торговля риском, а не прогноз.</li>
+          <li>Риск введения контроля капитала (нельзя будет вывести деньги) ⇒ премия $\zeta$ ⇒ CIP в чистом виде нарушается.</li>
+        </ul>
+      </div>
+      <h3 class="sub">Премия за риск как разница ошибок прогноза</h3>
+      <div class="prose"><p>Определим премию как $\psi \equiv \dfrac{E\varepsilon_{t+1} - F_{t+1}}{\varepsilon_t}$. Тогда для реализованного курса $\varepsilon_{t+1}$:</p></div>
+      <div class="eq-box">
+        $$\underbrace{\frac{\varepsilon_{t+1} - F_{t+1}}{\varepsilon_t}}_{\text{ошибка форвардного прогноза}} \;=\; \underbrace{\frac{\varepsilon_{t+1} - E\varepsilon_{t+1}}{\varepsilon_t}}_{\text{ошибка спот-прогноза}} \;+\; \psi$$
+        <span class="eq-note">Премия за риск — разница ошибок форвардного и спот-прогноза <span class="bt y">№30 — да</span>. При таком определении $\psi$ из CIP следует $i = i^{*} + \frac{E\varepsilon_{t+1} - \varepsilon_t}{\varepsilon_t} - \psi$: знак при премии зависит от того, как её определить, — важен смысл, а не буква.</span>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Пример</span>
+        <p>$i = 16\%$, $i^{*} = 5\%$, $\varepsilon = 90$. Точная форма CIP: $1 + i = (1 + i^{*})\,F/\varepsilon$, откуда $F = 90\cdot 1{,}16/1{,}05 \approx 99{,}4$. Приближённая формула даёт $F \approx 90\cdot(1 + 0{,}11) = 99{,}9$. По UIP без премии рынок ожидает примерно такого же ослабления рубля: высокая рублёвая ставка компенсирует ожидаемое обесценение.</p>
+      </div>
+      <div class="callout warn">
+        <span class="mark">Дополнительно</span>
+        <p><strong>Загадка форвардной премии</strong> (Fama, 1984): эмпирически валюты с высокими ставками в среднем обесцениваются меньше, чем предсказывает UIP, а нередко даже укрепляются. На этом построен <strong>carry trade</strong> — занимать в валюте с низкой ставкой и вкладывать в валюту с высокой. Он прибылен в среднем, но время от времени приносит резкие потери: это и есть премия за риск.</p>
+      </div>
+    </section>
+
+    <!-- ============ 07 ============ -->
+    <section class="sec" id="exchange-rate">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">07</span>Монетарная модель</p>
+        <h2 class="sec-title">Фундаментальный валютный курс</h2>
+      </div>
+      <div class="prose"><p>Три соотношения в логарифмах: спрос на деньги, паритет покупательной способности и UIP:</p></div>
+      <div class="eq-box">
+        $$m - p = \eta y - \alpha i, \qquad p = \varepsilon + p^{*}, \qquad i = i^{*} + E\varepsilon_{t+1} - \varepsilon_t$$
+      </div>
+      <div class="prose"><p>Подставим $p$ и $i$ в спрос на деньги: $m - \varepsilon_t - p^{*} = \eta y - \alpha i^{*} - \alpha E\varepsilon_{t+1} + \alpha\varepsilon_t$. Перенесём курсы в одну сторону:</p></div>
+      <div class="eq-box">
+        $$\varepsilon_t = \frac{\alpha}{1+\alpha}\,E\varepsilon_{t+1} + \frac{z_t}{1+\alpha}, \qquad z = m - p^{*} - \eta y + \alpha i^{*}$$
+        $$\varepsilon_t = \frac{1}{1+\alpha}\sum_{\tau=0}^{\infty}\left(\frac{\alpha}{1+\alpha}\right)^{\tau} E z_{t+\tau} \qquad\text{(при NBC)}$$
+        <span class="eq-note">Курс — forward-looking переменная, как цена акции: взвешенная сумма ожидаемых будущих фундаментальных факторов. Веса $\frac{1}{1+\alpha}\left(\frac{\alpha}{1+\alpha}\right)^\tau$ в сумме дают 1.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Фактор</th><th>Влияние на $z$</th><th>Курс $\varepsilon$</th><th>Рубль</th></tr></thead>
+          <tbody>
+            <tr><td>$m\uparrow$ (денежная масса)</td><td>$z\uparrow$</td><td>$\varepsilon\uparrow$</td><td>слабеет</td></tr>
+            <tr><td>$y\uparrow$ (выпуск России)</td><td>$z\downarrow$</td><td>$\varepsilon\downarrow$</td><td>крепнет</td></tr>
+            <tr><td>$p^{*}\uparrow$ (зарубежные цены)</td><td>$z\downarrow$</td><td>$\varepsilon\downarrow$</td><td>крепнет</td></tr>
+            <tr><td>$i^{*}\uparrow$ (зарубежная ставка)</td><td>$z\uparrow$</td><td>$\varepsilon\uparrow$</td><td>слабеет</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose">
+        <ul>
+          <li>Ожидание замедления роста российской экономики (будущий $y$ ниже) ⇒ ослабление рубля уже сегодня <span class="bt y">№31 — да</span>.</li>
+          <li>Ожидание продолжения антиинфляционной политики ЦБ (будущий $m$ ниже) ⇒ сдерживает ослабление рубля <span class="bt y">№32 — да</span>.</li>
+        </ul>
+      </div>
+      <div class="callout fact">
+        <span class="mark">Примеры</span>
+        <p><strong>Неожиданный перманентный рост денежной массы на 10%:</strong> все будущие $z$ выше на 0,1, сумма весов равна 1, значит $\varepsilon$ сразу растёт на 0,1 — рубль мгновенно слабеет на 10%.</p>
+        <p><strong>Объявленный будущий рост денежной массы:</strong> рубль слабеет уже в момент объявления, хотя деньги ещё не напечатаны, — ровно как цена акции реагирует на объявленный рост дивидендов.</p>
+      </div>
+      <div class="prose"><p>В этой модели цены гибкие. Если цены жёсткие (модель Дорнбуша, 1976), монетарная экспансия вызывает <strong>перелёт</strong> курса: в краткосрочном периоде он ослабевает сильнее, чем в долгосрочном, а затем частично восстанавливается.</p></div>
+    </section>
+
+    <!-- ============ 08 ============ -->
+    <section class="sec" id="cheatsheet">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">08</span>Итог</p>
+        <h2 class="sec-title">Шпаргалка к контрольной</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Что</th><th>Формула / вывод</th></tr></thead>
+          <tbody>
+            <tr><td>NAC (дискретно)</td><td>$q_t = (E q_{t+1} + E d_{t+1})/(1+r)$</td></tr>
+            <tr><td>NAC (непрерывно)</td><td>$\dot q = rq - d$</td></tr>
+            <tr><td>Фундаментал</td><td>$q = d/r$; при росте $g \lt r$: $q = d/(r - g)$</td></tr>
+            <tr><td>NBC</td><td>$\lim E q_{t+T}/(1+r)^T = 0$</td></tr>
+            <tr><td>Пузырь</td><td>$E B_{t+1} = (1+r)B_t$</td></tr>
+            <tr><td>Объявленный рост дивиденда</td><td>скачок в $t_A$: $\frac{d_1 - d_0}{r}e^{-r(t_S - t_A)}$; затем $q' \gt 0$, $q'' = rq'$</td></tr>
+            <tr><td>Облигация</td><td>$(1+YTM)^T = \prod(1 + r^e_\tau)$, YTM ≈ среднее ожидаемых ставок</td></tr>
+            <tr><td>UIP / CIP</td><td>$i = i^{*} + \frac{E\varepsilon' - \varepsilon}{\varepsilon}$; $i = i^{*} + \frac{F - \varepsilon}{\varepsilon}$</td></tr>
+            <tr><td>Валютный курс</td><td>$\varepsilon_t = \frac{1}{1+\alpha}\sum\left(\frac{\alpha}{1+\alpha}\right)^\tau E z_{t+\tau}$, $z = m - p^{*} - \eta y + \alpha i^{*}$</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout result">
+        <span class="mark">Главная идея</span>
+        <p>Любая цена актива — акции, капитала в q-модели, облигации, валюты — это приведённая стоимость ожидаемых будущих выплат или фундаментальных факторов. Поэтому цена прыгает только тогда, когда приходит новость о будущем, а между новостями движется плавно по условию отсутствия арбитража.</p>
+      </div>
+
+      <h3 class="sub">Литература</h3>
+      <ul class="lit-list">
+        <li><span class="idx">01</span><span>Fama, E. (1970) · <em>Efficient Capital Markets: A Review of Theory and Empirical Work</em> · Journal of Finance</span></li>
+        <li><span class="idx">02</span><span>Samuelson, P. (1965) · <em>Proof That Properly Anticipated Prices Fluctuate Randomly</em> · Industrial Management Review</span></li>
+        <li><span class="idx">03</span><span>Grossman, S., Stiglitz, J. (1980) · <em>On the Impossibility of Informationally Efficient Markets</em> · AER</span></li>
+        <li><span class="idx">04</span><span>Blanchard, O., Watson, M. (1982) · <em>Bubbles, Rational Expectations and Financial Markets</em></span></li>
+        <li><span class="idx">05</span><span>Diba, B., Grossman, H. (1988) · <em>The Theory of Rational Bubbles in Stock Prices</em> · Economic Journal</span></li>
+        <li><span class="idx">06</span><span>Fama, E. (1984) · <em>Forward and Spot Exchange Rates</em> · Journal of Monetary Economics</span></li>
+        <li><span class="idx">07</span><span>Dornbusch, R. (1976) · <em>Expectations and Exchange Rate Dynamics</em> · JPE</span></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="page-foot">Конспект · Макроэкономика 2 · Лекции 10–11: финансовые рынки и валютный курс</footer>
+
+  <script>
+    (function(){
+      var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+      var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+      if(!sections.length) return;
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            var id = '#' + entry.target.id;
+            links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+          }
+        });
+      }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+      sections.forEach(function(s){ io.observe(s); });
+    })();
+  </script>
+</body>
+</html>
