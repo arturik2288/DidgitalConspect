@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Макроэкономика 2 Квиз 4 — Цифровые конспекты</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{
+      --bg:#f6f2e9;
+      --surface:#ffffff;
+      --surface-2:#efe7d4;
+      --ink:#232019;
+      --ink-soft:#6b6353;
+      --ink-faint:#9a927e;
+      --accent:#2f5590;
+      --accent-strong:#1f3d66;
+      --accent-soft:#dde9e8;
+      --accent-2:#a8703a;
+      --accent-2-soft:#f3e3cd;
+      --accent-3:#3f7d5c;
+      --accent-3-soft:#e1efe4;
+      --bad:#a5432c;
+      --bad-soft:#f6e2da;
+      --rule:#ddd2b8;
+      --shadow: 0 1px 2px rgba(35,32,25,0.06), 0 6px 20px -8px rgba(35,32,25,0.15);
+    }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink-soft);
+      font-family:'Inter','Segoe UI',Tahoma,sans-serif;
+      font-size:16px;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:var(--accent-2-soft); color:var(--ink);}
+
+    h1,h2,h3{
+      font-family:'Fraunces',Georgia,'Times New Roman',serif;
+      color:var(--ink);
+      text-wrap:balance;
+      font-weight:700;
+      margin:0;
+    }
+    a{color:var(--accent-2);}
+    code, .mono{font-family:'IBM Plex Mono','Courier New',monospace;}
+
+    .wrap{max-width:860px; margin:0 auto; padding:0 24px;}
+
+    .back-link{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-family:'IBM Plex Mono',monospace;
+      font-size:0.85rem;
+      color:var(--accent);
+      text-decoration:none;
+      padding:18px 24px 0;
+      max-width:860px;
+      margin:0 auto;
+    }
+    .back-link:hover{text-decoration:underline;}
+
+    /* ---------- header ---------- */
+    header.hero{
+      background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      overflow:hidden;
+    }
+    header.hero::before{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(90deg, rgba(35,32,25,.05) 0 1px, transparent 1px 32px);
+      pointer-events:none;
+    }
+    .hero-inner{position:relative; padding:36px 24px 40px; max-width:860px; margin:0 auto;}
+    .eyebrow{
+      font-family:'IBM Plex Mono',monospace;
+      font-size:12.5px;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      color:var(--accent);
+      font-weight:700;
+      margin:0 0 14px;
+    }
+    h1.title{font-size:clamp(26px,4.2vw,40px); line-height:1.15; margin-bottom:14px;}
+    .subtitle{font-size:17px; color:var(--ink-soft); max-width:62ch; margin-bottom:22px;}
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px 24px;
+      font-size:13.5px; color:var(--ink-faint);
+      border-top:1px solid var(--rule); padding-top:16px;
+    }
+    .meta-row strong{color:var(--ink); font-weight:700;}
+
+    /* ---------- nav ---------- */
+    nav.toc{
+      position:sticky; top:0; z-index:20;
+      background:color-mix(in srgb, var(--surface) 92%, transparent);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--rule);
+    }
+    .toc-inner{
+      max-width:860px; margin:0 auto; padding:0 24px;
+      display:flex; gap:6px; overflow-x:auto;
+      scrollbar-width:none;
+    }
+    .toc-inner::-webkit-scrollbar{display:none;}
+    nav.toc a{
+      flex:none;
+      display:flex; align-items:center; gap:7px;
+      padding:13px 4px;
+      font-size:13.5px; font-weight:700; color:var(--ink-faint);
+      text-decoration:none;
+      border-bottom:2.5px solid transparent;
+      white-space:nowrap;
+    }
+    nav.toc a .n{
+      font-family:'IBM Plex Mono',monospace; font-size:11px;
+      color:var(--ink-faint); font-weight:500;
+    }
+    nav.toc a.active{color:var(--ink); border-bottom-color:var(--accent);}
+    nav.toc a.active .n{color:var(--accent);}
+    nav.toc a + a{margin-left:14px;}
+
+    /* ---------- sections ---------- */
+    main{padding-bottom:40px;}
+    section.sec{padding:44px 0 8px; border-bottom:1px solid var(--rule);}
+    section.sec:last-of-type{border-bottom:none;}
+    .sec-head{margin-bottom:22px;}
+    .sec-eyebrow{
+      font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700;
+      color:var(--accent); letter-spacing:.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .sec-eyebrow .num{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:24px;height:24px;border-radius:6px;
+      background:var(--accent-soft); color:var(--accent); font-size:12px;
+    }
+    h2.sec-title{font-size:clamp(20px,3vw,26px);}
+    .sec-count{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-faint);}
+    .prose{max-width:70ch;}
+    .prose p{margin:0 0 14px;}
+
+    strong{color:var(--ink);}
+
+    /* ---------- reference box ---------- */
+    .refbox{
+      background:var(--accent-2-soft); border:1px solid var(--accent-2); border-radius:12px;
+      padding:18px 22px 20px; margin:18px 0;
+    }
+    .refbox .reflabel{
+      font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--accent-2); margin-bottom:10px; display:block; font-weight:700;
+    }
+    .refrow{display:flex; align-items:baseline; gap:14px; padding:8px 0; border-top:1px dashed color-mix(in srgb, var(--accent-2) 40%, transparent);}
+    .refrow:first-of-type{border-top:none;}
+    .refrow .rk{font-size:13.5px; color:var(--ink-soft); min-width:15rem; flex-shrink:0;}
+    .refrow .rv{overflow-x:auto;}
+
+    /* ---------- quiz question ---------- */
+    .quiz-q{padding:20px 0; border-bottom:1px solid var(--rule);}
+    .quiz-q:last-child{border-bottom:none;}
+    .q-top{display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; justify-content:space-between;}
+    .q-body{display:flex; gap:10px; flex:1; min-width:220px;}
+    .q-num{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-faint); padding-top:3px; flex-shrink:0; min-width:3.2ch;}
+    .q-text{margin:0; font-size:15.5px; color:var(--ink);}
+    .q-choices{display:flex; gap:8px; flex-shrink:0;}
+    .choice-btn{
+      font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:700;
+      padding:7px 16px; border-radius:999px; border:1.5px solid var(--rule);
+      background:var(--surface); color:var(--ink-soft); cursor:pointer;
+      transition:transform .1s ease;
+    }
+    .choice-btn:hover:not(.disabled){border-color:var(--accent); color:var(--accent);}
+    .choice-btn:active:not(.disabled){transform:scale(0.96);}
+    .choice-btn.disabled{cursor:default;}
+    .choice-btn.is-correct{background:var(--accent-3-soft); border-color:var(--accent-3); color:var(--accent-3);}
+    .choice-btn.chosen-wrong{background:var(--bad-soft); border-color:var(--bad); color:var(--bad);}
+
+    .q-feedback{
+      font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13.5px;
+      margin-top:10px; max-height:0; overflow:hidden; opacity:0;
+      transition:max-height .25s ease, opacity .25s ease, margin .25s ease;
+    }
+    .q-feedback.show{max-height:40px; opacity:1;}
+    .q-feedback.good{color:var(--accent-3);}
+    .q-feedback.bad{color:var(--bad);}
+
+    .q-bottom{margin-top:12px;}
+    .answer-toggle{
+      font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:700;
+      letter-spacing:.03em; padding:6px 14px; border-radius:999px;
+      background:var(--surface-2); border:1px solid var(--rule); color:var(--ink-soft);
+      cursor:pointer;
+    }
+    .answer-toggle:hover{border-color:var(--accent-2); color:var(--accent-2);}
+    .answer-toggle.open{background:var(--accent-soft); border-color:var(--accent); color:var(--accent);}
+
+    .q-explain{
+      margin-top:12px; padding:14px 16px; background:var(--surface); border:1px solid var(--rule);
+      border-radius:10px; box-shadow:var(--shadow); max-width:66ch;
+    }
+    .q-explain p{margin:8px 0 0; font-size:14px;}
+    .verdict{
+      display:inline-flex; align-items:center; font-family:'IBM Plex Mono',monospace; font-weight:700;
+      font-size:11.5px; letter-spacing:.04em; padding:3px 10px; border-radius:6px;
+    }
+    .verdict.yes{background:var(--accent-3-soft); color:var(--accent-3); border:1px solid var(--accent-3);}
+    .verdict.no{background:var(--bad-soft); color:var(--bad); border:1px solid var(--bad);}
+
+    .q-explain p.intuit{margin-top:10px; padding:9px 12px; background:var(--accent-2-soft); border-radius:8px; color:var(--ink); font-size:13.5px;}
+    .q-explain p.intuit b{color:var(--accent-2);}
+
+    table.traps{width:100%; border-collapse:collapse; margin:16px 0; font-size:14.5px; background:var(--surface); border:1px solid var(--rule); border-radius:8px; overflow:hidden;}
+    table.traps th, table.traps td{padding:10px 14px; text-align:left; border-bottom:1px solid var(--rule);}
+    table.traps th{font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2);}
+    table.traps td:last-child{font-family:'IBM Plex Mono',monospace; color:var(--accent); white-space:nowrap;}
+    table.traps tr:last-child td{border-bottom:none;}
+    table.traps.ttable td{font-size:14px;}
+    table.traps.ttable td:last-child{font-family:inherit; color:var(--ink-soft); white-space:normal;}
+    table.traps.ttable td:first-child{font-weight:600; color:var(--ink);}
+
+    .tcard{background:var(--surface); border:1px solid var(--rule); border-radius:12px; box-shadow:var(--shadow); padding:18px 22px; margin:18px 0;}
+    .tcard h3{font-family:'Inter',sans-serif; font-size:16px; font-weight:700; color:var(--ink); margin:0 0 10px;}
+    .tcard p{margin:0 0 10px; font-size:14.5px; color:var(--ink-soft);}
+    .tcard ul{margin:0 0 10px; padding-left:1.2em; font-size:14.5px;}
+    .tcard li{margin-bottom:6px;}
+    .tcard li::marker{color:var(--accent);}
+    .tcard .tag{display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--accent-2); margin-bottom:6px;}
+    .tcard .eq{background:var(--bg); border-radius:8px; padding:10px 14px; margin:8px 0 12px; overflow-x:auto;}
+    figure.chart{background:var(--surface); border:1px solid var(--rule); border-radius:12px; padding:16px; margin:14px 0; overflow-x:auto;}
+    figure.chart svg{display:block; width:100%; min-width:460px; height:auto;}
+    figure.chart svg text{fill:var(--ink-soft); font-family:'Inter',sans-serif; font-size:13px;}
+    figure.chart svg text.m{fill:var(--ink-faint);}
+    figure.chart figcaption{font-size:13px; color:var(--ink-faint); margin-top:8px; padding-top:8px; border-top:1px solid var(--rule);}
+
+    mjx-container{overflow-x:auto; overflow-y:hidden;}
+
+    footer.page-foot{
+      padding:36px 0 60px; text-align:center; color:var(--ink-faint); font-size:13px;
+    }
+
+    @media (max-width:560px){
+      .q-body{min-width:0;}
+      .q-top{flex-direction:column;}
+      .refrow{flex-direction:column; gap:4px;}
+      .refrow .rk{min-width:0;}
+    }
+    @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="../sections/economics.html">← Раздел «Экономика»</a>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Macroeconomics of Financial Markets · Самопроверка</p>
+      <h1 class="title">Макроэкономика 2 Квиз 4</h1>
+      <p class="subtitle">73 утверждения в трёх частях: эффективный финансовый рынок (EMH, пузыри, облигации, паритеты ставок), финансовые посредники и финансовая репрессия, финансовые кризисы и регулирование. Сначала мини-теория для решения, затем «Да» или «Нет» и разбор.</p>
+      <div class="meta-row">
+        <span>73 утверждения</span><span>·</span><span>3 части</span><span>·</span><span>мини-теория + да / нет + разбор</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="toc" aria-label="Оглавление">
+    <div class="toc-inner" id="tocInner">
+      <a href="#theory"><span class="n">00</span>Мини-теория</a>
+      <a href="#part1"><span class="n">01</span>Эффективный рынок</a>
+      <a href="#part2"><span class="n">02</span>Финансовые посредники</a>
+      <a href="#part3"><span class="n">03</span>Финансовые кризисы</a>
+      <a href="#traps"><span class="n">04</span>Подвохи</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <section class="sec" id="theory">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">00</span>Прочитайте перед решением</p>
+        <h2 class="sec-title">Мини-теория для решения</h2>
+      </div>
+
+      <!-- ===== Часть 1 ===== -->
+      <div class="tcard">
+        <span class="tag">К части 1</span>
+        <h3>Гипотеза эффективного рынка (EMH)</h3>
+        <p>Рынок эффективен, если цены <strong>мгновенно и полностью</strong> отражают всю релевантную информацию. Для этого не нужна полная информация у каждого агента — нужны рациональные ожидания: рынок сам собирает разрозненную информацию в цене.</p>
+        <table class="traps ttable">
+          <thead><tr><th>Форма</th><th>Цены отражают</th></tr></thead>
+          <tbody>
+            <tr><td>Слабая</td><td>всю историю цен — технический анализ не даёт сверхдоходности</td></tr>
+            <tr><td>Умеренная</td><td>+ всю публичную информацию — фундаментальный анализ публичных данных тоже не даёт</td></tr>
+            <tr><td>Сильная</td><td>+ инсайдерскую информацию — не помогает даже она</td></tr>
+          </tbody>
+        </table>
+        <ul>
+          <li>Формы вложены: каждая следующая включает предыдущую.</li>
+          <li>Сильная форма требует <strong>агрегирования</strong> частной информации, слабой достаточно <strong>усреднения</strong> общедоступной.</li>
+          <li>«Не даёт систематической сверхдоходности» ≠ «полностью бесполезен».</li>
+          <li>Эмпирика: слабая и умеренная формы подтверждаются; управляемые фонды часто проигрывают индексам; арбитраж исключён.</li>
+        </ul>
+      </div>
+
+      <div class="tcard">
+        <span class="tag">К части 1</span>
+        <h3>Фундаментальная стоимость и пузыри</h3>
+        <p>Условие отсутствия арбитража (NAC): доходность актива = безрисковая ставка. Решая его вперёд:</p>
+        <div class="eq">\( q_t = \dfrac{E q_{t+1} + E d_{t+1}}{1+r} \;\Rightarrow\; q_t = \underbrace{E\displaystyle\sum_{\tau\ge1}\dfrac{d_{t+\tau}}{(1+r)^\tau}}_{\text{фундаментал}} + \underbrace{\lim_{T\to\infty}\dfrac{E q_{t+T}}{(1+r)^T}}_{\text{пузырь}} \)</div>
+        <ul>
+          <li><strong>Фундаментал</strong> есть у запаса (актива) и равен приведённой стоимости потока выплат, который актив порождает.</li>
+          <li><strong>Условие отсутствия пузыря (NBC):</strong> к нулю стремится <em>приведённая</em> стоимость будущей цены. Цена может расти, но не систематически быстрее \(r\).</li>
+          <li><strong>Рациональный пузырь</strong> не противоречит NAC и в среднем растёт со ставкой \(r\): \(E B_{t+1} = (1+r)B_t\).</li>
+          <li>Высокая цена или обвал — не обязательно пузырь: может меняться сам фундаментал.</li>
+          <li>Цена прыгает <strong>только на новостях</strong>; ожидаемый скачок противоречил бы EMH.</li>
+        </ul>
+      </div>
+
+      <div class="tcard">
+        <span class="tag">К части 1</span>
+        <h3>Облигации и кривая доходности</h3>
+        <div class="eq">\( (1+YTM)^T = (1+r^e_1)(1+r^e_2)\cdots(1+r^e_T) \;\Rightarrow\; YTM \approx \text{среднее ожидаемых краткосрочных ставок} \)</div>
+        <ul>
+          <li>Кривая доходности — YTM в зависимости от срока до погашения.</li>
+          <li>Растущая — рынок ждёт роста краткосрочных ставок. Небольшой плюс-наклон — норма (премия за ликвидность). Сильно отрицательный — предвестник спада.</li>
+        </ul>
+      </div>
+
+      <div class="tcard">
+        <span class="tag">К части 1</span>
+        <h3>Паритеты ставок и фундаментальный курс</h3>
+        <p>\(\varepsilon\) — цена иностранной валюты в рублях (рост — ослабление рубля), \(F\) — форвардный курс.</p>
+        <div class="eq">\( \text{UIP: } i = i^* + \dfrac{E\varepsilon_{t+1} - \varepsilon_t}{\varepsilon_t} \;(+\text{премия за риск}), \qquad \text{CIP: } i = i^* + \dfrac{F - \varepsilon_t}{\varepsilon_t} \)</div>
+        <ul>
+          <li>UIP использует <strong>ожидаемый</strong> курс — знать будущее не нужно. Знак премии за риск зависит от того, где риск выше.</li>
+          <li>CIP — арбитраж с форвардом. Форвард не обязан совпасть с будущим спотом.</li>
+          <li>Премия за риск = ошибка форвардного прогноза − ошибка спот-прогноза.</li>
+          <li>Курс, как цена актива, зависит от <strong>ожиданий</strong>: ожидание более медленного роста ослабляет рубль, ожидание антиинфляционной политики (меньше денег в будущем) сдерживает ослабление.</li>
+        </ul>
+      </div>
+
+      <!-- ===== Часть 2 ===== -->
+      <div class="tcard">
+        <span class="tag">К части 2</span>
+        <h3>Финансовые посредники</h3>
+        <p>Тождество \(S = I\) выполняется всегда. Вопрос не в том, равны ли они, а в том, <strong>как</strong> сбережения домохозяйств доходят до фирм. Посредники (банки, фонды) решают эту задачу в условиях несовершенной конкуренции: асимметрия информации, эффект масштаба, регулирование.</p>
+        <ul>
+          <li><strong>Трансформация сроков:</strong> короткие депозиты → длинные кредиты.</li>
+          <li><strong>Трансформация ликвидности:</strong> вклад можно забрать в любой момент, хотя кредиты и корпоративные бумаги неликвидны.</li>
+          <li><strong>Трансформация риска:</strong> диверсификация — вкладчик не несёт риск отдельного кредита.</li>
+          <li><strong>Поиск контрагента и мониторинг:</strong> не нужно самому искать фирму с подходящим сроком и проверять её.</li>
+          <li>Активная торговля бумагами повышает ликвидность рынка и удешевляет капитал для фирм.</li>
+        </ul>
+      </div>
+
+      <div class="tcard">
+        <span class="tag">К части 2</span>
+        <h3>Внешние и внутренние деньги, финансовая репрессия</h3>
+        <ul>
+          <li><strong>Внешние деньги</strong> — чистый актив частного сектора, не являющийся чьим-то частным долгом: наличные и резервы, выпущенные государством. «Внешние» — по отношению к частному сектору, а не к стране. Их контролирует ЦБ.</li>
+          <li><strong>Внутренние деньги</strong> — требования, обеспеченные частным долгом (депозиты). Создаются банками через <strong>мультипликатор</strong>: кредит возвращается в банки новым депозитом.</li>
+          <li><strong>Финансовая репрессия</strong> — меры, удерживающие ставки ниже рыночных и направляющие сбережения государству: потолки ставок, высокие резервные требования, обязательная покупка госдолга, контроль капитала, селективное кредитование.</li>
+          <li>Цель — дешёвое финансирование и «растворение» госдолга через отрицательные реальные ставки, то есть она <strong>облегчает</strong> его обслуживание. Для вкладчиков это скрытый налог, сбережения она не стимулирует. Применялась и в развитых странах (США, Великобритания после Второй мировой войны).</li>
+          <li><strong>Селективное кредитование</strong> — один из инструментов репрессии, тоже искажает распределение ресурсов.</li>
+        </ul>
+      </div>
+
+      <!-- ===== Часть 3 ===== -->
+      <div class="tcard">
+        <span class="tag">К части 3</span>
+        <h3>Почему кризисы бьют по реальному сектору</h3>
+        <ul>
+          <li>Сбережения не превращаются в инвестиции автоматически: в кризисе нарушено посредничество, банки сжимают кредит, а рост сбережений сокращает спрос.</li>
+          <li>Кризис затрагивает всех, а не только спекулянтов: через кредит, падение богатства и залогов, доверие и безработицу.</li>
+          <li>Пузыри трудно распознать: фундаментал не наблюдается. Инфляция цен активов связана с <strong>расширением кредита</strong>.</li>
+          <li>Финансовые инновации и развитость рынка не страхуют от кризиса (секьюритизация, 2008 год). Предупреждения рынки часто игнорируют, а «аккуратно сдуть» пузырь удаётся не всегда.</li>
+        </ul>
+      </div>
+
+      <div class="tcard">
+        <span class="tag">К части 3</span>
+        <h3>Кредитор последней инстанции</h3>
+        <ul>
+          <li><strong>Неплатёжеспособность</strong>: активы меньше обязательств. <strong>Неликвидность</strong>: активов достаточно, но их нельзя быстро превратить в деньги.</li>
+          <li><strong>Правило Беджгота:</strong> ЦБ кредитует щедро, но только платёжеспособных и неликвидных, под хороший залог и по штрафной ставке. Спасение неплатёжеспособных порождает моральный риск.</li>
+          <li>На практике отличить одно от другого трудно, поэтому решения вроде спасения LTCM (1998) и отказа спасать Lehman Brothers (2008) остаются спорными — не «однозначно» верными или ошибочными.</li>
+        </ul>
+      </div>
+
+      <div class="tcard">
+        <span class="tag">К части 3</span>
+        <h3>Фишер, Кейнс, Мински, пределы арбитража</h3>
+        <ul>
+          <li><strong>Фишер (1933), долговая дефляция:</strong> закредитованность → распродажи активов → падение цен (дефляция) → реальный долг растёт → новые банкротства.</li>
+          <li><strong>Кейнс:</strong> цены активов и ставка процента опираются на <strong>конвенции</strong> — общепринятые ожидания. Дилемма ликвидности: ликвидный рынок поощряет инвестиции, но питает спекуляцию; ограничение спекуляций снижает ликвидность и может снизить инвестиции.</li>
+          <li><strong>Мински, гипотеза финансовой нестабильности:</strong> кризисы эндогенны — стабильность порождает нестабильность. Финансирование смещается от хеджевого к спекулятивному и затем к понци-финансированию.</li>
+          <li><strong>Пределы арбитража (Шлейфер, Вишни):</strong> рациональные инвесторы не могут устранить все искажения от иррациональных — мешают риск и ограниченность капитала.</li>
+        </ul>
+      </div>
+
+      <div class="tcard">
+        <span class="tag">К части 3</span>
+        <h3>Агентские проблемы, финансовый акселератор, рационирование кредита</h3>
+        <ul>
+          <li><strong>Финансовый акселератор (Бернанке, Гертлер):</strong> премия за внешнее финансирование убывает с ростом собственного капитала заёмщика. Поэтому богатство предпринимателя (нефундаментальная переменная) влияет на стоимость и объём кредита, а шоки ставки действуют через дополнительный балансовый канал.</li>
+          <li>Кризис бьёт и по <strong>предложению</strong>: фирмы теряют доступ к кредиту на производство и инвестиции. Малый бизнес страдает <strong>сильнее</strong> крупного.</li>
+          <li><strong>Рационирование кредита (Стиглиц, Вайс, 1981):</strong> контрактные выплаты растут со ставкой, а ожидаемые — сначала растут, потом падают из-за неблагоприятного отбора и морального риска. Банк останавливается на \(r^*\) и рационирует кредит.</li>
+        </ul>
+        <figure class="chart">
+          <svg viewBox="0 0 560 260" role="img" aria-label="По горизонтали ставка по кредиту, по вертикали выплаты банку. Контрактные выплаты растут прямой линией. Ожидаемые выплаты сначала растут, достигают максимума при ставке r звёздочка, затем снижаются">
+            <defs><marker id="sw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+            <line x1="60" y1="220" x2="530" y2="220" stroke="var(--ink-faint)" marker-end="url(#sw)"/>
+            <line x1="60" y1="220" x2="60" y2="20" stroke="var(--ink-faint)" marker-end="url(#sw)"/>
+            <text x="532" y="238" text-anchor="end">ставка по кредиту</text>
+            <text x="66" y="22">выплаты банку</text>
+            <line x1="60" y1="215" x2="500" y2="45" stroke="var(--ink-faint)" stroke-width="1.8" stroke-dasharray="6 4"/>
+            <text class="m" x="420" y="66">контрактные</text>
+            <path d="M60 215 C 150 150, 220 108, 270 104 C 330 100, 400 140, 500 190" fill="none" stroke="var(--accent)" stroke-width="2.6"/>
+            <text x="288" y="92" style="fill:var(--accent); font-weight:700">ожидаемые</text>
+            <line x1="270" y1="104" x2="270" y2="220" stroke="var(--ink-faint)" stroke-dasharray="3 3"/>
+            <circle cx="270" cy="104" r="4.5" fill="var(--accent)"/>
+            <text x="270" y="238" text-anchor="middle">r*</text>
+          </svg>
+          <figcaption>Повышать ставку выше \(r^*\) банку невыгодно: ожидаемые выплаты падают. Поэтому даже при избыточном спросе на кредит рынок остаётся в дефиците.</figcaption>
+        </figure>
+      </div>
+
+      <div class="tcard">
+        <span class="tag">К части 3</span>
+        <h3>Микро- и макропруденциальное регулирование</h3>
+        <table class="traps ttable">
+          <thead><tr><th></th><th>Микропруденциальное</th><th>Макропруденциальное</th></tr></thead>
+          <tbody>
+            <tr><td>Объект</td><td>отдельная финансовая организация</td><td>финансовая система в целом</td></tr>
+            <tr><td>Природа риска</td><td>идиосинкратический, внешний для организации</td><td>системный, эндогенный: процикличность во времени, взаимосвязанность институтов</td></tr>
+          </tbody>
+        </table>
+        <ul>
+          <li>Ценовая стабильность и надзор за отдельными банками не стабилизируют систему: устойчивость каждого ≠ устойчивость всех.</li>
+          <li>Макропруденциальная политика должна учитывать денежно-кредитную и бюджетную политику: низкие ставки и большой госдолг тоже влияют на системный риск.</li>
+        </ul>
+      </div>
+
+      <div class="refbox">
+        <span class="reflabel">Общее правило для утверждений</span>
+        <p style="margin:0; color:var(--ink); font-size:14.5px;">Слова «всегда», «только», «исключительно», «однозначно», «полностью» в этом банке почти всегда означают ответ «нет».</p>
+      </div>
+    </section>
+
+    <section class="sec" id="part1">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">01</span>Часть 1 <span class="sec-count">· 32 утверждения</span></p>
+        <h2 class="sec-title">Эффективный финансовый рынок</h2>
+      </div>
+      <div class="prose"><p>Три формы EMH, условие отсутствия арбитража, фундаментальная стоимость и пузыри, облигации и кривая доходности, паритеты процентных ставок и фундаментальный курс рубля.</p></div>
+      <div class="quiz-part" id="quizPart1"></div>
+    </section>
+
+    <section class="sec" id="part2">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">02</span>Часть 2 <span class="sec-count">· 14 утверждений</span></p>
+        <h2 class="sec-title">Финансовые посредники</h2>
+      </div>
+      <div class="prose"><p>Функции посредников, внешние и внутренние деньги, ликвидность рынка, финансовая репрессия и селективное кредитование.</p></div>
+      <div class="quiz-part" id="quizPart2"></div>
+    </section>
+
+    <section class="sec" id="part3">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">03</span>Часть 3 <span class="sec-count">· 27 утверждений</span></p>
+        <h2 class="sec-title">Финансовые кризисы</h2>
+      </div>
+      <div class="prose"><p>Пузыри и кредит, кредитор последней инстанции, Фишер, Кейнс и Мински, пределы арбитража, агентские проблемы и финансовый акселератор, рационирование кредита, макропруденциальная политика.</p></div>
+      <div class="quiz-part" id="quizPart3"></div>
+    </section>
+
+    <section class="sec" id="traps">
+      <div class="sec-head">
+        <p class="sec-eyebrow"><span class="num">04</span>Итог</p>
+        <h2 class="sec-title">Шпаргалка подвохов банка 4</h2>
+      </div>
+      <table class="traps">
+        <thead><tr><th>Подвох</th><th>Где</th></tr></thead>
+        <tbody>
+          <tr><td>«Рано или поздно» вместо «мгновенно»; полная информация не нужна</td><td>1.1, 1.2</td></tr>
+          <tr><td>«Не даёт сверхдоходности» ≠ «полностью бесполезен»</td><td>1.4, 1.6</td></tr>
+          <tr><td>К нулю идёт приведённая стоимость цены, а не сама цена; рост цены не запрещён</td><td>1.17–1.19</td></tr>
+          <tr><td>Фундаментал — у запаса (актива), считается по потоку выплат</td><td>1.22</td></tr>
+          <tr><td>Высокие цены и обвал ≠ обязательно пузырь</td><td>1.23, 1.24</td></tr>
+          <tr><td>В UIP — ожидаемый курс; форвард ≠ прогноз; знак премии не определён</td><td>1.27–1.29</td></tr>
+          <tr><td>Тождество \(S = I\) выполняется всегда</td><td>2.1</td></tr>
+          <tr><td>«Внешние» — по отношению к частному сектору, а не к стране</td><td>2.2, 2.3</td></tr>
+          <tr><td>Финансовая репрессия облегчает обслуживание долга и бьёт по вкладчикам</td><td>2.11–2.14</td></tr>
+          <tr><td>Слова «всегда», «исключительно», «однозначно» — почти всегда «нет»</td><td>3.5–3.9, 3.12, 3.13</td></tr>
+          <tr><td>Неликвидность ≠ неплатёжеспособность</td><td>3.10, 3.11</td></tr>
+          <tr><td>Фишер — дефляция, а не инфляция; Мински — кризисы эндогенны</td><td>3.14, 3.17</td></tr>
+          <tr><td>Малый бизнес страдает от агентских проблем сильнее</td><td>3.21</td></tr>
+          <tr><td>Ожидаемые выплаты по кредиту — перевёрнутая U, а не монотонно</td><td>3.23</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <footer class="page-foot">Источник утверждений: «Банк тестов № 4», Макроэкономика – 2 (первый поток), блок «Макроэкономика финансовых рынков». Мини-теория и разборы составлены для конспекта.</footer>
+
+  <script>
+  var QUIZ_DATA = {
+ "part1": [
+  {
+   "n": "1.1",
+   "c": "no",
+   "q": "Финансовый рынок является (информационно) эффективным, если в рыночных ценах рано или поздно находит отражение вся доступная информация.",
+   "e": "Ключевое слово определения — <b>мгновенно</b>, а не «рано или поздно». Если бы информация входила в цены с задержкой, на этой задержке можно было бы систематически зарабатывать.",
+   "i": "Если о новости все знают, а цена ещё не сдвинулась, — это бесплатные деньги, и их тут же заберут."
+  },
+  {
+   "n": "1.2",
+   "c": "no",
+   "q": "EMH вводится в предположении, что экономические агенты обладают полной информацией.",
+   "e": "Полная информация у каждого агента не нужна. Нужны рациональные ожидания: агенты не ошибаются систематически, а рынок через торговлю собирает разрозненную информацию в цене."
+  },
+  {
+   "n": "1.3",
+   "c": "yes",
+   "q": "Слабая форма EMH требует, чтобы текущие цены мгновенно и полностью отражали всю информацию, содержащуюся в предшествующей динамике цен.",
+   "e": "Это и есть определение слабой формы: всё, что можно извлечь из истории цен, уже в текущей цене."
+  },
+  {
+   "n": "1.4",
+   "c": "no",
+   "q": "Слабая форма EMH означает полную бесполезность анализа предшествующей динамики цен (технического анализа).",
+   "e": "Слабая форма утверждает лишь, что технический анализ не даёт <b>систематической сверхдоходности</b>. «Полная бесполезность» — слишком сильно: история цен нужна, например, для оценки риска и волатильности."
+  },
+  {
+   "n": "1.5",
+   "c": "yes",
+   "q": "Умеренная форма EMH требует, чтобы текущие цены мгновенно и полностью отражали всю информацию, содержащуюся в предшествующей динамике цен.",
+   "e": "Формы вложены друг в друга: умеренная = прошлые цены + вся публичная информация. Значит, требование слабой формы в ней тоже выполняется.",
+   "i": "Каждая следующая форма — это предыдущая плюс ещё один слой информации."
+  },
+  {
+   "n": "1.6",
+   "c": "no",
+   "q": "В соответствии с умеренной формой EMH, только фундаментальный анализ деятельности компаний позволяет получать норму отдачи выше рыночной.",
+   "e": "При умеренной форме вся публичная информация уже в ценах, поэтому и фундаментальный анализ публичных данных сверхдоходности не даёт. Её может дать только инсайдерская информация."
+  },
+  {
+   "n": "1.7",
+   "c": "yes",
+   "q": "Сильная форма EMH требует, чтобы текущие цены мгновенно и полностью отражали всю релевантную информацию, включая инсайдерскую информацию.",
+   "e": "Определение сильной формы: в ценах уже и закрытая информация, поэтому даже инсайдер не обыграет рынок."
+  },
+  {
+   "n": "1.8",
+   "c": "yes",
+   "q": "Сильная форма EMH требует полного агрегирования информации, в то время как слабая форма EMH требует лишь усреднения информации.",
+   "e": "Для сильной формы рынок должен собрать в цене <b>частную</b> информацию, рассеянную по разным агентам, — это агрегирование. Для слабой достаточно усреднить общедоступную историю цен."
+  },
+  {
+   "n": "1.9",
+   "c": "yes",
+   "q": "Тесты однозначно подтверждают слабую и умеренную формы EMH: использование информации о ценах в прошлом и релевантную общедоступную информацию не позволяет «обойти рынок» (с учетом дополнительных рисков и издержек).",
+   "e": "Эмпирически, с учётом риска и транзакционных издержек, систематически обыграть рынок на прошлых ценах и публичной информации не удаётся."
+  },
+  {
+   "n": "1.10",
+   "c": "yes",
+   "q": "Чистые нормы доходности профессионально управляемых фондов часто оказываются ниже неуправляемых индексов.",
+   "e": "Подтверждение EMH на практике: после вычета комиссий большинство активно управляемых фондов проигрывает индексным.",
+   "i": "Если бы управляющие умели обыгрывать рынок, они делали бы это стабильно, а не в отдельные годы."
+  },
+  {
+   "n": "1.11",
+   "c": "yes",
+   "q": "EMH исключает возможность арбитража — возможность купить ценную бумагу на одном рынке и сразу же продать ее на другом рынке по более высокой цене практически без риска.",
+   "e": "Арбитраж — безрисковая прибыль без вложений. На эффективном рынке такие возможности исчезают мгновенно."
+  },
+  {
+   "n": "1.12",
+   "c": "yes",
+   "q": "Доходность к погашению по простой T-периодной облигации определяется как постоянная ставка процента, которая дает такой же фактор дисконтирования, что и рассмотрение ожидаемых однопериодных ставок процента.",
+   "e": "Определение YTM: \\((1+YTM)^T = (1+r^e_1)\\cdots(1+r^e_T)\\). Отсюда YTM примерно равна среднему ожидаемых краткосрочных ставок."
+  },
+  {
+   "n": "1.13",
+   "c": "yes",
+   "q": "Кривая доходности отражает зависимость доходности к погашению от срока до погашения облигаций.",
+   "e": "Определение кривой доходности: по горизонтали — срок, по вертикали — YTM."
+  },
+  {
+   "n": "1.14",
+   "c": "yes",
+   "q": "Возрастающая кривая доходности означает, что рынок ожидает увеличение краткосрочных процентных ставок.",
+   "e": "YTM длинной облигации — среднее ожидаемых коротких ставок. Если она выше текущей короткой, значит, будущие короткие ставки ожидаются выше."
+  },
+  {
+   "n": "1.15",
+   "c": "yes",
+   "q": "Небольшой положительный наклон кривой доходности отражает нормальную экономическую ситуацию, когда инвесторы требуют небольшую премию за ликвидность, но не ожидают значительных перемен в экономике.",
+   "e": "Долгосрочные облигации менее ликвидны и сильнее реагируют на ставки, поэтому за них требуют небольшую премию. Это и даёт слабый положительный наклон в спокойное время."
+  },
+  {
+   "n": "1.16",
+   "c": "yes",
+   "q": "Кривая доходности со значительным отрицательным наклоном, как правило, предвещает серьезный экономический спад.",
+   "e": "Инверсия означает, что рынок ждёт снижения ставок в будущем, а ЦБ обычно снижает ставки в рецессию. Исторически инверсия часто предшествовала спадам."
+  },
+  {
+   "n": "1.17",
+   "c": "no",
+   "q": "Условие отсутствия пузыря требует, чтобы текущая стоимость актива стремилась к нулю на бесконечном временном горизонте.",
+   "e": "К нулю должна стремиться <b>приведённая</b> стоимость будущей цены: \\(\\lim E q_{t+T}/(1+r)^T = 0\\). Сама цена может расти."
+  },
+  {
+   "n": "1.18",
+   "c": "yes",
+   "q": "Условие отсутствия пузыря исключает «слишком быстрый» рост стоимости актива: темп прироста стоимости актива не должен систематически превышать ставку процента.",
+   "e": "Это содержательный смысл NBC: если цена растёт медленнее \\(r\\), её приведённая стоимость на бесконечности стремится к нулю."
+  },
+  {
+   "n": "1.19",
+   "c": "no",
+   "q": "Условие отсутствия пузыря исключает рост стоимости актива.",
+   "e": "Рост цены допустим (например, при растущих дивидендах), запрещён только систематический рост быстрее \\(r\\)."
+  },
+  {
+   "n": "1.20",
+   "c": "yes",
+   "q": "Ожидаемый темп прироста пузыря равен ставке процента.",
+   "e": "Рациональный пузырь: \\(E B_{t+1} = (1+r) B_t\\). Только так держать его так же выгодно, как безрисковый актив.",
+   "i": "Покупатель «пузырной» части цены не получает за неё дивидендов, поэтому вся его доходность — рост пузыря, и она должна быть равна \\(r\\)."
+  },
+  {
+   "n": "1.21",
+   "c": "yes",
+   "q": "Пузырь — это отклонение фактической стоимости актива от фундаментальной, которое не противоречит NAC.",
+   "e": "Общее решение условия отсутствия арбитража: \\(q = q^F + B\\). Пузырь \\(B\\) с ростом по ставке \\(r\\) удовлетворяет NAC."
+  },
+  {
+   "n": "1.22",
+   "c": "no",
+   "q": "Фундаментальная стоимость может быть только у показателя «потока», но не у «запаса».",
+   "e": "Наоборот: фундаментальная стоимость есть у <b>запаса</b> (актива — акции, облигации, капитала). Она равна приведённой стоимости <b>потока</b> выплат, который этот актив порождает."
+  },
+  {
+   "n": "1.23",
+   "c": "no",
+   "q": "Высокие цены всегда говорят о существовании пузыря.",
+   "e": "Высокая цена может быть оправдана высоким фундаменталом: большими ожидаемыми дивидендами или низкой ставкой процента."
+  },
+  {
+   "n": "1.24",
+   "c": "no",
+   "q": "Резкое падение цен на рынке всегда означает, что это лопнул пузырь.",
+   "e": "Это может быть переоценка самого фундаментала: пришла новость о более низких будущих дивидендах или более высоких ставках."
+  },
+  {
+   "n": "1.25",
+   "c": "yes",
+   "q": "Дискретные изменения в стоимости ценных бумаг могут быть обусловлены только поступлением на рынок новой информации.",
+   "e": "Цена — приведённая стоимость ожидаемых выплат. Скачком она меняется, только когда скачком меняются ожидания, то есть при новостях."
+  },
+  {
+   "n": "1.26",
+   "c": "yes",
+   "q": "Ожидаемые дискретные изменения стоимости ценных бумаг противоречат EMH.",
+   "e": "Если все знают, что цена завтра прыгнет вверх, бумагу купят сегодня — и цена вырастет уже сегодня. Предсказуемый скачок означал бы предсказуемую сверхприбыль."
+  },
+  {
+   "n": "1.27",
+   "c": "no",
+   "q": "UIP уравнивает ставку процента в стране и за рубежом при условии, что инвесторы достоверно знают будущий спотовый обменный курс.",
+   "e": "В UIP стоит <b>ожидаемый</b> курс: \\(i = i^* + \\frac{E\\varepsilon_{t+1}-\\varepsilon_t}{\\varepsilon_t}\\). Достоверное знание будущего не требуется."
+  },
+  {
+   "n": "1.28",
+   "c": "no",
+   "q": "Если инвесторы несклонны к риску, то разница между ставкой процента в стране и за рубежом, определяемая в соответствии с UIP, должна быть однозначно выше, чем ожидаемая норма прироста обменного курса.",
+   "e": "При несклонности к риску появляется премия за риск, но её знак зависит от того, какие вложения рискованнее — в рубли или в валюту. Поэтому «однозначно выше» неверно."
+  },
+  {
+   "n": "1.29",
+   "c": "no",
+   "q": "CIP действует в предположении, что курс, прописанный в форвардном контракте, совпадет с будущим спотовым обменным курсом.",
+   "e": "CIP: \\(i = i^* + \\frac{F-\\varepsilon_t}{\\varepsilon_t}\\) — это арбитраж с уже зафиксированным форвардом. Совпадение \\(F\\) с будущим спотом не предполагается: форвард — способ торговать риском, а не прогноз."
+  },
+  {
+   "n": "1.30",
+   "c": "yes",
+   "q": "Если CIP и UIP выполняются одновременно, то премия за валютный риск определяется как разница между ошибкой форвардного прогноза и ошибкой прогноза спотового курса.",
+   "e": "Ошибка форвардного прогноза \\(\\varepsilon_{t+1}-F\\) = ошибка спот-прогноза \\(\\varepsilon_{t+1}-E\\varepsilon_{t+1}\\) + \\((E\\varepsilon_{t+1}-F)\\). Последнее слагаемое (в долях \\(\\varepsilon_t\\)) и есть премия за риск."
+  },
+  {
+   "n": "1.31",
+   "c": "yes",
+   "q": "Ожидания замедления роста российской экономики приводят к фундаментальному ослаблению рубля.",
+   "e": "В монетарной модели курс — взвешенная сумма ожидаемых фундаментальных факторов, и рост выпуска \\(y\\) укрепляет рубль. Ожидание более низкого \\(y\\) в будущем ослабляет рубль уже сегодня."
+  },
+  {
+   "n": "1.32",
+   "c": "yes",
+   "q": "Ожидания продолжения антиинфляционной политики Банка России должны сдерживать фундаментальное ослабление рубля.",
+   "e": "Антиинфляционная политика — это более медленный рост денежной массы \\(m\\) в будущем. Меньше ожидаемых денег — слабее давление на рубль."
+  }
+ ],
+ "part2": [
+  {
+   "n": "2.1",
+   "c": "no",
+   "q": "В то время как модель Рамсея и модель перекрывающихся поколений строятся в предположении, что сбережения домохозяйств автоматически становятся инвестициями в производственный капитал фирм, на практике это не так: сбережения не всегда равны инвестициям, основное макроэкономическое тождество соблюдается не всегда.",
+   "e": "Ловушка в конце. Тождество \\(S = I\\) (в закрытой экономике) выполняется <b>всегда</b> — это бухгалтерское тождество ex post. На практике не автоматичен другой момент: <b>как</b> сбережения доходят до фирм. Этим и занимаются финансовые посредники."
+  },
+  {
+   "n": "2.2",
+   "c": "no",
+   "q": "Внешние деньги — это валюта, размещенная за пределами территории страны.",
+   "e": "«Внешние» здесь — по отношению к частному сектору, а не к стране. Внешние деньги — это чистый актив частного сектора, который не является чьим-то частным долгом: наличные и резервы, выпущенные государством (ЦБ)."
+  },
+  {
+   "n": "2.3",
+   "c": "no",
+   "q": "Внутренние деньги — это ликвидные активы, непосредственно контролируемые центральным банком.",
+   "e": "Внутренние деньги создаются внутри частного сектора: это требования, обеспеченные частным долгом (например, банковские депозиты). ЦБ напрямую контролирует <b>внешние</b> деньги, а внутренние — лишь косвенно.",
+   "i": "Ваш депозит — актив для вас и долг банка; в сумме по частному сектору он «гасится»."
+  },
+  {
+   "n": "2.4",
+   "c": "no",
+   "q": "В отличие от денежной массы, процесс создания внутренних активов не характеризуется эффектом мультипликатора.",
+   "e": "Наоборот: создание внутренних денег — это и есть мультипликатор. Банк выдаёт кредит из части депозита, кредит возвращается в банки новым депозитом, и так далее."
+  },
+  {
+   "n": "2.5",
+   "c": "no",
+   "q": "Условия, в которых работают финансовые посредники, ближе всего к совершенной конкуренции.",
+   "e": "Финансовые рынки далеки от совершенной конкуренции: асимметрия информации, эффект масштаба, регулирование и барьеры входа. Именно эти несовершенства объясняют, зачем вообще нужны посредники."
+  },
+  {
+   "n": "2.6",
+   "c": "yes",
+   "q": "Роль финансовых посредников заключается, среди прочего, в том, что они трансформируют краткосрочные сбережения в долгосрочные инвестиции.",
+   "e": "Трансформация сроков (maturity transformation): банк принимает короткие депозиты и выдаёт длинные кредиты."
+  },
+  {
+   "n": "2.7",
+   "c": "yes",
+   "q": "Роль финансовых посредников заключается, среди прочего, в том, что они обеспечивают высокую ликвидность активов домохозяйств, несмотря на низкую ликвидность корпоративных ценных бумаг.",
+   "e": "Трансформация ликвидности: домохозяйство может забрать депозит в любой момент, хотя сам банк вложил деньги в неликвидные кредиты и бумаги."
+  },
+  {
+   "n": "2.8",
+   "c": "yes",
+   "q": "Финансовые посредники решают проблему поиска контрагента в условиях, когда домохозяйства предпочитают делать краткосрочные сбережения, а фирмы нуждаются в долгосрочных займах.",
+   "e": "Без посредника каждому вкладчику пришлось бы искать фирму с подходящими сроком, суммой и риском. Посредник сводит их и снижает издержки поиска."
+  },
+  {
+   "n": "2.9",
+   "c": "no",
+   "q": "Вкладчики коммерческих банков в полном объеме берут на себя идиосинкратические риски отдельных кредитов, выдаваемых банком.",
+   "e": "Банк диверсифицирует: невозврат отдельного кредита покрывается доходами по остальным и капиталом банка. Требование вкладчика фиксировано, часто ещё и застраховано. Трансформация риска — одна из функций посредника."
+  },
+  {
+   "n": "2.10",
+   "c": "no",
+   "q": "Чем активнее торговля долгосрочными корпоративными ценными бумагами, тем ниже ликвидность рынка и инвестиции в производственный капитал.",
+   "e": "Активная торговля повышает ликвидность рынка: бумагу легко продать. Это снижает стоимость капитала для фирм и поддерживает инвестиции."
+  },
+  {
+   "n": "2.11",
+   "c": "no",
+   "q": "Финансовая репрессия — это феномен, присущий исключительно развивающимся странам.",
+   "e": "Развитые страны тоже её применяли: США и Великобритания после Второй мировой войны (потолки ставок, обязательное держание госдолга) снижали отношение долга к ВВП через отрицательные реальные ставки."
+  },
+  {
+   "n": "2.12",
+   "c": "no",
+   "q": "Финансовая репрессия затрудняет задачу обслуживания государственного долга.",
+   "e": "Наоборот, облегчает: искусственно низкие (часто отрицательные в реальном выражении) ставки удешевляют обслуживание долга, а инфляция обесценивает его."
+  },
+  {
+   "n": "2.13",
+   "c": "no",
+   "q": "Финансовая репрессия призвана стимулировать рост сбережений домохозяйств.",
+   "e": "Её цель — дешёвое финансирование государства и приоритетных секторов. Для домохозяйств она означает низкую доходность сбережений, поэтому скорее снижает их (Маккиннон, Шоу).",
+   "i": "Это скрытый налог на вкладчиков: их деньги работают на государство почти бесплатно."
+  },
+  {
+   "n": "2.14",
+   "c": "no",
+   "q": "Государственная политика селективного кредитования отличается от финансовой репрессии тем, что она практически не вносит искажений в работу финансовой системы.",
+   "e": "Селективное (направленное) кредитование — один из инструментов финансовой репрессии. Оно перенаправляет кредит не туда, где выше отдача, а туда, куда решило государство, то есть вносит искажения."
+  }
+ ],
+ "part3": [
+  {
+   "n": "3.1",
+   "c": "no",
+   "q": "Негативное воздействие финансового кризиса на реальный сектор экономики компенсируется следующим обстоятельством: финансовый кризис приводит к падению потребления и росту сбережений, а они, в свою очередь, автоматически трансформируются в более высокие инвестиции в производственный капитал.",
+   "e": "Автоматической трансформации нет: в кризисе нарушена сама финансовая система, банки сокращают кредит, фирмы откладывают инвестиции из-за неопределённости. Рост желаемых сбережений сокращает спрос и выпуск (парадокс бережливости)."
+  },
+  {
+   "n": "3.2",
+   "c": "no",
+   "q": "Т.к. подавляющее большинство населения не участвует в спекуляциях на финансовых рынках, финансовые кризисы не должны приводить к серьезным рецессиям в реальном секторе экономики.",
+   "e": "Кризис бьёт по всем через банки и кредит, через падение богатства и залогов, через доверие и безработицу. Участвовать в спекуляциях для этого не нужно."
+  },
+  {
+   "n": "3.3",
+   "c": "yes",
+   "q": "В реальности, идентификация пузырей на рынках активов затруднена.",
+   "e": "Фундаментальная стоимость не наблюдается: она зависит от ожиданий будущих выплат и ставки дисконтирования. Поэтому сказать, где кончается фундаментал и начинается пузырь, трудно — часто только задним числом."
+  },
+  {
+   "n": "3.4",
+   "c": "yes",
+   "q": "Так же как инфляция цен товаров связана с ростом денежной массы, инфляция цен активов связана с расширением кредита.",
+   "e": "Пузыри цен активов почти всегда сопровождаются кредитным бумом: кредит финансирует покупки активов, рост цен повышает залоги, что позволяет занять ещё больше."
+  },
+  {
+   "n": "3.5",
+   "c": "no",
+   "q": "Как и технологические инновации, финансовые инновации характеризуются исключительно положительным воздействием на благосостояние общества.",
+   "e": "Финансовые инновации могут скрывать и недооценивать риск: секьюритизация ипотеки и CDO стали одним из источников кризиса 2008 года."
+  },
+  {
+   "n": "3.6",
+   "c": "no",
+   "q": "Чем более развит финансовый рынок, тем ниже опасность возникновения масштабного финансового кризиса.",
+   "e": "Развитые рынки не защищены: рост долговой нагрузки, сложности инструментов и взаимосвязанности институтов делает их уязвимыми. Кризис 2008 года начался в США."
+  },
+  {
+   "n": "3.7",
+   "c": "no",
+   "q": "История показывает, что финансовые рынки адекватно реагируют на предупреждения регуляторов и авторитетных экономистов о рисках раздувания пузырей.",
+   "e": "Предупреждения часто игнорируются. Классический пример — речь Гринспена о «иррациональном изобилии» в 1996 году: рынок продолжал расти ещё несколько лет, до 2000 года."
+  },
+  {
+   "n": "3.8",
+   "c": "no",
+   "q": "История показывает, что если финансовый регулятор диагностирует пузыри на рынках активов, он всегда может их аккуратно «сдуть».",
+   "e": "Ужесточение политики может не «сдуть», а резко проколоть пузырь и вызвать кризис: например, Япония в 1989–1990 годах."
+  },
+  {
+   "n": "3.9",
+   "c": "no",
+   "q": "Центральный банк всегда должен помогать крупным финансовым посредникам, оказавшимся на грани неплатежеспособности.",
+   "e": "Правило кредитора последней инстанции (Беджгот): помогать только <b>платёжеспособным, но неликвидным</b> — под хороший залог и по штрафной ставке. Спасение неплатёжеспособных создаёт моральный риск."
+  },
+  {
+   "n": "3.10",
+   "c": "no",
+   "q": "Неплатежеспособность и неликвидность финансовых посредников — это практически синонимы.",
+   "e": "Неплатёжеспособность: активы меньше обязательств, капитал отрицательный. Неликвидность: активы больше обязательств, но их нельзя быстро превратить в деньги, чтобы расплатиться сейчас. Это разные проблемы.",
+   "i": "Неликвидному не хватает денег сегодня; неплатёжеспособному не хватит никогда."
+  },
+  {
+   "n": "3.11",
+   "c": "yes",
+   "q": "Выполняя функцию кредитора последней надежды, центральный банк всегда должен помогать крупным финансовым посредникам, которые являются платежеспособными, но столкнулись с острой нехваткой ликвидности. Однако на практике разделить неплатежеспособность и неликвидность часто затруднительно.",
+   "e": "Верная формулировка правила Беджгота плюс практическая оговорка: в панике цены активов падают, и неясно, временно ли банк неликвиден или уже неплатёжеспособен."
+  },
+  {
+   "n": "3.12",
+   "c": "no",
+   "q": "Утверждение «Глава ФРС Алан Гринспен поступил правильно, приняв решение спасти от банкротства LTCM в 1998 году: в противном случае крах крупнейшего хедж-фонда мог привести к цепной реакции, обвалу фондовых рынков и серьезной рецессии» — однозначно верное.",
+   "e": "Ключевое слово — «однозначно». Решение спорное: оно, возможно, предотвратило цепную реакцию, но создало моральный риск — ожидание, что крупных игроков спасут. Контрфактический сценарий неизвестен."
+  },
+  {
+   "n": "3.13",
+   "c": "no",
+   "q": "Утверждение «Глава ФРС Бен Бернанке поступил неправильно, приняв ошибочное решение не спасать от банкротства Lehman Brothers в 2008 году, что привело к цепной реакции в глобальной финансовой системе, обвалу фондовых рынков и Великой рецессии» — однозначно верное.",
+   "e": "Тоже не «однозначно»: ФРС ссылалась на отсутствие достаточного залога, спасение усилило бы моральный риск, а кризис мог развиться и без банкротства Lehman. Решение остаётся предметом споров."
+  },
+  {
+   "n": "3.14",
+   "c": "no",
+   "q": "Описывая механизм финансового кризиса, Ирвин Фишер делает акцент на инфляции, которая следует за обвалом фондового рынка и приводит к обесценению долговых обязательств.",
+   "e": "У Фишера (теория долговой дефляции, 1933) акцент на <b>дефляции</b>: распродажи активов и падение цен увеличивают реальное бремя долга, должники банкротятся, цены падают ещё сильнее."
+  },
+  {
+   "n": "3.15",
+   "c": "no",
+   "q": "По мнению Кейнса, нестабильность цен активов вытекает из резких и непредсказуемых изменений конвенциональных суждений спекулянтов. Значит, ограничение краткосрочных спекуляций сделает рынок более стабильным и ликвидным, что приведет к росту долгосрочных инвестиций.",
+   "e": "Первая часть верна, вывод — нет. Кейнс видел дилемму: ликвидность рынка поощряет инвестиции, потому что вложение можно продать, но она же питает спекуляцию. Ограничение спекуляций снижает ликвидность и может уменьшить инвестиции."
+  },
+  {
+   "n": "3.16",
+   "c": "no",
+   "q": "По мнению Кейнса, в отличие от инвестиций, установление ставки процента в экономике не зависит от конвенциональных суждений инвесторов.",
+   "e": "У Кейнса ставка процента определяется предпочтением ликвидности, а оно зависит от ожиданий будущих ставок — то есть от конвенций. Кейнс прямо называл ставку процента «в высшей степени конвенциональным явлением»."
+  },
+  {
+   "n": "3.17",
+   "c": "no",
+   "q": "Следуя взглядам Кейнса и Фишера, Хайман Мински описывал финансовые кризисы как оптимальную реакцию экономики на негативные внешние шоки.",
+   "e": "Гипотеза финансовой нестабильности Мински: кризисы <b>эндогенны</b>. Стабильность порождает нестабильность: в спокойные времена финансирование смещается от хеджевого к спекулятивному и затем к понци-финансированию, и система становится хрупкой."
+  },
+  {
+   "n": "3.18",
+   "c": "yes",
+   "q": "На практике арбитражные возможности являются ограниченными: рациональные инвесторы не могут устранить все искажения, вносимые в ценообразование иррациональными инвесторами.",
+   "e": "Пределы арбитража (Шлейфер, Вишни): риск того, что неверные цены станут ещё более неверными, ограниченность капитала и короткий горизонт управляющих не дают полностью исправить отклонения.",
+   "i": "Рынок может оставаться иррациональным дольше, чем арбитражёр — платёжеспособным."
+  },
+  {
+   "n": "3.19",
+   "c": "yes",
+   "q": "Агентские проблемы на рынке капитала приводят к появлению новых каналов воздействия на инвестиции со стороны шоков традиционных неоклассических детерминант инвестиций, например ставки процента.",
+   "e": "Помимо прямого действия ставки на стоимость капитала появляется балансовый канал: рост ставки снижает стоимость активов и залогов фирм, повышает премию за внешнее финансирование и дополнительно сокращает инвестиции."
+  },
+  {
+   "n": "3.20",
+   "c": "yes",
+   "q": "Агентские проблемы на рынке капитала приводят к тому, что такая нефундаментальная переменная, как богатство предпринимателя, может оказать воздействие на стоимость и объем кредита.",
+   "e": "Финансовый акселератор (Бернанке, Гертлер): премия за внешнее финансирование убывает с ростом собственного капитала заёмщика. Богатому предпринимателю кредит дешевле и доступнее, хотя для неоклассической модели это неважно."
+  },
+  {
+   "n": "3.21",
+   "c": "no",
+   "q": "По сравнению с крупными корпорациями, малый бизнес в меньшей степени подвержен агентским проблемам в условиях падения прибылей, т.к. он в значительной степени опирается не на внутреннее, а на внешнее финансирование.",
+   "e": "Наоборот: малый бизнес <b>сильнее</b> страдает от агентских проблем. Информации о нём меньше, залогов меньше, а зависимость от банковского кредита выше. Падение прибыли бьёт по нему сильнее."
+  },
+  {
+   "n": "3.22",
+   "c": "yes",
+   "q": "В то время как традиционный кейнсианский подход определяет источники финансовых кризисов на стороне совокупного спроса, теория финансового акселератора показывает, что развитие финансового кризиса связано и с изменениями совокупного предложения.",
+   "e": "Ухудшение балансов ограничивает фирмам доступ к кредиту на оборотный капитал и инвестиции, а это сокращает производство и потенциальный выпуск. Кризис бьёт и по предложению."
+  },
+  {
+   "n": "3.23",
+   "c": "no",
+   "q": "В то время как контрактные выплаты по кредиту являются монотонно возрастающей функцией ставки процента по кредиту, ожидаемые выплаты монотонно убывают с ростом ставки процента по кредиту.",
+   "e": "Ожидаемые выплаты банку <b>сначала растут, потом падают</b> (кривая в форме перевёрнутой U, Стиглиц–Вайс). Рост ставки отпугивает надёжных заёмщиков (неблагоприятный отбор) и толкает оставшихся к рисковым проектам (моральный риск)."
+  },
+  {
+   "n": "3.24",
+   "c": "yes",
+   "q": "В условиях несовершенной информации банки вынуждены ограничивать кредит: начиная с определенного уровня, рост ставки процента не приводит к увеличению кредита, рынок заемных средств оказывается в состоянии дефицита.",
+   "e": "Рационирование кредита (Стиглиц, Вайс, 1981): банк держит ставку на уровне максимума ожидаемой доходности и не повышает её дальше, даже если спрос на кредит превышает предложение."
+  },
+  {
+   "n": "3.25",
+   "c": "yes",
+   "q": "Ценовая стабильность и микропруденциальное регулирование не могут стабилизировать финансовую систему.",
+   "e": "Системный риск возникает и при стабильных ценах (кредитные бумы шли при низкой инфляции). Устойчивость каждого банка по отдельности не гарантирует устойчивости системы: их одинаковые действия в кризис (например, распродажи) усиливают его."
+  },
+  {
+   "n": "3.26",
+   "c": "yes",
+   "q": "Микро- и макропруденциальное регулирование различаются по объектам и природе риска.",
+   "e": "Микропруденциальное — объект отдельная организация, риск идиосинкратический и внешний для неё. Макропруденциальное — объект финансовая система в целом, риск системный и эндогенный: процикличность во времени и взаимосвязанность между институтами."
+  },
+  {
+   "n": "3.27",
+   "c": "yes",
+   "q": "Макропруденциальная политика должна учитывать монетарную и фискальную политику, т.к. они также могут воздействовать на системные риски.",
+   "e": "Низкие ставки подпитывают кредитные бумы и поиск доходности, а большой госдолг связывает устойчивость банков и государства. Поэтому политики нужно координировать."
+  }
+ ]
+};
+
+  function renderPart(containerId, items){
+    var el = document.getElementById(containerId);
+    el.innerHTML = items.map(function(item){
+      return '' +
+        '<div class="quiz-q" data-correct="'+item.c+'">' +
+          '<div class="q-top">' +
+            '<div class="q-body"><span class="q-num">'+item.n+'</span><p class="q-text">'+item.q+'</p></div>' +
+            '<div class="q-choices">' +
+              '<button class="choice-btn" data-choice="yes" type="button">Да</button>' +
+              '<button class="choice-btn" data-choice="no" type="button">Нет</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="q-feedback"></div>' +
+          '<div class="q-bottom">' +
+            '<button class="answer-toggle" type="button">Ответ</button>' +
+            '<div class="q-explain" hidden>' +
+              '<span class="verdict '+item.c+'">'+(item.c==='yes' ? 'да' : 'нет')+'</span>' +
+              '<p>'+item.e+'</p>' +
+              (item.i ? '<p class="intuit"><b>Интуиция.</b> '+item.i+'</p>' : '') +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  renderPart('quizPart1', QUIZ_DATA.part1);
+  renderPart('quizPart2', QUIZ_DATA.part2);
+  renderPart('quizPart3', QUIZ_DATA.part3);
+
+  document.querySelectorAll('.quiz-part').forEach(function(part){
+    part.addEventListener('click', function(e){
+      var choiceBtn = e.target.closest('.choice-btn');
+      if (choiceBtn){
+        var qEl = choiceBtn.closest('.quiz-q');
+        if (qEl.dataset.answered === '1') return;
+        qEl.dataset.answered = '1';
+        var correct = qEl.dataset.correct;
+        var choice = choiceBtn.dataset.choice;
+        qEl.querySelectorAll('.choice-btn').forEach(function(b){
+          b.classList.add('disabled');
+          if (b.dataset.choice === correct) b.classList.add('is-correct');
+        });
+        var feedback = qEl.querySelector('.q-feedback');
+        if (choice === correct){
+          feedback.textContent = 'Молодец, тобой гордится Челеховский!';
+          feedback.className = 'q-feedback show good';
+        } else {
+          choiceBtn.classList.add('chosen-wrong');
+          feedback.textContent = 'Пахнешь слабостью';
+          feedback.className = 'q-feedback show bad';
+        }
+        return;
+      }
+      var toggleBtn = e.target.closest('.answer-toggle');
+      if (toggleBtn){
+        var qEl2 = toggleBtn.closest('.quiz-q');
+        var explain = qEl2.querySelector('.q-explain');
+        var isHidden = explain.hasAttribute('hidden');
+        if (isHidden){
+          explain.removeAttribute('hidden');
+          toggleBtn.textContent = 'Скрыть ответ';
+          toggleBtn.classList.add('open');
+        } else {
+          explain.setAttribute('hidden','');
+          toggleBtn.textContent = 'Ответ';
+          toggleBtn.classList.remove('open');
+        }
+      }
+    });
+  });
+
+  (function(){
+    var links = Array.prototype.slice.call(document.querySelectorAll('nav.toc a'));
+    var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+    if(!sections.length) return;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          var id = '#' + entry.target.id;
+          links.forEach(function(l){ l.classList.toggle('active', l.getAttribute('href') === id); });
+        }
+      });
+    }, {rootMargin:'-20% 0px -70% 0px', threshold:0});
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+  </script>
+</body>
+</html>
